@@ -91,25 +91,20 @@ Using Bulk Writer, the Pipeline concept is a little different because data is us
 
     =========     =========     =========         ==========
     |       |     |       |     |       |         |        |
-    | Stage | <-- | Stage | <-- | Stage | <- Pull |  Sink  |
+    | Stage | --> | Stage | --> | Stage | Pull -> |  Sink  |
     |       |     |       |     |       |         |        |
     =========     =========     =========         ==========
 
 Take the following example:
 
-	private static void Main(string[] args) {
-       var begin = DoStepBegin();
-       var step1 = DoStep1(begin);
-       var step2 = DoStep2(step1);
-       var step3 = DoStep3(step2);
-       DoStepEnd(step3);
+	var begin = DoStepBegin();
+    var step1 = DoStep1(begin);
+    var step2 = DoStep2(step1);
+    var step3 = DoStep3(step2);
+    DoStepEnd(step3);
       
-       // Or a one-liner!!
-       // DoStepEnd(DoStep3(DoStep2(DoStep1(DoStepBegin()))));
-
-       Console.WriteLine("Press ENTER to continue...");
-       Console.ReadLine();
-    }
+    // Or a one-liner!!
+    // DoStepEnd(DoStep3(DoStep2(DoStep1(DoStepBegin()))));
 
     private static IEnumerable<BeginStepResult> DoStepBegin() {
        foreach (var item in Enumerable.Range(0, 1000000)) {
@@ -132,7 +127,9 @@ Take the following example:
 
     private static IEnumerable<Step3Result> DoStep3(IEnumerable<Step2Result> input) {
        foreach (var item in input) {
-          yield return Step3Result(item);
+          foreach(var many in GetManyItems(item)) {
+             yield return Step3Result(many);
+          }
        }
     }
 
@@ -144,4 +141,76 @@ Take the following example:
 
 ## Advanced Pipelining ##
 
-The example above is fine, but we're only processing one source data item at a time. If one pipeline stage takes longer to produce output than other stages, all stage processing suffers. We argue that there are times when you'd like any pipeline stage to continue to process available items even if other stages in the pipeline are blocked. Such a pipeline would look like this
+The example above is fine, but we're only processing one source data item at a time. If one pipeline stage takes longer to produce output than other stages, all stage processing suffers. We argue that there are times when you'd like any pipeline stage to continue to process available items even if other stages in the pipeline are blocked.
+
+For example, suppose Stage 1 was IO-bound because it queried and produced a result set for each of its input items. In other words, Stage 1 is producing a larger data set than its input.  Next, supposed Stage 2 was CPU bound because it performed hundreds of calculations on each row produced by Stage 1. In this example, there's no reason why Stage 2 shouldn't be able to perform its calculations while Stage 1 is querying for its next input.
+
+We form a pipeline like this by running each pipeline stage on its own thread and by introducing an input and output buffer between each stage. Now, instead of a pipeline stage pulling directly from the previous stage, each pipeline stage pushes to and pulls from its input and output buffer, respectively.
+
+Such a pipeline would look like this:
+
+            ===                           ===                           ===
+            | |         =========         | |         =========         | |         ==========
+            ===         |       |         ===         |       |         ===         |        |
+    Push -> | | <- Pull | Stage | Push -> | | <- Pull | Stage | Push -> | | <- Pull |  Sink  |
+            ===         |       |         ===         |       |         ===         |        |
+            | |         =========         | |         =========         | |         ==========
+            ===                           ===                           ===
+           Buffer                        Buffer                        Buffer
+
+Since each stage is running on its own thread, we need to be careful so that the stage's thread doesn't end before all the items the pipeline needs to process have been pushed through. We also want to block bulk copy until an item is ready to write. In essence, what we need is a buffer that is thread-safe and blocks the current thread until a new item is available. .NET already has such a buffer, `BlockingCollection<T>`.
+
+To implement a pipeline like this, you would do the following:
+
+    var taskFactory = new TaskFactory(TaskCreationOptions.LongRunning, TaskContinuationOptions.None);
+    
+    var stage1Input = new BlockingCollection<Stage1Input>();
+    var stage2Input = new BlockingCollection<Stage2Input>();
+    var finalStageInput = new BlockingCollection<FinalStageInput>();
+    
+    var stage1 = taskFactory.StartNew(() => {
+       var enumerable = stage1Input.GetConsumingEnumerable();
+       
+       try {
+          foreach(var item in enumerable) {
+             var outputs = GetOutputsFromIO(item);
+             foreach(var output in outputs) {
+                stage2Input.Add(output);
+             }
+          }
+       } finally {
+          stage2Input.CompleteAdding();
+       }
+    });
+    
+    var stage2 = taskFactory.StartNew(() => {
+       var enumerable = stage2Input.GetConsumingEnumerable();
+       
+       try {
+          foreach(var item in enumerable) {
+             var outputs = DoLotsOfCalculations(item);
+             foreach(var output in outputs) {
+                finalStageInput.Add(output);
+             }
+          }
+       } finally {
+          finalStageInput.CompleteAdding();
+       }
+    });
+    
+    var finalStage = taskFactory.StartNew(() => {
+       var enumerable = finalStageInput.GetConsumingEnumerable();
+       
+       var bulkCopyFactory = CreateBulkCopyFactory();
+       var dataWriter = new EnumerableDataWriter();
+       dataWriter.WriteToDatabase(enumerable, bulkCopyFactory);
+    });
+    
+    foreach (var item in Enumerable.Range(0, 1000000)) {
+       stage1Input.add(new Stage1Input());
+    }
+
+    stage1Input.CompleteAdding();
+    
+    Task.WaitAll(new[] { stage1, stage2, finalStage });
+    // or "await Task.WhenAll", depending on your context
