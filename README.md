@@ -8,6 +8,8 @@ Bulk Writer
 1. Nhibernate assembly 
 1. Examples
  1. Relative distances between an entity and all zip codes
+ 2. Pipelining
+ 3. Advanced Pipelining
 
 # Introduction #
 
