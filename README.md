@@ -13,17 +13,33 @@ Bulk Writer
 
 # Introduction #
 
-We've all had reasons to write ETL jobs in C# rather than Integration Services in SQL Server. Sometimes it's just because it's easier to write them in C#, sometimes it's for other reasons. For whatever reason, it's okay.
+We've all had reasons to write ETL jobs in C# rather than with Integration Services in SQL Server. Sometimes it's because the transform logic is easier to reason about in C#, but for whatever reason, it's a perfectly acceptable way to to do things.
 
-When writing an ETL process in C#, we use the tools available to us. Unfortunately those tools help us read (or stream) from source data pretty well, but they leave us writing to our target data stores with `INSERT` statements. What we were looking for is a way to stream data into a target data store, just as we're able to stream from source data. A technique like this would be as fast as our transforms would allow, and use very little memory compared to existing techniques.
+When writing an ETL process in C#, we use the tools available to us like NHibernate, Entity Framework or PetaPoco to read and write data. Unfortunately those tools help us stream from source data pretty easily, but they don't make it easy to stream data into our target data stores. Instead, they typically leave us writing to target data stores with `INSERT` statements, which is not acceptable for transforms that generate very large data sets.
 
-`SqlBulkCopy` (or the Oracle or MySql equivalents) is the most likely candidate to stream into a target data store, and it is a great tool that *is* available to us, but its `WriteToServer()` methods take a `DataRow[]`, a `DataTable` or an `IDataReader`. The methods that take a `DataRow[]` or a `DataTable` aren't really useful when transforms produce very large data sets because they force us to load the entire data set into memory before being streamed into the target data store.
+> **What we need for transforms that generate very large data sets is a way to stream data into a target data store, just as we're able to stream from source data.**
 
-Which leaves us to examine how to leverage the `WriteToServer(IDataReader)` method. If you think about how `IDataReader` works, users of an `IDataReader` instance must call the `Read()` method before examining the current record held by the instance. A user advances the current record until `Read()` returns false, at which point the stream is finished and there is no longer a current record. In this way, `IDataReader` is a *non-caching forward-only client-pulling reader*.
+Such a technique would allow writing to target data stores as fast as our transforms would allow, compared to relying on our ORM to generate `INSERT` statements. In most cases, it would also use significantly less memory.
 
-There are other non-caching forward-only client-pulling readers in .NET, which are used every day by most developers. The most used example of this type of reader is `IEnumerator`, which works similarly to `IDataReader`. However, instead of a `Read():bool` method, `IEnumerator` has a `MoveNext():bool` method.
+## SqlBulkCopy ##
 
-The Bulk Writer core assembly has an `IDataReader` implementation that wraps an `IEnumerator` so that when users of the `IDataReader` instance call for the next record, the implementation retrieves the next record from the underlying `IEnumerator`. Most of the other code is for  mapping properties on the source data to columns in the target data store. You can give the `IDataReader` implementation to `SqlBulkCopy`, and it'll stream your `IEnumerable` into your target data store.
+`SqlBulkCopy` (or the Oracle or MySql equivalents) is the most likely candidate to stream into a target data store, but its `WriteToServer()` methods take a `DataRow[]`, a `DataTable` or an `IDataReader`.
+
+The methods that take a `DataRow[]` or a `DataTable` aren't really useful when transforms produce very large data sets because they force us to load the entire data set into memory before being streamed into the target data store.
+
+Which leaves us to examine how to leverage the `WriteToServer(IDataReader)` method. If you think about how `IDataReader` works, users of an `IDataReader` instance must call the `Read()` method before examining a current record. A user advances through the result set until `Read()` returns false, at which point the stream is finished and there is no longer a current record. It has no concept of a previous record. In this way, `IDataReader` is a *non-caching forward-only pull reader*.
+
+There are other non-caching forward-only pull readers in .NET, which are used every day by most developers. The most used example of this type of reader is `IEnumerator`, which works similarly to `IDataReader`. However, instead of a `Read():bool` method, `IEnumerator` has a `MoveNext():bool` method. In every other way, `IDataReader` and `IEnumerator` are similar.
+
+## Using SqlBulkCopy ##
+
+The Bulk Writer core assembly has an `IDataReader` implementation that wraps an `IEnumerator`. You can give this `IDataReader` implementation to an instance of `SqlBulkCopy`, so that when it calls for the next record to write, the implementation retrieves the next record from the underlying `IEnumerator`.
+
+It is conceivable that `IEnumerator.MoveNext()` and `IEnumerator.Current` are proffering records from any type of data source, but typically you retrieve an instance of `IEnumerator` from calling `IEnumerable.GetEnumerator()`. So, you can think of the `IDataReader` implementation in this way:
+
+> **You can give the `IDataReader` implementation to `SqlBulkCopy`, and it'll stream your `IEnumerable` into your target data store.**
+
+Most of the other code in the core assembly is for mapping properties on source data to columns in the target data store. 
 
 This technique does require you to reason differently about your ETL jobs. Most jobs *push* data into the target data store. This technique requires you to think about how to structure your transforms so that data is *pulled* from your source data through your transforms instead.
 
@@ -77,23 +93,23 @@ Next, all there is to do is let Bulk Writer write the results to your database t
 
 ## Pipelining ##
 
-The example above shows a transform that's pretty simple. But some ETL jobs require transforms that are so complex (and the code is so complicated), it's easier to reason about and implement the transforms in steps. You can create these steps using a single LINQ query if that works for you, or you can implement a Pipeline with Stages.
+The example above shows a transform that's pretty simple. But some ETL jobs require transforms that are so complex (and the code is so complicated), it's easier to reason about and implement the transforms in steps. You can create these steps using a single LINQ query (which are actually pipelines themselves), or you can implement a Pipeline with Stages.
 
-Typical pipelines look like this:
+Typical pipelines push data from one stage to the next.
 
-            =========     =========     =========     ==========
-            |       |     |       |     |       |     |        |
-    Push -> | Stage | --> | Stage | --> | Stage | --> |  Sink  |
-            |       |     |       |     |       |     |        |
-            =========     =========     =========     ==========
+            =========         =========         =========         ==========
+            |       |         |       |         |       |         |        |
+    Push -> | Stage | Push -> | Stage | Push -> | Stage | Push -> |  Sink  |
+            |       |         |       |         |       |         |        |
+            =========         =========         =========         ==========
 
-Using Bulk Writer, the Pipeline concept is a little different because data is usually *pushed* through Pipelines, but with Bulk Writer, data is *pulled* through the Pipeline by `EnumerableDataWriter`.
+Using Bulk Writer, data is *pulled* through the Pipeline by the `EnumerableDataWriter` class.
 
-    =========     =========     =========         ==========
-    |       |     |       |     |       |         |        |
-    | Stage | --> | Stage | --> | Stage | Pull -> |  Sink  |
-    |       |     |       |     |       |         |        |
-    =========     =========     =========         ==========
+    =========         =========         =========         ==========
+    |       |         |       |         |       |         |        |
+    | Stage | <- Pull | Stage | <- Pull | Stage | <- Pull |  Sink  |
+    |       |         |       |         |       |         |        |
+    =========         =========         =========         ==========
 
 Take the following example:
 
@@ -143,7 +159,7 @@ Take the following example:
 
 The example above is fine, but we're only processing one source data item at a time. If one pipeline stage takes longer to produce output than other stages, all stage processing suffers. We argue that there are times when you'd like any pipeline stage to continue to process available items even if other stages in the pipeline are blocked.
 
-For example, suppose Stage 1 was IO-bound because it queried and produced a result set for each of its input items. In other words, Stage 1 is producing a larger data set than its input.  Next, supposed Stage 2 was CPU bound because it performed hundreds of calculations on each row produced by Stage 1. In this example, there's no reason why Stage 2 shouldn't be able to perform its calculations while Stage 1 is querying for its next input.
+For example, suppose Stage 1 was IO-bound because it queried and produced a result set for each of its input items. In other words, Stage 1 is producing a larger data set than its input.  Next, supposed Stage 2 was CPU bound because it performed hundreds of calculations on each row produced by Stage 1. In this example, there's no reason why Stage 2 shouldn't be able to perform its calculations while Stage 1 is querying and producing input for Stage 2.
 
 We form a pipeline like this by running each pipeline stage on its own thread and by introducing an input and output buffer between each stage. Now, instead of a pipeline stage pulling directly from the previous stage, each pipeline stage pushes to and pulls from its input and output buffer, respectively.
 
@@ -158,7 +174,7 @@ Such a pipeline would look like this:
             ===                           ===                           ===
            Buffer                        Buffer                        Buffer
 
-Since each stage is running on its own thread, we need to be careful so that the stage's thread doesn't end before all the items the pipeline needs to process have been pushed through. We also want to block bulk copy until an item is ready to write. In essence, what we need is a buffer that is thread-safe and blocks the current thread until a new item is available. .NET already has such a buffer, `BlockingCollection<T>`.
+Since each stage is running on its own thread, we need to be careful so that the stage's thread doesn't end before all the items the pipeline needs to process have been pushed through. We also want to block `SqlBulkCopy` until an item is ready to write. In essence, what we need is a buffer that is thread-safe and blocks the current thread until a new item is available. .NET already has such a buffer, `BlockingCollection<T>`.
 
 To implement a pipeline like this, you would do the following:
 
@@ -179,6 +195,7 @@ To implement a pipeline like this, you would do the following:
              }
           }
        } finally {
+          // Let's the task managing Stage 2 know that it can end
           stage2Input.CompleteAdding();
        }
     });
@@ -205,12 +222,14 @@ To implement a pipeline like this, you would do the following:
        var dataWriter = new EnumerableDataWriter();
        dataWriter.WriteToDatabase(enumerable, bulkCopyFactory);
     });
+
+    // All stages are started and waiting for work at this point
     
+    // Populate your first stage here
     foreach (var item in Enumerable.Range(0, 1000000)) {
        stage1Input.add(new Stage1Input());
     }
 
     stage1Input.CompleteAdding();
     
-    Task.WaitAll(new[] { stage1, stage2, finalStage });
-    // or "await Task.WhenAll", depending on your context
+    await Task.WhenAll(new[] { stage1, stage2, finalStage });
