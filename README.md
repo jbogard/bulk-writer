@@ -63,8 +63,8 @@ All of these examples use the DecoratedModel assembly.
 
 Suppose that for performance reasons you wanted to cache the distances between an entity (such as a store, house or distribution center) and the centroid of every zip code in the U.S. Depending on the number of entities, you could easily produce a very large data set from these calculations. But sure, entity locations and zip code centroids aren't likely to change often enough to warrant computing this result set on every ETL job run, but the real point of this example is to show
 
-1. Sometimes our transforms can produce exponentially larger data sets than our source data
-2. That those very large data sets can be written to our target data store much faster than by generating an `INSERT` statement for each row.
+1. Sometimes our transforms can produce exponentially larger data sets than our source data. In this example, the result set size is (<span style="white-space: nowrap;"># of Entities &times; # of Zipcodes</span>).
+2. That those very large data sets can be written to our target data store much faster than by generating an `INSERT` statement for each row. In this example, you'd have to generate (<span style="white-space: nowrap;"># of Entities &times; # of Zipcodes</span>) `INSERT` statements which will never perform as well as bulk loading the data instead.
 
 We start off with this LINQ query that serves as our transform and will produce our large data set.
 
@@ -83,7 +83,7 @@ We start off with this LINQ query that serves as our transform and will produce 
          ArbitraryData = arbitraryData
       };
 
-Note that this LINQ query does not execute until its `IEnumerator.MoveNext()` method is called, which will ultimately be called by `SqlBulkCopy`.
+Note that this LINQ query does not execute until the `MoveNext()` method is called on its enumerator, which will ultimately be called by `SqlBulkCopy`.
 
 Next, all there is to do is let Bulk Writer write the results to your database table.
 
@@ -157,9 +157,11 @@ Take the following example:
 
 ## Advanced Pipelining ##
 
-The example above is fine, but we're only processing one source data item at a time. If one pipeline stage takes longer to produce output than other stages, all stage processing suffers. We argue that there are times when you'd like any pipeline stage to continue to process available items even if other stages in the pipeline are blocked.
+The example above is fine, but we're only processing one source data item at a time. If one pipeline stage takes longer to produce output than other stages, all stage processing suffers. We argue that there are times when you'd like any pipeline stage to continue to process available items even if other stages in the pipeline are blocked. For an example, let's consider a two stage segment of a pipeline.
 
-For example, suppose Stage 1 was IO-bound because it queried and produced a result set for each of its input items. In other words, Stage 1 is producing a larger data set than its input.  Next, supposed Stage 2 was CPU bound because it performed hundreds of calculations on each row produced by Stage 1. In this example, there's no reason why Stage 2 shouldn't be able to perform its calculations while Stage 1 is querying and producing input for Stage 2.
+Suppose Stage 1 was IO-bound because it queried for and produced a result set for each of its input items. In other words, Stage 1 is producing a larger data set than its input and it may be spending a lot of its time waiting.
+
+Next, supposed Stage 2 was CPU bound because it performed hundreds of calculations on each output produced by Stage 1. In this example, there's no reason why Stage 2 shouldn't be able to perform its calculations while Stage 1 is querying and producing input for Stage 2.
 
 We form a pipeline like this by running each pipeline stage on its own thread and by introducing an input and output buffer between each stage. Now, instead of a pipeline stage pulling directly from the previous stage, each pipeline stage pushes to and pulls from its input and output buffer, respectively.
 
@@ -174,7 +176,9 @@ Such a pipeline would look like this:
             ===                           ===                           ===
            Buffer                        Buffer                        Buffer
 
-Since each stage is running on its own thread, we need to be careful so that the stage's thread doesn't end before all the items the pipeline needs to process have been pushed through. We also want to block `SqlBulkCopy` until an item is ready to write. In essence, what we need is a buffer that is thread-safe and blocks the current thread until a new item is available. .NET already has such a buffer, `BlockingCollection<T>`.
+Since each stage is running on its own thread, we need to be careful so that the stage's thread doesn't end before all the items the pipeline needs to process have been pushed through. So, we'll need a way to indicate that previous stages have finished.
+
+We also want to block `SqlBulkCopy` until an item is ready to write. In essence, what we need is a buffer that is thread-safe and blocks the current thread until a new item is available. .NET already has such a buffer, `BlockingCollection<T>`.
 
 To implement a pipeline like this, you would do the following:
 
