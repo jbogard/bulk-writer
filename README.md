@@ -4,9 +4,11 @@ Bulk Writer
 # Table of Contents #
 
 1. Introduction
-1. DecoratedModel assembly
-1. Nhibernate assembly 
-1. Examples
+ 1. SqlBulkCopy
+ 2. Using SqlBulkCopy
+2. DecoratedModel assembly
+3. Nhibernate assembly 
+4. Examples
  1. Relative distances between an entity and all zip codes
  2. Pipelining
  3. Advanced Pipelining
@@ -27,29 +29,29 @@ Such a technique would allow writing to target data stores as fast as our transf
 
 The methods that take a `DataRow[]` or a `DataTable` aren't really useful when transforms produce very large data sets because they force us to load the entire data set into memory before being streamed into the target data store.
 
-Which leaves us to examine how to leverage the `WriteToServer(IDataReader)` method. If you think about how `IDataReader` works, users of an `IDataReader` instance must call the `Read()` method before examining a current record. A user advances through the result set until `Read()` returns false, at which point the stream is finished and there is no longer a current record. It has no concept of a previous record. In this way, `IDataReader` is a *non-caching forward-only pull reader*.
+Which leaves us to examine how to leverage the `WriteToServer(IDataReader)` method. If you think about how `IDataReader` works, users of an `IDataReader` instance must call the `Read()` method before examining a current record. A user advances through the result set until `Read()` returns false, at which point the stream is finished and there is no longer a current record. It has no concept of a previous record. In this way, `IDataReader` is a *non-caching forward-only reader*.
 
-There are other non-caching forward-only pull readers in .NET, which are used every day by most developers. The most used example of this type of reader is `IEnumerator`, which works similarly to `IDataReader`. However, instead of a `Read():bool` method, `IEnumerator` has a `MoveNext():bool` method. In every other way, `IDataReader` and `IEnumerator` are similar.
+There are other non-caching forward-only readers in .NET, which are used every day by most developers. The most used example of this type of reader is `IEnumerator`, which works similarly to `IDataReader`. However, instead of a `Read():bool` method, `IEnumerator` has a `MoveNext():bool` method. In every other way, `IDataReader` and `IEnumerator` are similar.
 
 ## Using SqlBulkCopy ##
 
-The Bulk Writer core assembly has an `IDataReader` implementation that wraps an `IEnumerator`. You can give this `IDataReader` implementation to an instance of `SqlBulkCopy`, so that when it calls for the next record to write, the implementation retrieves the next record from the underlying `IEnumerator`.
+The Bulk Writer core assembly has an `IDataReader` implementation that wraps an `IEnumerator` called `EnumeratorDataReader`. You can give an instance of `EnumeratorDataReader` to an instance of `SqlBulkCopy`, so that when `SqlBulkCopy` calls for the next record from the `EnumeratorDataReader` instance, it is retrieving the next record from the underlying `IEnumerator`.
 
-It is conceivable that `IEnumerator.MoveNext()` and `IEnumerator.Current` are proffering records from any type of data source, but typically you retrieve an instance of `IEnumerator` from calling `IEnumerable.GetEnumerator()`. So, you can think of the `IDataReader` implementation in this way:
+It is conceivable that `IEnumerator.MoveNext()` and `IEnumerator.Current` are proffering records from any type of data source, but typically you retrieve an instance of `IEnumerator` by calling `IEnumerable.GetEnumerator()`. So, you can think of `EnumeratorDataReader` in this way:
 
-> **You can give the `IDataReader` implementation to `SqlBulkCopy`, and it'll stream your `IEnumerable` into your target data store.**
+> **You can give `EnumeratorDataReader` to `SqlBulkCopy`, and in turn, `SqlBulkCopy` will stream the data from the `IEnumerable` into your target data store.**
 
-Most of the other code in the core assembly is for mapping properties on source data to columns in the target data store. 
+Most of the other code in the core assembly is for mapping properties on source data (objects yielded from an `IEnumerable`) to columns in the target data store. 
 
 This technique does require you to reason differently about your ETL jobs. Most jobs *push* data into the target data store. This technique requires you to think about how to structure your transforms so that data is *pulled* from your source data through your transforms instead.
 
-Any number of rows - since it is technically possible to produce infinite data sets with `IEnumerable` - can be pulled into a SQL Server table as soon as your `IEnumerable` can produce them and using very little memory.
+It is technically possible to produce infinite data sets with `IEnumerable`, which can be pulled into a SQL Server table as soon as your `IEnumerable` can produce them while using very little memory.
 
-## DecoratedModel assembly ##
+# DecoratedModel assembly #
 
 *Work in progress...*
 
-## Nhibernate assembly ##
+# Nhibernate assembly #
 
 *Work in progress...*
 
@@ -61,7 +63,7 @@ All of these examples use the DecoratedModel assembly.
 
 ## Relative distances between an entity and all zip codes ##
 
-Suppose that for performance reasons you wanted to cache the distances between an entity (such as a store, house or distribution center) and the centroid of every zip code in the U.S. Depending on the number of entities, you could easily produce a very large data set from these calculations. But sure, entity locations and zip code centroids aren't likely to change often enough to warrant computing this result set on every ETL job run, but the real point of this example is to show
+Suppose that for performance reasons you wanted to cache the distances between some entities (such as a store, house or distribution center) and the centroid of every zip code in the U.S. Depending on the number of entities, you could easily produce a very large data set from these calculations. But sure, entity locations and zip code centroids aren't likely to change often enough to warrant computing this result set on every ETL job run, but the real point of this example is to show
 
 1. Sometimes our transforms can produce exponentially larger data sets than our source data. In this example, the result set size is (<span style="white-space: nowrap;"># of Entities &times; # of Zipcodes</span>).
 2. That those very large data sets can be written to our target data store much faster than by generating an `INSERT` statement for each row. In this example, you'd have to generate (<span style="white-space: nowrap;"># of Entities &times; # of Zipcodes</span>) `INSERT` statements which will never perform as well as bulk loading the data instead.
@@ -157,11 +159,11 @@ Take the following example:
 
 ## Advanced Pipelining ##
 
-The example above is fine, but we're only processing one source data item at a time. If one pipeline stage takes longer to produce output than other stages, all stage processing suffers. We argue that there are times when you'd like any pipeline stage to continue to process available items even if other stages in the pipeline are blocked. For an example, let's consider a two stage segment of a pipeline.
+The example above is fine, but we're only processing one source data item at a time. If one pipeline stage takes longer to produce output than other stages, all stage processing suffers. We argue that there are times when you'd like any pipeline stage to continue to process available items even if other stages in the pipeline are blocked. For an example, let's consider a segment of a pipeline comprised of two stages.
 
 Suppose Stage 1 was IO-bound because it queried for and produced a result set for each of its input items. In other words, Stage 1 is producing a larger data set than its input and it may be spending a lot of its time waiting.
 
-Next, supposed Stage 2 was CPU bound because it performed hundreds of calculations on each output produced by Stage 1. In this example, there's no reason why Stage 2 shouldn't be able to perform its calculations while Stage 1 is querying and producing input for Stage 2.
+Next, supposed Stage 2 was CPU bound because it performed hundreds of calculations on each output produced by Stage 1. In this example, there's no reason why Stage 2 shouldn't be able to perform its calculations while Stage 1 is blocked or producing input for Stage 2.
 
 We form a pipeline like this by running each pipeline stage on its own thread and by introducing an input and output buffer between each stage. Now, instead of a pipeline stage pulling directly from the previous stage, each pipeline stage pushes to and pulls from its input and output buffer, respectively.
 
