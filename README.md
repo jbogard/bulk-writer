@@ -6,8 +6,6 @@ Bulk Writer
 1. Introduction
  1. SqlBulkCopy
  2. Using SqlBulkCopy
-2. DecoratedModel assembly
-3. Nhibernate assembly 
 4. Examples
  1. Relative distances between an entity and all zip codes
  2. Pipelining
@@ -15,13 +13,15 @@ Bulk Writer
 
 # Introduction #
 
-We've all had reasons to write ETL jobs in C# rather than with Integration Services in SQL Server. Sometimes it's because the transform logic is easier to reason about in C#, but for whatever reason, it's a perfectly acceptable way to to do things.
+We've all had reasons to write ETL jobs in C# rather than with Integration Services in SQL Server. Sometimes it's because your ETL's transform logic is easier to reason about in C#, sometimes we want to utilize .NET's rich library ecosystem, but for whatever reason, it's a perfectly acceptable way to to do things.
 
-When writing an ETL process in C#, we use the tools available to us like NHibernate, Entity Framework or PetaPoco to read and write data. Unfortunately those tools help us stream from source data pretty easily, but they don't make it easy to stream data into our target data stores. Instead, they typically leave us writing to target data stores with `INSERT` statements, which is not acceptable for transforms that generate very large data sets.
+When writing an ETL process in C#, we use the tools available to us like NHibernate, Entity Framework or PetaPoco to read from and write to databases. These tools help us stream _from_ source data pretty easily, but unfortunately, they don't make it easy to stream data _to_ our target data stores. Instead, they typically leave us writing to target data stores with `INSERT` statements, which is not performant for transforms that generate very large data sets.
 
-> **What we need for transforms that generate very large data sets is a way to stream data into a target data store, just as we're able to stream from source data.**
+> **What we need for transforms that generate very large data sets is a technique to stream data into a target data store, just as we're able to stream from source data.**
 
-Such a technique would allow writing to target data stores as fast as our transforms would allow, compared to relying on our ORM to generate `INSERT` statements. In most cases, it would also use significantly less memory.
+Such a technique would allow writing to target data stores as fast as our transforms and hardware will allow, compared to relying on our ORM to generate `INSERT` statements. In most cases, it would also use significantly less memory.
+
+This library shows how to use SqlBulkCopy, IEnumerator and IDataReader to enable this kind of streaming technique with our ETLs.  The code samples and guidance that follow will also show how to change your "push" based transforms to "pull" based transforms. 
 
 ## SqlBulkCopy ##
 
@@ -31,33 +31,25 @@ The methods that take a `DataRow[]` or a `DataTable` aren't really useful when t
 
 Which leaves us to examine how to leverage the `WriteToServer(IDataReader)` method. If you think about how `IDataReader` works, users of an `IDataReader` instance must call the `Read()` method before examining a current record. A user advances through the result set until `Read()` returns false, at which point the stream is finished and there is no longer a current record. It has no concept of a previous record. In this way, `IDataReader` is a *non-caching forward-only reader*.
 
-There are other non-caching forward-only readers in .NET, which are used every day by most developers. The most used example of this type of reader is `IEnumerator`, which works similarly to `IDataReader`. However, instead of a `Read():bool` method, `IEnumerator` has a `MoveNext():bool` method. In every other way, `IDataReader` and `IEnumerator` are similar.
+There are other non-caching forward-only readers in .NET, which are used every day by most developers. The most used example of this type of reader is `IEnumerator`, which works similarly to `IDataReader`. However, instead of a `Read():bool` method, `IEnumerator` has a `MoveNext():bool` method. Conceptually, `IDataReader` and `IEnumerator` are similar.
 
 ## Using SqlBulkCopy ##
 
 The Bulk Writer core assembly has an `IDataReader` implementation that wraps an `IEnumerator` called `EnumeratorDataReader`. You can give an instance of `EnumeratorDataReader` to an instance of `SqlBulkCopy`, so that when `SqlBulkCopy` calls for the next record from the `EnumeratorDataReader` instance, it is retrieving the next record from the underlying `IEnumerator`.
 
-It is conceivable that `IEnumerator.MoveNext()` and `IEnumerator.Current` are proffering records from any type of data source, but typically you retrieve an instance of `IEnumerator` by calling `IEnumerable.GetEnumerator()`. So, you can think of `EnumeratorDataReader` in this way:
+It is conceivable that `IEnumerator.MoveNext()` and `IEnumerator.Current` are proffering records from any type of data source, but you are typically enumerating over an enumerable by retrieving an instance of `IEnumerator` by calling `IEnumerable.GetEnumerator()`. So, you can think of `EnumeratorDataReader` in this way:
 
 > **You can give `EnumeratorDataReader` to `SqlBulkCopy`, and in turn, `SqlBulkCopy` will stream the data from the `IEnumerable` into your target data store.**
 
 Most of the other code in the core assembly is for mapping properties on source data (objects yielded from an `IEnumerable`) to columns in the target data store. 
 
-This technique does require you to reason differently about your ETL jobs. Most jobs *push* data into the target data store. This technique requires you to think about how to structure your transforms so that data is *pulled* from your source data through your transforms instead.
+This technique does require you to reason differently about your ETL jobs: Most jobs *push* data into the target data store. This technique requires you to think about how to structure your transforms so that data is *pulled* from your source data through your transforms instead.
 
 It is technically possible to produce infinite data sets with `IEnumerable`, which can be pulled into a SQL Server table as soon as your `IEnumerable` can produce them while using very little memory.
 
-# DecoratedModel assembly #
-
-*Work in progress...*
-
-# Nhibernate assembly #
-
-*Work in progress...*
-
 # Examples #
 
-By itself, Bulk Writer is a pretty simple concept and the code itself isn't really all that complicated. However, we believe even simple implementations can enable very complex scenarios. The rest of this document shows examples of what you can do with Bulk Writer.
+By itself, Bulk Writer is a pretty simple concept and the code itself isn't really all that complicated. However, even simple implementations can enable very complex scenarios. The rest of this document shows examples of what you can do with Bulk Writer.
 
 All of these examples use the DecoratedModel assembly.
 
@@ -159,7 +151,7 @@ Take the following example:
 
 ## Advanced Pipelining ##
 
-The example above is fine, but we're only processing one source data item at a time. If one pipeline stage takes longer to produce output than other stages, all stage processing suffers. We argue that there are times when you'd like any pipeline stage to continue to process available items even if other stages in the pipeline are blocked. For an example, let's consider a segment of a pipeline comprised of two stages.
+The example above is fine, but we're only processing one source data item at a time. If one pipeline stage takes longer to produce output than other stages, all stage processing suffers. There are times when you'd like any pipeline stage to continue to process available items even if other stages in the pipeline are blocked. For an example, let's consider a segment of a pipeline comprised of two stages.
 
 Suppose Stage 1 was IO-bound because it queried for and produced a result set for each of its input items. In other words, Stage 1 is producing a larger data set than its input and it may be spending a lot of its time waiting.
 
