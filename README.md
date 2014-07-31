@@ -21,7 +21,7 @@ When writing an ETL process in C#, we use the tools available to us like NHibern
 
 Such a technique would allow writing to target data stores as fast as our transforms and hardware will allow, compared to relying on our ORM to generate `INSERT` statements. In most cases, it would also use significantly less memory.
 
-This library shows how to use SqlBulkCopy, IEnumerator and IDataReader to enable this kind of streaming technique with our ETLs.  The code samples and guidance that follow will also show how to change your "push" based transforms to "pull" based transforms. 
+This library and the guidance that follows show how to use `SqlBulkCopy`, `IEnumerable` and `IDataReader` to enable this kind of streaming technique, that is, to stream from a data source and to stream into a data store, with our C# ETLs.  We'll also cover how to change your "push"-based transforms that use `INSERT` statements to "pull"-based transforms that use `IEnumerable` and `EnumeratorDataReader`, the `SqlBulkCopy` implementation contained in this library.
 
 ## SqlBulkCopy ##
 
