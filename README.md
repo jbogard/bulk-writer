@@ -62,28 +62,32 @@ Suppose that for performance reasons you wanted to cache the distances between s
 
 We start off with this LINQ query that serves as our transform and will produce our large data set.
 
-    var q =
-      from entity in GetAllEntities()
-      where entity.IsActive && SomeOtherPredicate(entity)
-      from zipCode in GetAllZipCodes()
-      where zipCode.IsInContiguousStates && SomeOtherPredicate(zipCode)
-      let distance = GetDistance(entity, zipCode)
-      let arbitraryData = CreateSomeArbitraryData(entity, zipCode)
-      where distance > 0
-      select new EntityToZipCodeDistance {
-         EntityId = entity.Id,
-         ZipCode = zipCode.Zip,
-         Distance = distance,
-         ArbitraryData = arbitraryData
-      };
+```csharp
+var q =
+  from entity in GetAllEntities()
+  where entity.IsActive && SomeOtherPredicate(entity)
+  from zipCode in GetAllZipCodes()
+  where zipCode.IsInContiguousStates && SomeOtherPredicate(zipCode)
+  let distance = GetDistance(entity, zipCode)
+  let arbitraryData = CreateSomeArbitraryData(entity, zipCode)
+  where distance > 0
+  select new EntityToZipCodeDistance {
+     EntityId = entity.Id,
+     ZipCode = zipCode.Zip,
+     Distance = distance,
+     ArbitraryData = arbitraryData
+  };
+```
 
 Note that this LINQ query does not execute until the `MoveNext()` method is called on its enumerator, which will ultimately be called by `SqlBulkCopy`.
 
 Next, all there is to do is let Bulk Writer write the results to your database table.
 
-    var bulkCopyFactory = CreateBulkCopyFactory();
-    var dataWriter = new EnumerableDataWriter();
-    dataWriter.WriteToDatabase(q, bulkCopyFactory);
+```csharp
+var bulkCopyFactory = CreateBulkCopyFactory();
+var dataWriter = new EnumerableDataWriter();
+dataWriter.WriteToDatabase(q, bulkCopyFactory);
+```
 
 ## Pipelining ##
 
@@ -107,47 +111,49 @@ Using Bulk Writer, data is *pulled* through the Pipeline by the `EnumerableDataW
 
 Take the following example:
 
-	var begin = DoStepBegin();
-    var step1 = DoStep1(begin);
-    var step2 = DoStep2(step1);
-    var step3 = DoStep3(step2);
-    DoStepEnd(step3);
+```csharp
+var begin = DoStepBegin();
+var step1 = DoStep1(begin);
+var step2 = DoStep2(step1);
+var step3 = DoStep3(step2);
+DoStepEnd(step3);
       
-    // Or a one-liner!!
-    // DoStepEnd(DoStep3(DoStep2(DoStep1(DoStepBegin()))));
+// Or a one-liner!!
+// DoStepEnd(DoStep3(DoStep2(DoStep1(DoStepBegin()))));
 
-    private static IEnumerable<BeginStepResult> DoStepBegin() {
-       foreach (var item in Enumerable.Range(0, 1000000)) {
-          yield return new BeginStepResult();
-       }
-    }
+private static IEnumerable<BeginStepResult> DoStepBegin() {
+   foreach (var item in Enumerable.Range(0, 1000000)) {
+      yield return new BeginStepResult();
+   }
+}
 
-    private static IEnumerable<Step1Result> DoStep1(IEnumerable<BeginStepResult> input) {
-        // Or using LINQ, which does the same thing as below
-        return input.Where(x => SomePredicate(x)).Select(x => new Step1Result(x));
-    }
+private static IEnumerable<Step1Result> DoStep1(IEnumerable<BeginStepResult> input) {
+    // Or using LINQ, which does the same thing as below
+    return input.Where(x => SomePredicate(x)).Select(x => new Step1Result(x));
+}
 
-    private static IEnumerable<Step2Result> DoStep2(IEnumerable<Step1Result> input) {
-       foreach (var item in input) {
-	      if (SomePredicate(item)) {
-             yield return new Step2Result(item);
-          }
-       }
-    }
+private static IEnumerable<Step2Result> DoStep2(IEnumerable<Step1Result> input) {
+   foreach (var item in input) {
+      if (SomePredicate(item)) {
+         yield return new Step2Result(item);
+      }
+   }
+}
 
-    private static IEnumerable<Step3Result> DoStep3(IEnumerable<Step2Result> input) {
-       foreach (var item in input) {
-          foreach(var many in GetManyItems(item)) {
-             yield return Step3Result(many);
-          }
-       }
-    }
+private static IEnumerable<Step3Result> DoStep3(IEnumerable<Step2Result> input) {
+   foreach (var item in input) {
+      foreach(var many in GetManyItems(item)) {
+         yield return Step3Result(many);
+      }
+   }
+}
 
-    private static void DoStepEnd(IEnumerable<Step3Result> input) {
-       var bulkCopyFactory = CreateBulkCopyFactory();
-       var dataWriter = new EnumerableDataWriter();
-       dataWriter.WriteToDatabase(input, bulkCopyFactory);
-    }
+private static void DoStepEnd(IEnumerable<Step3Result> input) {
+   var bulkCopyFactory = CreateBulkCopyFactory();
+   var dataWriter = new EnumerableDataWriter();
+   dataWriter.WriteToDatabase(input, bulkCopyFactory);
+}
+```
 
 ## Advanced Pipelining ##
 
@@ -176,58 +182,60 @@ We also want to block `SqlBulkCopy` until an item is ready to write. In essence,
 
 To implement a pipeline like this, you would do the following:
 
-    var taskFactory = new TaskFactory(TaskCreationOptions.LongRunning, TaskContinuationOptions.None);
-    
-    var stage1Input = new BlockingCollection<Stage1Input>();
-    var stage2Input = new BlockingCollection<Stage2Input>();
-    var finalStageInput = new BlockingCollection<FinalStageInput>();
-    
-    var stage1 = taskFactory.StartNew(() => {
-       var enumerable = stage1Input.GetConsumingEnumerable();
-       
-       try {
-          foreach(var item in enumerable) {
-             var outputs = GetOutputsFromIO(item);
-             foreach(var output in outputs) {
-                stage2Input.Add(output);
-             }
-          }
-       } finally {
-          // Let's the task managing Stage 2 know that it can end
-          stage2Input.CompleteAdding();
-       }
-    });
-    
-    var stage2 = taskFactory.StartNew(() => {
-       var enumerable = stage2Input.GetConsumingEnumerable();
-       
-       try {
-          foreach(var item in enumerable) {
-             var outputs = DoLotsOfCalculations(item);
-             foreach(var output in outputs) {
-                finalStageInput.Add(output);
-             }
-          }
-       } finally {
-          finalStageInput.CompleteAdding();
-       }
-    });
-    
-    var finalStage = taskFactory.StartNew(() => {
-       var enumerable = finalStageInput.GetConsumingEnumerable();
-       
-       var bulkCopyFactory = CreateBulkCopyFactory();
-       var dataWriter = new EnumerableDataWriter();
-       dataWriter.WriteToDatabase(enumerable, bulkCopyFactory);
-    });
+```csharp
+var taskFactory = new TaskFactory(TaskCreationOptions.LongRunning, TaskContinuationOptions.None);
 
-    // All stages are started and waiting for work at this point
-    
-    // Populate your first stage here
-    foreach (var item in Enumerable.Range(0, 1000000)) {
-       stage1Input.add(new Stage1Input());
-    }
+var stage1Input = new BlockingCollection<Stage1Input>();
+var stage2Input = new BlockingCollection<Stage2Input>();
+var finalStageInput = new BlockingCollection<FinalStageInput>();
 
-    stage1Input.CompleteAdding();
-    
-    await Task.WhenAll(new[] { stage1, stage2, finalStage });
+var stage1 = taskFactory.StartNew(() => {
+   var enumerable = stage1Input.GetConsumingEnumerable();
+   
+   try {
+      foreach(var item in enumerable) {
+         var outputs = GetOutputsFromIO(item);
+         foreach(var output in outputs) {
+            stage2Input.Add(output);
+         }
+      }
+   } finally {
+      // Let's the task managing Stage 2 know that it can end
+      stage2Input.CompleteAdding();
+   }
+});
+
+var stage2 = taskFactory.StartNew(() => {
+   var enumerable = stage2Input.GetConsumingEnumerable();
+   
+   try {
+      foreach(var item in enumerable) {
+         var outputs = DoLotsOfCalculations(item);
+         foreach(var output in outputs) {
+            finalStageInput.Add(output);
+         }
+      }
+   } finally {
+      finalStageInput.CompleteAdding();
+   }
+});
+
+var finalStage = taskFactory.StartNew(() => {
+   var enumerable = finalStageInput.GetConsumingEnumerable();
+   
+   var bulkCopyFactory = CreateBulkCopyFactory();
+   var dataWriter = new EnumerableDataWriter();
+   dataWriter.WriteToDatabase(enumerable, bulkCopyFactory);
+});
+
+// All stages are started and waiting for work at this point
+
+// Populate your first stage here
+foreach (var item in Enumerable.Range(0, 1000000)) {
+   stage1Input.add(new Stage1Input());
+}
+
+stage1Input.CompleteAdding();
+
+await Task.WhenAll(new[] { stage1, stage2, finalStage });
+```
