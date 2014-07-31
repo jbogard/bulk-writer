@@ -4,12 +4,12 @@ Bulk Writer
 # Table of Contents #
 
 1. Introduction
- 1. SqlBulkCopy
- 2. Using SqlBulkCopy
-4. Examples
- 1. Relative distances between an entity and all zip codes
- 2. Pipelining
- 3. Advanced Pipelining
+ 1. [SqlBulkCopy](#sqlbulkcopy)
+ 1. [Using SqlBulkCopy](#using-sqlbulkcopy)
+1. Examples
+ 1. [Relative distances between an entity and all zip codes](#relative-distances-between-an-entity-and-all-zip-codes)
+ 1. [Pipelining](#pipelining)
+ 1. [Advanced Pipelining](#advanced-pipelining)
 
 # Introduction #
 
