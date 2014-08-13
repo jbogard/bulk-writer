@@ -21,7 +21,7 @@ namespace Headspring.BulkWriter.Nhibernate
             this.configuration = configuration;
         }
 
-        public IBulkCopy Create(object item, out IPropertyToOrdinalMappings mappings)
+        public IBulkCopy Create(object item, BulkWriterOptions options, out IPropertyToOrdinalMappings mappings)
         {
             var connectionString = this.configuration.GetProperty(Environment.ConnectionString);
 
@@ -37,7 +37,11 @@ namespace Headspring.BulkWriter.Nhibernate
             var connection = new SqlConnection(connectionString);
             connection.Open();
 
-            var transaction = connection.BeginTransaction(IsolationLevel.Snapshot);
+            IsolationLevel isolationLevel;
+            var isolationLevelSetting = this.configuration.GetProperty(Environment.Isolation);
+            var transactionIsolationLevel = Enum.TryParse(isolationLevelSetting, out isolationLevel) ? isolationLevel : options.IsolationLevel;
+
+            var transaction = connection.BeginTransaction(transactionIsolationLevel);
 
             var sqlBulkCopy = new SqlBulkCopy(connection, SqlBulkCopyOptions.Default, transaction)
             {
