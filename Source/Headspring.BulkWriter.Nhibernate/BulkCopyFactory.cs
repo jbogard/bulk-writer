@@ -23,8 +23,16 @@ namespace Headspring.BulkWriter.Nhibernate
 
         public IBulkCopy Create(object item, out IPropertyToOrdinalMappings mappings)
         {
-            string connectionStringName = this.configuration.GetProperty(Environment.ConnectionStringName);
-            string connectionString = ConfigurationManager.ConnectionStrings[connectionStringName].ConnectionString;
+            var connectionString = this.configuration.GetProperty(Environment.ConnectionString);
+
+            if (connectionString == null)
+            {
+                var connectionStringName = this.configuration.GetProperty(Environment.ConnectionStringName);
+                if (connectionStringName == null)
+                    throw new InvalidOperationException("Unable to create SqlConnection without a valid connection string.");
+
+                connectionString = ConfigurationManager.ConnectionStrings[connectionStringName].ConnectionString;
+            }
 
             var connection = new SqlConnection(connectionString);
             connection.Open();
