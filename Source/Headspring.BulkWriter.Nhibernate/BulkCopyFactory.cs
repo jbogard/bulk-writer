@@ -21,15 +21,27 @@ namespace Headspring.BulkWriter.Nhibernate
             this.configuration = configuration;
         }
 
-        public IBulkCopy Create(object item, out IPropertyToOrdinalMappings mappings)
+        public IBulkCopy Create(object item, BulkWriterOptions options, out IPropertyToOrdinalMappings mappings)
         {
-            string connectionStringName = this.configuration.GetProperty(Environment.ConnectionStringName);
-            string connectionString = ConfigurationManager.ConnectionStrings[connectionStringName].ConnectionString;
+            var connectionString = this.configuration.GetProperty(Environment.ConnectionString);
+
+            if (connectionString == null)
+            {
+                var connectionStringName = this.configuration.GetProperty(Environment.ConnectionStringName);
+                if (connectionStringName == null)
+                    throw new InvalidOperationException("Unable to create SqlConnection without a valid connection string.");
+
+                connectionString = ConfigurationManager.ConnectionStrings[connectionStringName].ConnectionString;
+            }
 
             var connection = new SqlConnection(connectionString);
             connection.Open();
 
-            var transaction = connection.BeginTransaction(IsolationLevel.Snapshot);
+            IsolationLevel isolationLevel;
+            var isolationLevelSetting = this.configuration.GetProperty(Environment.Isolation);
+            var transactionIsolationLevel = Enum.TryParse(isolationLevelSetting, out isolationLevel) ? isolationLevel : options.IsolationLevel;
+
+            var transaction = connection.BeginTransaction(transactionIsolationLevel);
 
             var sqlBulkCopy = new SqlBulkCopy(connection, SqlBulkCopyOptions.Default, transaction)
             {

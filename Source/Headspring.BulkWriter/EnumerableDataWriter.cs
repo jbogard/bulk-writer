@@ -5,13 +5,24 @@ namespace Headspring.BulkWriter
 {
     public class EnumerableDataWriter
     {
+        private readonly BulkWriterOptions options;
+
+        public EnumerableDataWriter(BulkWriterOptions options)
+        {
+            this.options = options;
+        }
+
+        public EnumerableDataWriter() : this(BulkWriterOptions.Default)
+        {
+        }
+
         public void WriteToDatabase(IEnumerable items, IBulkCopyFactory bulkCopyFactory)
         {
             IEnumerator enumerator = items.GetEnumerator();
             if (enumerator.MoveNext())
             {
                 IPropertyToOrdinalMappings mappings;
-                using (IBulkCopy bulkCopy = bulkCopyFactory.Create(enumerator.Current, out mappings))
+                using (IBulkCopy bulkCopy = bulkCopyFactory.Create(enumerator.Current, options, out mappings))
                 {
                     using (var dataReader = new EnumeratorDataReader(enumerator.Current, enumerator, mappings))
                     {
@@ -27,7 +38,7 @@ namespace Headspring.BulkWriter
             if (enumerator.MoveNext())
             {
                 IPropertyToOrdinalMappings mappings;
-                using (IBulkCopy bulkCopy = bulkCopyFactory.Create(enumerator.Current, out mappings))
+                using (IBulkCopy bulkCopy = bulkCopyFactory.Create(enumerator.Current, options, out mappings))
                 {
                     using (var dataReader = new EnumeratorDataReader(enumerator.Current, enumerator, mappings))
                     {

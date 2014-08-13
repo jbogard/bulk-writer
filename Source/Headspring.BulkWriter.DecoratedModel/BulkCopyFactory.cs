@@ -16,7 +16,7 @@ namespace Headspring.BulkWriter.DecoratedModel
             this.transaction = transaction;
         }
 
-        public IBulkCopy Create(object item, out IPropertyToOrdinalMappings mappings)
+        public IBulkCopy Create(object item, BulkWriterOptions bulkWriterOptions, out IPropertyToOrdinalMappings mappings)
         {
             Type type = item.GetType();
             var mappingsImpl = new PropertyToOrdinalMappings(type);
