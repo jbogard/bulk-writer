@@ -85,8 +85,7 @@ Next, all there is to do is let Bulk Writer write the results to your database t
 
 ```csharp
 var bulkCopyFactory = CreateBulkCopyFactory();
-var dataWriter = new EnumerableDataWriter();
-dataWriter.WriteToDatabase(q, bulkCopyFactory);
+EnumerableDataWriter.WriteToDatabase(q, bulkCopyFactory);
 ```
 
 ## Pipelining ##
@@ -150,8 +149,7 @@ private static IEnumerable<Step3Result> DoStep3(IEnumerable<Step2Result> input) 
 
 private static void DoStepEnd(IEnumerable<Step3Result> input) {
    var bulkCopyFactory = CreateBulkCopyFactory();
-   var dataWriter = new EnumerableDataWriter();
-   dataWriter.WriteToDatabase(input, bulkCopyFactory);
+   EnumerableDataWriter.WriteToDatabase(input, bulkCopyFactory);
 }
 ```
 
@@ -224,8 +222,7 @@ var finalStage = taskFactory.StartNew(() => {
    var enumerable = finalStageInput.GetConsumingEnumerable();
    
    var bulkCopyFactory = CreateBulkCopyFactory();
-   var dataWriter = new EnumerableDataWriter();
-   dataWriter.WriteToDatabase(enumerable, bulkCopyFactory);
+   EnumerableDataWriter.WriteToDatabase(enumerable, bulkCopyFactory);
 });
 
 // All stages are started and waiting for work at this point
