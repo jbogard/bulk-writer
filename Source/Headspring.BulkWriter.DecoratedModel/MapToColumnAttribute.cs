@@ -3,7 +3,7 @@
 namespace Headspring.BulkWriter.DecoratedModel
 {
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
-    public class MapToColumnAttribute : Attribute
+    public sealed class MapToColumnAttribute : Attribute
     {
         private readonly string name;
         private readonly int ordinal;

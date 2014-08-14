@@ -44,6 +44,11 @@ namespace Headspring.BulkWriter.DecoratedModel
 
         public void Add(PropertyInfo property, out int ordinal)
         {
+            if (null == property)
+            {
+                throw new ArgumentNullException("property");
+            }
+
             this.nameToOrdinalMap[property.Name] = this.currentOrdinal;
             this.ordinalToNameMap[this.currentOrdinal] = property.Name;
 

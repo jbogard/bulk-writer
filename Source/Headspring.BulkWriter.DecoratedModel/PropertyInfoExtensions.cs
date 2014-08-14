@@ -6,7 +6,7 @@ using System.Reflection;
 
 namespace Headspring.BulkWriter.DecoratedModel
 {
-    public static class PropertyInfoExtensions
+    internal static class PropertyInfoExtensions
     {
         private static readonly Dictionary<PropertyInfo, Delegate> CachedGetters = new Dictionary<PropertyInfo, Delegate>();
 

@@ -4,11 +4,12 @@ using System.Globalization;
 
 namespace Headspring.BulkWriter.Nhibernate
 {
-    public class SchemaReader
+    internal static class SchemaReader
     {
         private const string SchemaMappingUnsortedIndex = "SchemaMapping Unsorted Index";
 
-        public DbSchemaRow[] GetSortedSchemaRows(string connectionString, string quotedTableName)
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2100:Review SQL queries for security vulnerabilities", Justification = "SchemaReader is internal.")]
+        public static DbSchemaRow[] GetSortedSchemaRows(string connectionString, string quotedTableName)
         {
             DataTable schemaTable;
 

@@ -38,6 +38,16 @@ namespace Headspring.BulkWriter.Nhibernate
 
         public void Add(Property property, Configuration configuration, out int ordinal)
         {
+            if (null == property)
+            {
+                throw new ArgumentNullException("property");
+            }
+
+            if (null == configuration)
+            {
+                throw new ArgumentNullException("configuration");
+            }
+            
             this.nameToOrdinalMap[property.Name] = this.currentOrdinal;
             this.ordinalToNameMap[this.currentOrdinal] = property.Name;
 
@@ -69,6 +79,11 @@ namespace Headspring.BulkWriter.Nhibernate
 
         public static bool ShouldMap(Property property)
         {
+            if (null == property)
+            {
+                throw new ArgumentNullException("property");
+            }
+            
             return property.IsUpdateable && ((property.Value is ToOne) || (property.Value is SimpleValue));
         }
 

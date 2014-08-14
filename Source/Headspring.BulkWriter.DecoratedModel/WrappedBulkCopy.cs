@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Headspring.BulkWriter.DecoratedModel
 {
-    public class WrappedBulkCopy : IBulkCopy
+    public sealed class WrappedBulkCopy : IBulkCopy
     {
         private readonly SqlBulkCopy sqlBulkCopy;
 

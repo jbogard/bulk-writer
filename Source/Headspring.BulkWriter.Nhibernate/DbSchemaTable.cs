@@ -3,7 +3,7 @@ using System.Data.Common;
 
 namespace Headspring.BulkWriter.Nhibernate
 {
-    public sealed class DbSchemaTable
+    internal sealed class DbSchemaTable
     {
         private static readonly string[] DbcolumnName =
         {

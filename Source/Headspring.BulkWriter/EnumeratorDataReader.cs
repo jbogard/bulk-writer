@@ -4,7 +4,7 @@ using System.Data;
 
 namespace Headspring.BulkWriter
 {
-    public class EnumeratorDataReader : IDataReader
+    public sealed class EnumeratorDataReader : IDataReader
     {
         private readonly IEnumerator enumerator;
         private readonly object firstItem;
@@ -189,16 +189,19 @@ namespace Headspring.BulkWriter
             throw new NotImplementedException();
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1065:DoNotRaiseExceptionsInUnexpectedLocations")]
         public int Depth
         {
             get { throw new NotImplementedException(); }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1065:DoNotRaiseExceptionsInUnexpectedLocations")]
         public bool IsClosed
         {
             get { throw new NotImplementedException(); }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1065:DoNotRaiseExceptionsInUnexpectedLocations")]
         public int RecordsAffected
         {
             get { throw new NotImplementedException(); }

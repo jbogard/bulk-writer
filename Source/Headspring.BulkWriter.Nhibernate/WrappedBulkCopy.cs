@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Headspring.BulkWriter.Nhibernate
 {
-    public class WrappedBulkCopy : IBulkCopy
+    public sealed class WrappedBulkCopy : IBulkCopy
     {
         private readonly SqlConnection connection;
         private readonly SqlBulkCopy sqlBulkCopy;

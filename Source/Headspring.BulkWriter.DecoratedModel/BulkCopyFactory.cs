@@ -16,12 +16,18 @@ namespace Headspring.BulkWriter.DecoratedModel
             this.transaction = transaction;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "SqlBulkCopy disposal is managed further up the return stack.")]
         public IBulkCopy Create(object item, out IPropertyToOrdinalMappings mappings)
         {
+            if (null == item)
+            {
+                throw new ArgumentNullException("item");
+            }
+
             Type type = item.GetType();
             var mappingsImpl = new PropertyToOrdinalMappings(type);
 
-            SqlBulkCopyOptions bulkCopyOptions = this.GetBulkCopyOptions(type);
+            SqlBulkCopyOptions bulkCopyOptions = GetBulkCopyOptions(type);
             var sqlBulkCopy = new SqlBulkCopy(this.connection, bulkCopyOptions, this.transaction)
             {
                 BatchSize = 4096,
@@ -29,14 +35,14 @@ namespace Headspring.BulkWriter.DecoratedModel
                 EnableStreaming = true
             };
 
-            this.AddColumnMappings(type, sqlBulkCopy, mappingsImpl);
+            AddColumnMappings(type, sqlBulkCopy, mappingsImpl);
 
             mappings = mappingsImpl;
 
             return new WrappedBulkCopy(sqlBulkCopy);
         }
 
-        private SqlBulkCopyOptions GetBulkCopyOptions(Type type)
+        private static SqlBulkCopyOptions GetBulkCopyOptions(Type type)
         {
             PropertyInfo[] properties = type.GetProperties();
 
@@ -49,7 +55,7 @@ namespace Headspring.BulkWriter.DecoratedModel
             return preservingIdentity ? SqlBulkCopyOptions.KeepIdentity : SqlBulkCopyOptions.Default;
         }
 
-        private void AddColumnMappings(Type type, SqlBulkCopy sqlBulkCopy, PropertyToOrdinalMappings mappings)
+        private static void AddColumnMappings(Type type, SqlBulkCopy sqlBulkCopy, PropertyToOrdinalMappings mappings)
         {
             var mapToTableAttribute = (MapToTableAttribute) Attribute.GetCustomAttribute(type, typeof (MapToTableAttribute));
             if (null == mapToTableAttribute)
@@ -59,10 +65,10 @@ namespace Headspring.BulkWriter.DecoratedModel
 
             sqlBulkCopy.DestinationTableName = mapToTableAttribute.Name;
 
-            this.MapProperties(type, mappings, sqlBulkCopy);
+            MapProperties(type, mappings, sqlBulkCopy);
         }
 
-        private void MapProperties(Type type, PropertyToOrdinalMappings mappings, SqlBulkCopy sqlBulkCopy)
+        private static void MapProperties(Type type, PropertyToOrdinalMappings mappings, SqlBulkCopy sqlBulkCopy)
         {
             PropertyInfo[] properties = type.GetProperties();
             foreach (PropertyInfo property in properties)

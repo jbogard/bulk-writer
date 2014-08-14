@@ -1,12 +1,23 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Threading.Tasks;
 
 namespace Headspring.BulkWriter
 {
-    public class EnumerableDataWriter
+    public static class EnumerableDataWriter
     {
-        public void WriteToDatabase(IEnumerable items, IBulkCopyFactory bulkCopyFactory)
+        public static void WriteToDatabase(IEnumerable items, IBulkCopyFactory bulkCopyFactory)
         {
+            if (null == items)
+            {
+                throw new ArgumentNullException("items");
+            }
+
+            if (null == bulkCopyFactory)
+            {
+                throw new ArgumentNullException("bulkCopyFactory");
+            }
+
             IEnumerator enumerator = items.GetEnumerator();
             if (enumerator.MoveNext())
             {
@@ -21,8 +32,18 @@ namespace Headspring.BulkWriter
             }
         }
 
-        public async Task WriteToDatabaseAsync(IEnumerable items, IBulkCopyFactory bulkCopyFactory)
+        public static async Task WriteToDatabaseAsync(IEnumerable items, IBulkCopyFactory bulkCopyFactory)
         {
+            if (null == items)
+            {
+                throw new ArgumentNullException("items");
+            }
+
+            if (null == bulkCopyFactory)
+            {
+                throw new ArgumentNullException("bulkCopyFactory");
+            }
+            
             IEnumerator enumerator = items.GetEnumerator();
             if (enumerator.MoveNext())
             {
