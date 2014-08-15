@@ -4,7 +4,7 @@ using System.Data;
 
 namespace Headspring.BulkWriter
 {
-    public sealed class EnumeratorDataReader : IDataReader
+    internal sealed class EnumeratorDataReader : IDataReader
     {
         private readonly IEnumerator enumerator;
         private readonly object firstItem;
