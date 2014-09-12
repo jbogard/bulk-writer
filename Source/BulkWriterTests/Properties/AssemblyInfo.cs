@@ -1,18 +1,16 @@
-﻿using System;
-using System.Reflection;
+﻿using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Resources;
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("bulk-writer")]
+[assembly: AssemblyTitle("BulkWriterTests")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Headspring")]
-[assembly: AssemblyProduct("bulk-writer")]
-[assembly: AssemblyCopyright("Copyright © Headspring 2014")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("BulkWriterTests")]
+[assembly: AssemblyCopyright("Copyright ©  2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -22,7 +20,7 @@ using System.Resources;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("d4478ca6-9e19-4372-8d21-5f90f05212c0")]
+[assembly: Guid("4c66e920-fae4-4310-bc39-17a83ef37230")]
 
 // Version information for an assembly consists of the following four values:
 //
@@ -34,9 +32,5 @@ using System.Resources;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("2.0.0.0")]
+[assembly: AssemblyVersion("1.0.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
-
-[assembly: InternalsVisibleTo("BulkWriterTests")]
-[assembly: NeutralResourcesLanguageAttribute("en-US")]
-[assembly: CLSCompliant(true)]

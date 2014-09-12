@@ -1,13 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.30110.0
-MinimumVisualStudioVersion = 10.0.40219.1
+# Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Headspring.BulkWriter", "Headspring.BulkWriter\Headspring.BulkWriter.csproj", "{A232D2EA-6E54-4941-9496-4DB98122B14C}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Headspring.BulkWriter.DecoratedModel", "Headspring.BulkWriter.DecoratedModel\Headspring.BulkWriter.DecoratedModel.csproj", "{A0EB5F33-451E-43A1-9832-4E8A25B8963C}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Headspring.BulkWriter.Nhibernate", "Headspring.BulkWriter.Nhibernate\Headspring.BulkWriter.Nhibernate.csproj", "{12A298A1-2E78-48C5-93E8-58A207509150}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{6F63ABE3-E69D-41F2-8878-1A7DE81D493D}"
 	ProjectSection(SolutionItems) = preProject
@@ -15,6 +9,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{6F63AB
 		.nuget\NuGet.exe = .nuget\NuGet.exe
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BulkWriterDemo", "BulkWriterDemo\BulkWriterDemo.csproj", "{09FA9E48-9696-4E1E-A1DB-B4D8ACE96B18}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BulkWriterTests", "BulkWriterTests\BulkWriterTests.csproj", "{6DAD0F01-655C-49BF-924F-01C8ED7CA62C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -26,14 +24,14 @@ Global
 		{A232D2EA-6E54-4941-9496-4DB98122B14C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A232D2EA-6E54-4941-9496-4DB98122B14C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A232D2EA-6E54-4941-9496-4DB98122B14C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A0EB5F33-451E-43A1-9832-4E8A25B8963C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A0EB5F33-451E-43A1-9832-4E8A25B8963C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A0EB5F33-451E-43A1-9832-4E8A25B8963C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A0EB5F33-451E-43A1-9832-4E8A25B8963C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{12A298A1-2E78-48C5-93E8-58A207509150}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{12A298A1-2E78-48C5-93E8-58A207509150}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{12A298A1-2E78-48C5-93E8-58A207509150}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{12A298A1-2E78-48C5-93E8-58A207509150}.Release|Any CPU.Build.0 = Release|Any CPU
+		{09FA9E48-9696-4E1E-A1DB-B4D8ACE96B18}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{09FA9E48-9696-4E1E-A1DB-B4D8ACE96B18}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{09FA9E48-9696-4E1E-A1DB-B4D8ACE96B18}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{09FA9E48-9696-4E1E-A1DB-B4D8ACE96B18}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6DAD0F01-655C-49BF-924F-01C8ED7CA62C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6DAD0F01-655C-49BF-924F-01C8ED7CA62C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6DAD0F01-655C-49BF-924F-01C8ED7CA62C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6DAD0F01-655C-49BF-924F-01C8ED7CA62C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

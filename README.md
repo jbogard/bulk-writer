@@ -21,7 +21,7 @@ When writing an ETL process in C#, we use the tools available to us like NHibern
 
 Such a technique would allow writing to target data stores as fast as our transforms and hardware will allow, compared to relying on our ORM to generate `INSERT` statements. In most cases, it would also use significantly less memory.
 
-This library and the guidance that follows show how to use `SqlBulkCopy`, `IEnumerable` and `IDataReader` to enable this kind of streaming technique, that is, to stream from a data source and to stream into a data store, with our C# ETLs.  We'll also cover how to change your "push"-based transforms that use `INSERT` statements to "pull"-based transforms that use `IEnumerable` and `EnumeratorDataReader`, the `SqlBulkCopy` implementation contained in this library.
+This library and the guidance that follows show how to use `SqlBulkCopy`, `IEnumerable` and `IDataReader` to enable this kind of streaming technique, that is, to stream from a data source and to stream into a data store, with our C# ETLs.  We'll also cover how to change your "push"-based transforms that use `INSERT` statements to "pull"-based transforms that use `IEnumerable` and `EnumerableDataReader`, the `SqlBulkCopy` implementation contained in this library.
 
 ## SqlBulkCopy ##
 
@@ -35,11 +35,11 @@ There are other non-caching forward-only readers in .NET, which are used every d
 
 ## Using SqlBulkCopy ##
 
-The Bulk Writer core assembly has an `IDataReader` implementation that wraps an `IEnumerator` called `EnumeratorDataReader`. You can give an instance of `EnumeratorDataReader` to an instance of `SqlBulkCopy`, so that when `SqlBulkCopy` calls for the next record from the `EnumeratorDataReader` instance, it is retrieving the next record from the underlying `IEnumerator`.
+The Bulk Writer core assembly has an `IDataReader` implementation that wraps an `IEnumerator` called `EnumerableDataReader`. You can give an instance of `EnumerableDataReader` to an instance of `SqlBulkCopy`, so that when `SqlBulkCopy` calls for the next record from the `EnumerableDataReader` instance, it is retrieving the next record from the underlying `IEnumerator`.
 
-It is conceivable that `IEnumerator.MoveNext()` and `IEnumerator.Current` are proffering records from any type of data source, but you are typically enumerating over an enumerable by retrieving an instance of `IEnumerator` by calling `IEnumerable.GetEnumerator()`. So, you can think of `EnumeratorDataReader` in this way:
+It is conceivable that `IEnumerator.MoveNext()` and `IEnumerator.Current` are proffering records from any type of data source, but you are typically enumerating over an enumerable by retrieving an instance of `IEnumerator` by calling `IEnumerable.GetEnumerator()`. So, you can think of `EnumerableDataReader` in this way:
 
-> **You can give `EnumeratorDataReader` to `SqlBulkCopy`, and in turn, `SqlBulkCopy` will stream the data from the `IEnumerable` into your target data store.**
+> **You can give `EnumerableDataReader` to `SqlBulkCopy`, and in turn, `SqlBulkCopy` will stream the data from the `IEnumerable` into your target data store.**
 
 Most of the other code in the core assembly is for mapping properties on source data (objects yielded from an `IEnumerable`) to columns in the target data store. 
 
@@ -50,8 +50,6 @@ It is technically possible to produce infinite data sets with `IEnumerable`, whi
 # Examples #
 
 By itself, Bulk Writer is a pretty simple concept and the code itself isn't really all that complicated. However, even simple implementations can enable very complex scenarios. The rest of this document shows examples of what you can do with Bulk Writer.
-
-All of these examples use the DecoratedModel assembly.
 
 ## Relative distances between an entity and all zip codes ##
 
@@ -64,19 +62,19 @@ We start off with this LINQ query that serves as our transform and will produce 
 
 ```csharp
 var q =
-  from entity in GetAllEntities()
-  where entity.IsActive && SomeOtherPredicate(entity)
-  from zipCode in GetAllZipCodes()
-  where zipCode.IsInContiguousStates && SomeOtherPredicate(zipCode)
-  let distance = GetDistance(entity, zipCode)
-  let arbitraryData = CreateSomeArbitraryData(entity, zipCode)
-  where distance > 0
-  select new EntityToZipCodeDistance {
-     EntityId = entity.Id,
-     ZipCode = zipCode.Zip,
-     Distance = distance,
-     ArbitraryData = arbitraryData
-  };
+   from entity in GetAllEntities()
+   where entity.IsActive && SomeOtherPredicate(entity)
+   from zipCode in GetAllZipCodes()
+   where zipCode.IsInContiguousStates && SomeOtherPredicate(zipCode)
+   let distance = GetDistance(entity, zipCode)
+   let arbitraryData = CreateSomeArbitraryData(entity, zipCode)
+   where distance > 0
+   select new EntityToZipCodeDistance {
+      EntityId = entity.Id,
+      ZipCode = zipCode.Zip,
+      Distance = distance,
+      ArbitraryData = arbitraryData
+   };
 ```
 
 Note that this LINQ query does not execute until the `MoveNext()` method is called on its enumerator, which will ultimately be called by `SqlBulkCopy`.
@@ -84,8 +82,12 @@ Note that this LINQ query does not execute until the `MoveNext()` method is call
 Next, all there is to do is let Bulk Writer write the results to your database table.
 
 ```csharp
-var bulkCopyFactory = CreateBulkCopyFactory();
-EnumerableDataWriter.WriteToDatabase(q, bulkCopyFactory);
+var mapping = MapBuilder.BuildAllProperties<EntityToZipCodeDistance>();
+using (var bulkWriter = mapping.CreateBulkWriter(connectionString))
+{
+   var items = GetDomainEntities();
+   bulkWriter.WriteToDatabase(q);
+}
 ```
 
 ## Pipelining ##
@@ -100,7 +102,7 @@ Typical pipelines push data from one stage to the next.
             |       |         |       |         |       |         |        |
             =========         =========         =========         ==========
 
-Using Bulk Writer, data is *pulled* through the Pipeline by the `EnumerableDataWriter` class.
+Using Bulk Writer, data is *pulled* through the Pipeline.
 
     =========         =========         =========         ==========
     |       |         |       |         |       |         |        |
@@ -148,8 +150,11 @@ private static IEnumerable<Step3Result> DoStep3(IEnumerable<Step2Result> input) 
 }
 
 private static void DoStepEnd(IEnumerable<Step3Result> input) {
-   var bulkCopyFactory = CreateBulkCopyFactory();
-   EnumerableDataWriter.WriteToDatabase(input, bulkCopyFactory);
+   var mapping = MapBuilder.BuildAllProperties<Step3Result>();
+   using (var bulkWriter = mapping.CreateBulkWriter(connectionString))
+   {
+      bulkWriter.WriteToDatabase(input);
+   }
 }
 ```
 
@@ -220,9 +225,11 @@ var stage2 = taskFactory.StartNew(() => {
 
 var finalStage = taskFactory.StartNew(() => {
    var enumerable = finalStageInput.GetConsumingEnumerable();
-   
-   var bulkCopyFactory = CreateBulkCopyFactory();
-   EnumerableDataWriter.WriteToDatabase(enumerable, bulkCopyFactory);
+   var mapping = MapBuilder.BuildAllProperties<FinalStageInput>();
+   using (var bulkWriter = mapping.CreateBulkWriter(connectionString))
+   {
+      bulkWriter.WriteToDatabase(enumerable);
+   }
 });
 
 // All stages are started and waiting for work at this point
