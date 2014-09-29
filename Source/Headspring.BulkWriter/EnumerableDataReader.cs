@@ -88,9 +88,9 @@ namespace Headspring.BulkWriter
                 throw new InvalidOperationException(Resources.EnumerableDataReader_GetValue_OrdinalDoesNotMapToProperty);
             }
 
-            Delegate valueGetter = mapping.Source.Property.GetValueGetter();
+            GetPropertyValueHandler valueGetter = mapping.Source.Property.GetValueGetter();
 
-            object value = valueGetter.DynamicInvoke(this.enumerator.Current);
+            object value = valueGetter(this.enumerator.Current);
             return value;
         }
 

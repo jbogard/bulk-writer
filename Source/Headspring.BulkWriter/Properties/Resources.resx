@@ -137,4 +137,7 @@
   <data name="MappingDestination_GetPropertyValue_PropertyNotSet" xml:space="preserve">
     <value>The property '{0}' is not set. Use the 'IsPropertySet' method to check if a property has been set.</value>
   </data>
+  <data name="PropertyInfoExtensions_PropertyNotDeclaredOnType" xml:space="preserve">
+    <value>The supplied property is not declared on a type.</value>
+  </data>
 </root>

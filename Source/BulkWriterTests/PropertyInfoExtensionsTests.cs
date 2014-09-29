@@ -17,12 +17,12 @@ namespace BulkWriterTests
             
             var testClass = new MyTestClass();
 
-            object zeroValue = valueTypePropertyValueGetter.DynamicInvoke(testClass);
+            object zeroValue = valueTypePropertyValueGetter(testClass);
             Assert.IsInstanceOfType(zeroValue, typeof (int));
             Assert.AreEqual(0, zeroValue);
 
             testClass.ValueTypeProperty = 418;
-            object fourOneEightValue = valueTypePropertyValueGetter.DynamicInvoke(testClass);
+            object fourOneEightValue = valueTypePropertyValueGetter(testClass);
             Assert.IsInstanceOfType(fourOneEightValue, typeof(int));
             Assert.AreEqual(418, fourOneEightValue);
         }
@@ -37,11 +37,11 @@ namespace BulkWriterTests
 
             var testClass = new MyTestClass();
 
-            object nullValue = referenceTypePropertyValueGetter.DynamicInvoke(testClass);
+            object nullValue = referenceTypePropertyValueGetter(testClass);
             Assert.IsNull(nullValue);
 
             testClass.ReferenceTypeProperty = "418";
-            object fourOneEightValue = referenceTypePropertyValueGetter.DynamicInvoke(testClass);
+            object fourOneEightValue = referenceTypePropertyValueGetter(testClass);
             Assert.IsInstanceOfType(fourOneEightValue, typeof(string));
             Assert.AreEqual("418", fourOneEightValue);
         }
@@ -56,11 +56,11 @@ namespace BulkWriterTests
 
             var testClass = new MyTestClass();
 
-            object nullValue = nullableTypePropertyValueGetter.DynamicInvoke(testClass);
+            object nullValue = nullableTypePropertyValueGetter(testClass);
             Assert.IsNull(nullValue);
 
             testClass.NullableTypeProperty = 418;
-            object fourOneEightValue = nullableTypePropertyValueGetter.DynamicInvoke(testClass);
+            object fourOneEightValue = nullableTypePropertyValueGetter(testClass);
             Assert.IsInstanceOfType(fourOneEightValue, typeof(int?));
             Assert.AreEqual(418, fourOneEightValue);
         }
