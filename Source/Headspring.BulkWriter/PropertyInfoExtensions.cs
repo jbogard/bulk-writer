@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Threading;
 using Headspring.BulkWriter.Properties;
 
 namespace Headspring.BulkWriter
@@ -11,7 +10,6 @@ namespace Headspring.BulkWriter
 
     internal static class PropertyInfoExtensions
     {
-        private static readonly ReaderWriterLockSlim ReaderWriterLock = new ReaderWriterLockSlim();
         private static readonly Dictionary<PropertyInfo, GetPropertyValueHandler> CachedGetters = new Dictionary<PropertyInfo, GetPropertyValueHandler>();
 
         public static GetPropertyValueHandler GetValueGetter(this PropertyInfo propertyInfo)
@@ -28,35 +26,20 @@ namespace Headspring.BulkWriter
 
             GetPropertyValueHandler getter;
 
-            ReaderWriterLock.EnterUpgradeableReadLock();
-
-            try
+            lock (CachedGetters)
             {
                 if (!CachedGetters.TryGetValue(propertyInfo, out getter))
                 {
-                    ReaderWriterLock.EnterWriteLock();
+                    var instance = Expression.Parameter(typeof(object), "instance");
+                    var convertedInstance = Expression.Convert(instance, propertyInfo.DeclaringType);
+                    var propertyCall = Expression.Property(convertedInstance, propertyInfo);
+                    var convertedPropertyValue = Expression.Convert(propertyCall, typeof(object));
 
-                    try
-                    {
-                        var instance = Expression.Parameter(typeof(object), "instance");
-                        var convertedInstance = Expression.Convert(instance, propertyInfo.DeclaringType);
-                        var propertyCall = Expression.Property(convertedInstance, propertyInfo);
-                        var convertedPropertyValue = Expression.Convert(propertyCall, typeof(object));
+                    var lambda = Expression.Lambda<GetPropertyValueHandler>(convertedPropertyValue, instance);
+                    var compiled = lambda.Compile();
 
-                        var lambda = Expression.Lambda<GetPropertyValueHandler>(convertedPropertyValue, instance);
-                        var compiled = lambda.Compile();
-
-                        CachedGetters[propertyInfo] = getter = compiled;
-                    }
-                    finally
-                    {
-                        ReaderWriterLock.ExitWriteLock();
-                    }
+                    CachedGetters[propertyInfo] = getter = compiled;
                 }
-            }
-            finally
-            {
-                ReaderWriterLock.ExitUpgradeableReadLock();
             }
 
             return getter;
