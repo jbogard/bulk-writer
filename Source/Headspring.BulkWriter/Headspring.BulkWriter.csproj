@@ -46,6 +46,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BulkWriter.cs" />
+    <Compile Include="BulkWriterOptions.cs" />
     <Compile Include="DbSchemaRow.cs" />
     <Compile Include="DbSchemaTable.cs" />
     <Compile Include="EnumerableDataReader.cs" />

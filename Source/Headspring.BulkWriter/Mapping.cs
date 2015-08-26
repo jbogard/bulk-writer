@@ -27,15 +27,13 @@ namespace Headspring.BulkWriter
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller is responsible for disposing.")]
         public IBulkWriter<TResult> CreateBulkWriter(string connectionString)
         {
-            if (null == connectionString)
-            {
-                throw new ArgumentNullException("connectionString");
-            }
+            return CreateBulkWriter(new BulkWriterOptions(connectionString));
+        }
 
-            if (0 == connectionString.Length)
-            {
-                throw new ArgumentException(Resources.Mapping_CreateBulkWriter_InvalidConnectionString, "connectionString");
-            }
+        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller is responsible for disposing.")]
+        public IBulkWriter<TResult> CreateBulkWriter(BulkWriterOptions options)
+        {
+            var connectionString = options.ConnectionString;
 
             this.AutoDiscoverIfNeeded(connectionString);
 
@@ -43,8 +41,14 @@ namespace Headspring.BulkWriter
             SqlBulkCopyOptions sqlBulkCopyOptions = hasAnyKeys ? SqlBulkCopyOptions.KeepIdentity : SqlBulkCopyOptions.Default;
             var sqlBulkCopy = new SqlBulkCopy(connectionString, sqlBulkCopyOptions)
             {
-                DestinationTableName = this.destinationTableName
+                DestinationTableName = this.destinationTableName,
+                BatchSize = options.BatchSize,
+                BulkCopyTimeout = options.BulkCopyTimeout,
+                EnableStreaming = options.EnableStreaming,
+                NotifyAfter = options.NotifyAfter,
             };
+
+            sqlBulkCopy.SqlRowsCopied += options.SqlRowsCopied;
 
             foreach (PropertyMapping propertyMapping in this.propertyMappings)
             {
