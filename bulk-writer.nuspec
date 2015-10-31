@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+    <metadata>
+        <id>bulk-writer</id>
+        <version>2.0.0.1</version>
+        <authors>Headspring</authors>
+        <owners>Headspring</owners>
+        <licenseUrl>https://raw.githubusercontent.com/HeadspringLabs/bulk-writer/master/LICENSE</licenseUrl>
+        <projectUrl>https://github.com/HeadspringLabs/bulk-writer</projectUrl>
+        <iconUrl>https://bitbucket-assetroot.s3.amazonaws.com/c/photos/2010/May/14/spray_avatar.png</iconUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>Provides guidance for fast ETL jobs, an IDataReader implementation for SqlBulkCopy (or the MySql or Oracle equivalents) that wraps an IEnumerable, and libraries for mapping entities to table columns.</description>
+        <tags>etl sql</tags>
+    </metadata>
+    <files>
+        <file src="lib\net40\Headspring.BulkWriter.dll" target="lib\net40\Headspring.BulkWriter.dll" />
+    </files>
+</package>
