@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
-using Headspring.BulkWriter.Properties;
+using BulkWriter.Properties;
 
-namespace Headspring.BulkWriter
+namespace BulkWriter
 {
     internal class MapBuilderContext<TResult> : IMapBuilderContext<TResult>
     {

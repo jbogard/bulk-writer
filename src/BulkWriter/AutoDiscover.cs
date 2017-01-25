@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Data.Entity.Design.PluralizationServices;
 using System.Globalization;
 using System.Linq;
-using Headspring.BulkWriter.Properties;
+using BulkWriter.Properties;
 
-namespace Headspring.BulkWriter
+namespace BulkWriter
 {
     internal static class AutoDiscover
     {

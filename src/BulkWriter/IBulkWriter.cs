@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Headspring.BulkWriter
+namespace BulkWriter
 {
     public interface IBulkWriter<TResult> : IDisposable
     {

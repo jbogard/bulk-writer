@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace Headspring.BulkWriter
+namespace BulkWriter
 {
     public static class MapBuilder
     {

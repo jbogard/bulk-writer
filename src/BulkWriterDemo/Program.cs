@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using Headspring.BulkWriter;
+using BulkWriter;
 
 namespace BulkWriterDemo
 {

@@ -1,4 +1,4 @@
-﻿namespace Headspring.BulkWriter
+﻿namespace BulkWriter
 {
     public interface IMapping<TResult>
     {

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Reflection;
-using Headspring.BulkWriter.Properties;
+using BulkWriter.Properties;
 
-namespace Headspring.BulkWriter
+namespace BulkWriter
 {
     internal class MappingSource
     {

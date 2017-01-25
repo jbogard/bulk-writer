@@ -1,5 +1,5 @@
 ﻿using System.Reflection;
-using Headspring.BulkWriter;
+using BulkWriter;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace BulkWriterTests

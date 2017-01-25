@@ -1,4 +1,4 @@
-namespace Headspring.BulkWriter
+namespace BulkWriter
 {
     internal enum MappingProperty
     {

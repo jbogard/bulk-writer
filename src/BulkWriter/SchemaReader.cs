@@ -3,7 +3,7 @@ using System.Data.SqlClient;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 
-namespace Headspring.BulkWriter
+namespace BulkWriter
 {
     internal static class SchemaReader
     {

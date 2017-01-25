@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Data.SqlClient;
 
-namespace Headspring.BulkWriter
+namespace BulkWriter
 {
     internal sealed class BulkWriter<TResult> : IBulkWriter<TResult>
     {

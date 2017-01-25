@@ -46,7 +46,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Headspring.BulkWriter\Headspring.BulkWriter.csproj">
+    <ProjectReference Include="..\BulkWriter\BulkWriter.csproj">
       <Project>{a232d2ea-6e54-4941-9496-4db98122b14c}</Project>
       <Name>Headspring.BulkWriter</Name>
     </ProjectReference>

@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using Headspring.BulkWriter.Properties;
+using BulkWriter.Properties;
 
-namespace Headspring.BulkWriter
+namespace BulkWriter
 {
     internal class Mapping<TResult> : IMapping<TResult>
     {

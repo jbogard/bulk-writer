@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
-using Headspring.BulkWriter.Properties;
+using BulkWriter.Properties;
 
-namespace Headspring.BulkWriter
+namespace BulkWriter
 {
     public delegate object GetPropertyValueHandler(object instance);
 

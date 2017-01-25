@@ -2,7 +2,7 @@
 using System.Data;
 using System.Globalization;
 
-namespace Headspring.BulkWriter
+namespace BulkWriter
 {
     public sealed class DbSchemaRow
     {

@@ -1,7 +1,7 @@
 ﻿using System.Data;
 using System.Data.Common;
 
-namespace Headspring.BulkWriter
+namespace BulkWriter
 {
     internal sealed class DbSchemaTable
     {

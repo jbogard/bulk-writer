@@ -7,8 +7,8 @@
     <ProjectGuid>{A232D2EA-6E54-4941-9496-4DB98122B14C}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Headspring.BulkWriter</RootNamespace>
-    <AssemblyName>Headspring.BulkWriter</AssemblyName>
+    <RootNamespace>BulkWriter</RootNamespace>
+    <AssemblyName>BulkWriter</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />

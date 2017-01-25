@@ -1,6 +1,6 @@
 ﻿using System.IO;
 using System.Linq;
-using Headspring.BulkWriter;
+using BulkWriter;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace BulkWriterTests

@@ -1,7 +1,7 @@
 ﻿using System;
-using Headspring.BulkWriter.Properties;
+using BulkWriter.Properties;
 
-namespace Headspring.BulkWriter
+namespace BulkWriter
 {
     internal class MapBuilderContextMap : IMapBuilderContextMap
     {

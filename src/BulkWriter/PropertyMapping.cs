@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Headspring.BulkWriter
+namespace BulkWriter
 {
     internal class PropertyMapping
     {
