@@ -12,9 +12,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{6F63AB
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BulkWriter.Demo", "BulkWriterDemo\BulkWriter.Demo.csproj", "{09FA9E48-9696-4E1E-A1DB-B4D8ACE96B18}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BulkWriter.Demo", "BulkWriter.Demo\BulkWriter.Demo.csproj", "{09FA9E48-9696-4E1E-A1DB-B4D8ACE96B18}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BulkWriter.Tests", "BulkWriterTests\BulkWriter.Tests.csproj", "{6DAD0F01-655C-49BF-924F-01C8ED7CA62C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BulkWriter.Tests", "BulkWriter.Tests\BulkWriter.Tests.csproj", "{6DAD0F01-655C-49BF-924F-01C8ED7CA62C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
