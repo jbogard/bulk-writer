@@ -2,7 +2,7 @@
 using BulkWriter;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace BulkWriterTests
+namespace BulkWriter.Tests
 {
     [TestClass]
     public class PropertyInfoExtensionsTests

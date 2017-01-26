@@ -3,7 +3,7 @@ using System.Linq;
 using BulkWriter;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace BulkWriterTests
+namespace BulkWriter.Tests
 {
     [TestClass]
     public class SchemaReaderTests
@@ -24,7 +24,7 @@ namespace BulkWriterTests
 
             TestHelpers.ExecuteNonQuery(connectionString, createTableScript);
 
-            var schemaRows = SchemaReader.GetSortedSchemaRows(connectionString, tableName);
+            var schemaRows = BulkWriter.SchemaReader.GetSortedSchemaRows(connectionString, tableName);
 
             TestHelpers.ExecuteNonQuery(connectionString, dropTableScript);
 

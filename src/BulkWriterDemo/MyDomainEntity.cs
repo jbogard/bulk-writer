@@ -1,4 +1,4 @@
-﻿namespace BulkWriterDemo
+﻿namespace BulkWriter.Demo
 {
     public class MyDomainEntity
     {

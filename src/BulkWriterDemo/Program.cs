@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using BulkWriter;
 
-namespace BulkWriterDemo
+namespace BulkWriter.Demo
 {
     internal class Program
     {

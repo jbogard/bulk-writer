@@ -3,17 +3,17 @@ using System.Linq;
 using BulkWriter;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace BulkWriterTests
+namespace BulkWriter.Tests
 {
     [TestClass]
     public class EnumerableDataReaderTests
     {
         const string connectionString = "Data Source=(local);Initial Catalog=BulkWriterTest;Integrated Security=SSPI";
 
-        private readonly string tableName = AutoDiscover.TableName<MyTestClass>(false);
+        private readonly string tableName = BulkWriter.AutoDiscover.TableName<MyTestClass>(false);
 
         private IEnumerable<MyTestClass> enumerable;
-        private EnumerableDataReader<MyTestClass> dataReader;
+        private BulkWriter.EnumerableDataReader<MyTestClass> dataReader;
         
         [TestInitialize]
         public void Initialize_Test()
@@ -28,10 +28,10 @@ namespace BulkWriterTests
                 ")");
 
             var mapping = MapBuilder.MapAllProperties<MyTestClass>();
-            var propertyMappings = ((MapBuilderContext<MyTestClass>)mapping).GetPropertyMappings();
-            AutoDiscover.Mappings(connectionString, tableName, propertyMappings);
+            var propertyMappings = ((BulkWriter.MapBuilderContext<MyTestClass>)mapping).GetPropertyMappings();
+            BulkWriter.AutoDiscover.Mappings(connectionString, tableName, propertyMappings);
 
-            this.dataReader = new EnumerableDataReader<MyTestClass>(enumerable, propertyMappings);
+            this.dataReader = new BulkWriter.EnumerableDataReader<MyTestClass>(enumerable, propertyMappings);
             dataReader.Read();
         }
 

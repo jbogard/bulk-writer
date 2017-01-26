@@ -1,6 +1,6 @@
 ﻿using System.Data.SqlClient;
 
-namespace BulkWriterTests
+namespace BulkWriter.Tests
 {
     internal static class TestHelpers
     {

@@ -7,11 +7,11 @@ using System.Resources;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("bulk-writer")]
+[assembly: AssemblyTitle("BulkWriter")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Headspring")]
-[assembly: AssemblyProduct("bulk-writer")]
+[assembly: AssemblyProduct("BulkWriter")]
 [assembly: AssemblyCopyright("Copyright © Headspring 2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -37,6 +37,6 @@ using System.Resources;
 [assembly: AssemblyVersion("2.0.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
 
-[assembly: InternalsVisibleTo("BulkWriterTests")]
-[assembly: NeutralResourcesLanguageAttribute("en-US")]
+[assembly: InternalsVisibleTo("BulkWriter.Tests")]
+[assembly: NeutralResourcesLanguage("en-US")]
 [assembly: CLSCompliant(true)]
