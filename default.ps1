@@ -19,7 +19,7 @@ task clean {
 }
 
 task release {
-    $global:config = "Release"
+    $script:config = "Release"
 }
 
 task compile -depends clean {
@@ -28,11 +28,11 @@ task compile -depends clean {
 	
     exec { & $source_dir\.nuget\Nuget.exe restore $source_dir\BulkWriter.sln }
 
-    exec { msbuild /t:Clean /t:Build /p:Configuration=$config /v:q /p:NoWarn=1591 /nologo $source_dir\BulkWriter.sln }
+    exec { msbuild /t:Clean /t:Build /p:Configuration=$script:config /v:q /p:NoWarn=1591 /nologo $source_dir\BulkWriter.sln }
 
-    exec { & $source_dir\.nuget\Nuget.exe pack $source_dir\BulkWriter\BulkWriter.csproj -Symbols -Properties Configuration=$config }
+    exec { & $source_dir\.nuget\Nuget.exe pack $source_dir\BulkWriter\BulkWriter.csproj -Symbols -Properties Configuration=$script:config }
 }
 
 task test {
-    exec { & $source_dir\packages\xunit.runner.console.2.1.0\tools\xunit.console.exe $source_dir/BulkWriter.Tests/bin/$config/BulkWriter.Tests.dll }
+    exec { & $source_dir\packages\xunit.runner.console.2.1.0\tools\xunit.console.exe $source_dir/BulkWriter.Tests/bin/$script:config/BulkWriter.Tests.dll }
 }
