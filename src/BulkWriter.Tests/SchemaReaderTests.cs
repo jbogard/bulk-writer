@@ -1,17 +1,17 @@
 ﻿using System.IO;
 using System.Linq;
 using BulkWriter;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace BulkWriter.Tests
 {
-    [TestClass]
+    
     public class SchemaReaderTests
     {
-        [TestMethod]
+        [Fact]
         public void Can_Read_Table_Schema()
         {
-            const string connectionString = "Data Source=(local);Initial Catalog=BulkWriterTest;Integrated Security=SSPI";
+            string connectionString = TestHelpers.ConnectionString;
             const string tableName = "TempTestTable";
             
             const string createTableScript = "CREATE TABLE [dbo].[" + tableName + "](" +
@@ -29,20 +29,20 @@ namespace BulkWriter.Tests
             TestHelpers.ExecuteNonQuery(connectionString, dropTableScript);
 
             var idRow = schemaRows.ElementAtOrDefault(0);
-            Assert.IsNotNull(idRow);
-            Assert.AreEqual("Id", idRow.ColumnName);
-            Assert.AreEqual(typeof (int), idRow.DataType);
-            Assert.AreEqual("int", idRow.DataTypeName);
-            Assert.IsTrue(idRow.IsKey);
-            Assert.IsFalse(idRow.AllowDbNull);
+            Assert.NotNull(idRow);
+            Assert.Equal("Id", idRow.ColumnName);
+            Assert.Equal(typeof (int), idRow.DataType);
+            Assert.Equal("int", idRow.DataTypeName);
+            Assert.True(idRow.IsKey);
+            Assert.False(idRow.AllowDbNull);
 
             var firstNameRow = schemaRows.ElementAtOrDefault(1);
-            Assert.IsNotNull(firstNameRow);
-            Assert.AreEqual("FirstName", firstNameRow.ColumnName);
-            Assert.AreEqual(50, firstNameRow.Size);
-            Assert.AreEqual("nvarchar", firstNameRow.DataTypeName);
-            Assert.AreEqual(typeof(string), firstNameRow.DataType);
-            Assert.IsTrue(firstNameRow.AllowDbNull);
+            Assert.NotNull(firstNameRow);
+            Assert.Equal("FirstName", firstNameRow.ColumnName);
+            Assert.Equal(50, firstNameRow.Size);
+            Assert.Equal("nvarchar", firstNameRow.DataTypeName);
+            Assert.Equal(typeof(string), firstNameRow.DataType);
+            Assert.True(firstNameRow.AllowDbNull);
         }
     }
 }

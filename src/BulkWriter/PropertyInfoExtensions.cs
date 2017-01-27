@@ -16,12 +16,12 @@ namespace BulkWriter
         {
             if (null == propertyInfo)
             {
-                throw new ArgumentNullException("propertyInfo");
+                throw new ArgumentNullException(nameof(propertyInfo));
             }
 
             if (null == propertyInfo.DeclaringType)
             {
-                throw new ArgumentException(Resources.PropertyInfoExtensions_PropertyNotDeclaredOnType, "propertyInfo");
+                throw new ArgumentException(Resources.PropertyInfoExtensions_PropertyNotDeclaredOnType, nameof(propertyInfo));
             }
 
             GetPropertyValueHandler getter;

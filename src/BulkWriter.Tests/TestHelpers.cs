@@ -1,4 +1,5 @@
-﻿using System.Data.SqlClient;
+﻿using System.Configuration;
+using System.Data.SqlClient;
 
 namespace BulkWriter.Tests
 {
@@ -15,5 +16,7 @@ namespace BulkWriter.Tests
                 }
             }
         }
+
+        public static string ConnectionString => ConfigurationManager.ConnectionStrings["Test"].ConnectionString;
     }
 }

@@ -1,49 +1,48 @@
 ﻿using System;
 using BulkWriter;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace BulkWriter.Tests
 {
-    [TestClass]
+    
     public class MappingTests
     {
-        [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException))]
+        [Fact]
         public void Cannot_Read_Property_Without_Set()
         {
             var mappingDestination = new BulkWriter.MappingDestination();
-            string columnName = mappingDestination.ColumnName;
-            GC.KeepAlive(columnName);
+            string columnName = null;
+            Assert.Throws<InvalidOperationException>(() => columnName = mappingDestination.ColumnName);
         }
 
-        [TestMethod]
+        [Fact]
         public void Property_Reports_As_Set()
         {
             var destination = new BulkWriter.MappingDestination();
 
             destination.ColumnName = "TestColumn";
-            Assert.IsTrue(destination.IsPropertySet(BulkWriter.MappingProperty.ColumnName));
-            Assert.AreEqual(destination.ColumnName, "TestColumn");
+            Assert.True(destination.IsPropertySet(BulkWriter.MappingProperty.ColumnName));
+            Assert.Equal(destination.ColumnName, "TestColumn");
 
             var random = new Random();
 
             int columnOrdinal = random.Next();
             destination.ColumnOrdinal = columnOrdinal;
-            Assert.IsTrue(destination.IsPropertySet(BulkWriter.MappingProperty.ColumnOrdinal));
-            Assert.AreEqual(destination.ColumnOrdinal, columnOrdinal);
+            Assert.True(destination.IsPropertySet(BulkWriter.MappingProperty.ColumnOrdinal));
+            Assert.Equal(destination.ColumnOrdinal, columnOrdinal);
 
             int columnSize = random.Next();
             destination.ColumnSize = columnSize;
-            Assert.IsTrue(destination.IsPropertySet(BulkWriter.MappingProperty.ColumnSize));
-            Assert.AreEqual(destination.ColumnSize, columnSize);
+            Assert.True(destination.IsPropertySet(BulkWriter.MappingProperty.ColumnSize));
+            Assert.Equal(destination.ColumnSize, columnSize);
 
             destination.DataTypeName = "TestDataTypeName";
-            Assert.IsTrue(destination.IsPropertySet(BulkWriter.MappingProperty.DataTypeName));
-            Assert.AreEqual(destination.DataTypeName, "TestDataTypeName");
+            Assert.True(destination.IsPropertySet(BulkWriter.MappingProperty.DataTypeName));
+            Assert.Equal(destination.DataTypeName, "TestDataTypeName");
 
             destination.IsKey = true;
-            Assert.IsTrue(destination.IsPropertySet(BulkWriter.MappingProperty.IsKey));
-            Assert.AreEqual(destination.IsKey, true);
+            Assert.True(destination.IsPropertySet(BulkWriter.MappingProperty.IsKey));
+            Assert.Equal(destination.IsKey, true);
         }
     }
 }

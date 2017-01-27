@@ -1,25 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
 using BulkWriter;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace BulkWriter.Tests
 {
-    [TestClass]
+    
     public class AutoDiscoverTests
     {
-        [TestMethod]
+        [Fact]
         public void Discovers_Quoted_Table_Name()
         {
             string tableName = BulkWriter.AutoDiscover.TableName<MyTestClass>(true);
-            StringAssert.StartsWith(tableName, "[");
-            StringAssert.EndsWith(tableName, "]");
+            Assert.StartsWith("[", tableName);
+            Assert.EndsWith("]", tableName);
         }
 
-        [TestMethod]
+        [Fact]
         public void Maps_Only_Appropriate_Properties()
         {
-            const string connectionString = "Data Source=(local);Initial Catalog=BulkWriterTest;Integrated Security=SSPI";
+            string connectionString = TestHelpers.ConnectionString;
             string tableName = BulkWriter.AutoDiscover.TableName<MyTestClass>(false);
 
             TestHelpers.ExecuteNonQuery(connectionString,
@@ -45,17 +45,16 @@ namespace BulkWriter.Tests
                 {
                     for (int i = 0; i < BulkWriter.MappingDestination.PropertyIndexCount; i++)
                     {
-                        Assert.IsTrue(propertyMapping.Destination.IsPropertySet((BulkWriter.MappingProperty) i));
+                        Assert.True(propertyMapping.Destination.IsPropertySet((BulkWriter.MappingProperty) i));
                     }
                 }
             }
         }
 
-        [TestMethod]
-        [ExpectedException(typeof (InvalidOperationException))]
+        [Fact]
         public void Fails_On_MisMatch_Column_Auto_Map()
         {
-            const string connectionString = "Data Source=(local);Initial Catalog=BulkWriterTest;Integrated Security=SSPI";
+            string connectionString = TestHelpers.ConnectionString;
             string tableName = BulkWriter.AutoDiscover.TableName<MyTestClass>(false);
 
             TestHelpers.ExecuteNonQuery(connectionString,
@@ -71,7 +70,7 @@ namespace BulkWriter.Tests
 
             try
             {
-                BulkWriter.AutoDiscover.Mappings(connectionString, tableName, propertyMappings);
+                Assert.Throws<InvalidOperationException>(() => AutoDiscover.Mappings(connectionString, tableName, propertyMappings));
             }
             finally
             {
@@ -79,11 +78,10 @@ namespace BulkWriter.Tests
             }
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException))]
+        [Fact]
         public void Fails_On_MisMatch_Column_Manual_Map()
         {
-            const string connectionString = "Data Source=(local);Initial Catalog=BulkWriterTest;Integrated Security=SSPI";
+            string connectionString = TestHelpers.ConnectionString;
             string tableName = BulkWriter.AutoDiscover.TableName<MyTestClass>(false);
 
             TestHelpers.ExecuteNonQuery(connectionString,
@@ -101,7 +99,7 @@ namespace BulkWriter.Tests
 
             try
             {
-                BulkWriter.AutoDiscover.Mappings(connectionString, tableName, propertyMappings);
+                Assert.Throws<InvalidOperationException>(() => AutoDiscover.Mappings(connectionString, tableName, propertyMappings));
             }
             finally
             {
@@ -109,10 +107,10 @@ namespace BulkWriter.Tests
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void Can_Find_Destination_Table_Manual_Map()
         {
-            const string connectionString = "Data Source=(local);Initial Catalog=BulkWriterTest;Integrated Security=SSPI";
+            string connectionString = TestHelpers.ConnectionString;
             const string tableName = "TempTestTable";
 
             TestHelpers.ExecuteNonQuery(connectionString,
@@ -134,22 +132,22 @@ namespace BulkWriter.Tests
 
             foreach (BulkWriter.PropertyMapping propertyMapping in propertyMappings)
             {
-                Assert.IsTrue(propertyMapping.ShouldMap);
+                Assert.True(propertyMapping.ShouldMap);
 
                 if (propertyMapping.ShouldMap)
                 {
                     for (int i = 0; i < BulkWriter.MappingDestination.PropertyIndexCount; i++)
                     {
-                        Assert.IsTrue(propertyMapping.Destination.IsPropertySet((BulkWriter.MappingProperty)i));
+                        Assert.True(propertyMapping.Destination.IsPropertySet((BulkWriter.MappingProperty)i));
                     }
                 }
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void Can_Find_Column_Manual_Map()
         {
-            const string connectionString = "Data Source=(local);Initial Catalog=BulkWriterTest;Integrated Security=SSPI";
+            string connectionString = TestHelpers.ConnectionString;
             const string tableName = "TempTestTable";
 
             TestHelpers.ExecuteNonQuery(connectionString,
@@ -172,22 +170,22 @@ namespace BulkWriter.Tests
 
             foreach (BulkWriter.PropertyMapping propertyMapping in propertyMappings)
             {
-                Assert.IsTrue(propertyMapping.ShouldMap);
+                Assert.True(propertyMapping.ShouldMap);
 
                 if (propertyMapping.ShouldMap)
                 {
                     for (int i = 0; i < BulkWriter.MappingDestination.PropertyIndexCount; i++)
                     {
-                        Assert.IsTrue(propertyMapping.Destination.IsPropertySet((BulkWriter.MappingProperty)i));
+                        Assert.True(propertyMapping.Destination.IsPropertySet((BulkWriter.MappingProperty)i));
                     }
                 }
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void Can_Find_All_Columns_Auto_Map()
         {
-            const string connectionString = "Data Source=(local);Initial Catalog=BulkWriterTest;Integrated Security=SSPI";
+            string connectionString = TestHelpers.ConnectionString;
             string tableName = BulkWriter.AutoDiscover.TableName<MyTestClass>(false);
 
             TestHelpers.ExecuteNonQuery(connectionString,
@@ -207,13 +205,13 @@ namespace BulkWriter.Tests
 
             foreach (BulkWriter.PropertyMapping propertyMapping in propertyMappings)
             {
-                Assert.IsTrue(propertyMapping.ShouldMap);
+                Assert.True(propertyMapping.ShouldMap);
 
                 if (propertyMapping.ShouldMap)
                 {
                     for (int i = 0; i < BulkWriter.MappingDestination.PropertyIndexCount; i++)
                     {
-                        Assert.IsTrue(propertyMapping.Destination.IsPropertySet((BulkWriter.MappingProperty)i));
+                        Assert.True(propertyMapping.Destination.IsPropertySet((BulkWriter.MappingProperty)i));
                     }
                 }
             }

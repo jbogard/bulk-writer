@@ -1,22 +1,22 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using BulkWriter;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace BulkWriter.Tests
 {
-    [TestClass]
-    public class EnumerableDataReaderTests
+    
+    public class EnumerableDataReaderTests : IDisposable
     {
-        const string connectionString = "Data Source=(local);Initial Catalog=BulkWriterTest;Integrated Security=SSPI";
+        string connectionString = TestHelpers.ConnectionString;
 
         private readonly string tableName = BulkWriter.AutoDiscover.TableName<MyTestClass>(false);
 
         private IEnumerable<MyTestClass> enumerable;
         private BulkWriter.EnumerableDataReader<MyTestClass> dataReader;
         
-        [TestInitialize]
-        public void Initialize_Test()
+        public EnumerableDataReaderTests()
         {
             this.enumerable = new[] { new MyTestClass() };
 
@@ -35,52 +35,51 @@ namespace BulkWriter.Tests
             dataReader.Read();
         }
 
-        [TestCleanup]
-        public void Cleanup_Test()
+        public void Dispose()
         {
             TestHelpers.ExecuteNonQuery(connectionString, "DROP TABLE " + tableName);
         }
 
-        [TestMethod]
+        [Fact]
         public void Read_Advances_Enumerable()
         {
-            Assert.AreSame(enumerable.ElementAt(0), dataReader.Current);
+            Assert.Same(enumerable.ElementAt(0), dataReader.Current);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetOrdinal_Returns_Correct_Value()
         {
-            Assert.AreEqual(0, dataReader.GetOrdinal("Id"));
+            Assert.Equal(0, dataReader.GetOrdinal("Id"));
         }
 
-        [TestMethod]
+        [Fact]
         public void IsDbNull_Returns_Correct_Value()
         {
-            Assert.IsTrue(this.dataReader.IsDBNull(1));
+            Assert.True(this.dataReader.IsDBNull(1));
         }
 
-        [TestMethod]
+        [Fact]
         public void GetValue_Returns_Correct_Value()
         {
             var element = this.enumerable.ElementAt(0);
             element.Id = 418;
             element.Name = "Michael";
 
-            Assert.AreEqual(418, this.dataReader.GetValue(0));
-            Assert.AreEqual("Michael", this.dataReader.GetValue(1));
+            Assert.Equal(418, this.dataReader.GetValue(0));
+            Assert.Equal("Michael", this.dataReader.GetValue(1));
         }
 
-        [TestMethod]
+        [Fact]
         public void GetName_Returns_Correct_Value()
         {
-            Assert.AreEqual("Id", this.dataReader.GetName(0));
-            Assert.AreEqual("Name", this.dataReader.GetName(1));
+            Assert.Equal("Id", this.dataReader.GetName(0));
+            Assert.Equal("Name", this.dataReader.GetName(1));
         }
 
-        [TestMethod]
+        [Fact]
         public void FieldCount_Returns_Correct_Value()
         {
-            Assert.AreEqual(2, this.dataReader.FieldCount);
+            Assert.Equal(2, this.dataReader.FieldCount);
         }
         
         public class MyTestClass
