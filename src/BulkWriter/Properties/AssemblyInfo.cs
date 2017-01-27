@@ -8,11 +8,11 @@ using System.Resources;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("BulkWriter")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("LINQ to SQL bulk copy")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Headspring")]
 [assembly: AssemblyProduct("BulkWriter")]
-[assembly: AssemblyCopyright("Copyright © Headspring 2014")]
+[assembly: AssemblyCopyright("Copyright © Headspring 2014-2017")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
