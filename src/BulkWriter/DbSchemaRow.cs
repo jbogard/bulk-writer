@@ -9,7 +9,7 @@ namespace BulkWriter
         private readonly DataRow dataRow;
         private readonly DbSchemaTable schemaTable;
 
-        internal DbSchemaRow(DbSchemaTable schemaTable, DataRow dataRow)
+        public DbSchemaRow(DbSchemaTable schemaTable, DataRow dataRow)
         {
             this.schemaTable = schemaTable;
             this.dataRow = dataRow;
@@ -99,7 +99,7 @@ namespace BulkWriter
             }
         }
 
-        internal string BaseTableName
+        public string BaseTableName
         {
             get
             {

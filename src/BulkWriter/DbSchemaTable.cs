@@ -3,7 +3,7 @@ using System.Data.Common;
 
 namespace BulkWriter
 {
-    internal sealed class DbSchemaTable
+    public sealed class DbSchemaTable
     {
         private static readonly string[] DbcolumnName =
         {

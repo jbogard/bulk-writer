@@ -7,7 +7,7 @@ using BulkWriter.Properties;
 
 namespace BulkWriter
 {
-    internal class Mapping<TResult> : IMapping<TResult>
+    public class Mapping<TResult> : IMapping<TResult>
     {
         private readonly IEnumerable<PropertyMapping> propertyMappings;
 

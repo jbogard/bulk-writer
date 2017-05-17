@@ -1,17 +1,10 @@
 ﻿using System;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Resources;
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("BulkWriter")]
-[assembly: AssemblyDescription("LINQ to SQL bulk copy")]
-[assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Headspring")]
-[assembly: AssemblyProduct("BulkWriter")]
 [assembly: AssemblyCopyright("Copyright © Headspring 2014-2017")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -24,19 +17,4 @@ using System.Resources;
 // The following GUID is for the ID of the typelib if this project is exposed to COM
 [assembly: Guid("d4478ca6-9e19-4372-8d21-5f90f05212c0")]
 
-// Version information for an assembly consists of the following four values:
-//
-//      Major Version
-//      Minor Version 
-//      Build Number
-//      Revision
-//
-// You can specify all the values or you can default the Build and Revision Numbers 
-// by using the '*' as shown below:
-// [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("0.1.0.0")]
-[assembly: AssemblyFileVersion("0.1.0.0")]
-
-[assembly: InternalsVisibleTo("BulkWriter.Tests")]
-[assembly: NeutralResourcesLanguage("en-US")]
 [assembly: CLSCompliant(true)]

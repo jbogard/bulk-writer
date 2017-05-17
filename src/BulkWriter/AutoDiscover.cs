@@ -7,7 +7,7 @@ using BulkWriter.Properties;
 
 namespace BulkWriter
 {
-    internal static class AutoDiscover
+    public static class AutoDiscover
     {
         public static string TableName<TResult>(bool quoted)
         {

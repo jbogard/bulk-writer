@@ -4,7 +4,7 @@ using BulkWriter.Properties;
 
 namespace BulkWriter
 {
-    internal class MappingSource
+    public class MappingSource
     {
         private readonly PropertyInfo property;
         private readonly int ordinal;

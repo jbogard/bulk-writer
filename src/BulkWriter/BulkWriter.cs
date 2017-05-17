@@ -4,7 +4,7 @@ using System.Data.SqlClient;
 
 namespace BulkWriter
 {
-    internal sealed class BulkWriter<TResult> : IBulkWriter<TResult>
+    public sealed class BulkWriter<TResult> : IBulkWriter<TResult>
     {
         private readonly SqlBulkCopy sqlBulkCopy;
         private readonly IEnumerable<PropertyMapping> propertyMappings;

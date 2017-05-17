@@ -5,11 +5,10 @@ using System.Globalization;
 
 namespace BulkWriter
 {
-    internal static class SchemaReader
+    public static class SchemaReader
     {
         private const string SchemaMappingUnsortedIndex = "SchemaMapping Unsorted Index";
 
-        [SuppressMessage("Microsoft.Security", "CA2100:Review SQL queries for security vulnerabilities", Justification = "SchemaReader is internal.")]
         public static DbSchemaRow[] GetSortedSchemaRows(string connectionString, string quotedTableName)
         {
             DataTable schemaTable;

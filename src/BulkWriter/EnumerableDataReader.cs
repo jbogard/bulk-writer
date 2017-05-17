@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using BulkWriter.Internal;
 using BulkWriter.Properties;
 
 namespace BulkWriter
 {
-    internal class EnumerableDataReader<TResult> : IDataReader
+    public class EnumerableDataReader<TResult> : IDataReader
     {
         private readonly IEnumerable<TResult> items;
         private readonly Dictionary<string, int> nameToOrdinalMappings;

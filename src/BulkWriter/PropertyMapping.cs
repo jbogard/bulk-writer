@@ -2,7 +2,7 @@
 
 namespace BulkWriter
 {
-    internal class PropertyMapping
+    public class PropertyMapping
     {
         private readonly MappingDestination destination = new MappingDestination();
         private readonly MappingSource source;

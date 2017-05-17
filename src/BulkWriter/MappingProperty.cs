@@ -1,6 +1,6 @@
 namespace BulkWriter
 {
-    internal enum MappingProperty
+    public enum MappingProperty
     {
         ColumnName,
         ColumnOrdinal,

@@ -6,7 +6,7 @@ using BulkWriter.Properties;
 
 namespace BulkWriter
 {
-    internal class MapBuilderContext<TResult> : IMapBuilderContext<TResult>
+    public class MapBuilderContext<TResult> : IMapBuilderContext<TResult>
     {
         private readonly Dictionary<PropertyInfo, PropertyMapping> mappings = new Dictionary<PropertyInfo, PropertyMapping>();
 
@@ -89,7 +89,7 @@ namespace BulkWriter
         /// Implemented to facilitate testing. Not intended to be used in your code.
         /// </summary>
         /// <returns>A collection of property mappings this instance is managing.</returns>
-        internal IEnumerable<PropertyMapping> GetPropertyMappings()
+        public IEnumerable<PropertyMapping> GetPropertyMappings()
         {
             return this.mappings.Values;
         } 

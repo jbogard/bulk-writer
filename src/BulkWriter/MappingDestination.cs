@@ -5,9 +5,9 @@ using BulkWriter.Properties;
 
 namespace BulkWriter
 {
-    internal class MappingDestination
+    public class MappingDestination
     {
-        internal const int PropertyIndexCount = 5;
+        public const int PropertyIndexCount = 5;
 
         private readonly BitArray propertiesSet = new BitArray(PropertyIndexCount);
 
@@ -20,31 +20,31 @@ namespace BulkWriter
         public string ColumnName
         {
             get { return this.GetPropertyValue(MappingProperty.ColumnName, ref this.columnName); }
-            internal set { this.SetPropertyValue(MappingProperty.ColumnName, value, ref this.columnName); }
+            set { this.SetPropertyValue(MappingProperty.ColumnName, value, ref this.columnName); }
         }
 
         public int ColumnOrdinal
         {
             get { return this.GetPropertyValue(MappingProperty.ColumnOrdinal, ref this.ordinal); }
-            internal set { this.SetPropertyValue(MappingProperty.ColumnOrdinal, value, ref this.ordinal); }
+            set { this.SetPropertyValue(MappingProperty.ColumnOrdinal, value, ref this.ordinal); }
         }
 
         public int ColumnSize
         {
             get { return this.GetPropertyValue(MappingProperty.ColumnSize, ref this.columnSize); }
-            internal set { this.SetPropertyValue(MappingProperty.ColumnSize, value, ref this.columnSize); }
+            set { this.SetPropertyValue(MappingProperty.ColumnSize, value, ref this.columnSize); }
         }
 
         public string DataTypeName
         {
             get { return this.GetPropertyValue(MappingProperty.DataTypeName, ref this.dataType); }
-            internal set { this.SetPropertyValue(MappingProperty.DataTypeName, value, ref this.dataType); }
+            set { this.SetPropertyValue(MappingProperty.DataTypeName, value, ref this.dataType); }
         }
 
         public bool IsKey
         {
             get { return this.GetPropertyValue(MappingProperty.IsKey, ref this.isKey); }
-            internal set { this.SetPropertyValue(MappingProperty.IsKey, value, ref this.isKey); }
+            set { this.SetPropertyValue(MappingProperty.IsKey, value, ref this.isKey); }
         }
 
         public bool IsPropertySet(MappingProperty property)

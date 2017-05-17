@@ -3,7 +3,7 @@ using BulkWriter.Properties;
 
 namespace BulkWriter
 {
-    internal class MapBuilderContextMap : IMapBuilderContextMap
+    public class MapBuilderContextMap : IMapBuilderContextMap
     {
         private readonly PropertyMapping propertyMapping;
 

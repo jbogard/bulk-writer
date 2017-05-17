@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Reflection;
-using BulkWriter;
+using BulkWriter.Internal;
 using Xunit;
 
 namespace BulkWriter.Tests
