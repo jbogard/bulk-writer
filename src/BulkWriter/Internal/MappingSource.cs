@@ -6,33 +6,19 @@ namespace BulkWriter.Internal
 {
     public class MappingSource
     {
-        private readonly PropertyInfo property;
-        private readonly int ordinal;
-
         public MappingSource(PropertyInfo property, int ordinal)
         {
-            if (null == property)
-            {
-                throw new ArgumentNullException("property");
-            }
-
             if (0 > ordinal)
             {
-                throw new ArgumentException(Resources.MappingSource_InvalidOrdinal, "ordinal");
+                throw new ArgumentException(Resources.MappingSource_InvalidOrdinal, nameof(ordinal));
             }
 
-            this.property = property;
-            this.ordinal = ordinal;
+            Property = property ?? throw new ArgumentNullException(nameof(property));
+            Ordinal = ordinal;
         }
 
-        public PropertyInfo Property
-        {
-            get { return this.property; }
-        }
+        public PropertyInfo Property { get; }
 
-        public int Ordinal
-        {
-            get { return this.ordinal; }
-        }
+        public int Ordinal { get; }
     }
 }

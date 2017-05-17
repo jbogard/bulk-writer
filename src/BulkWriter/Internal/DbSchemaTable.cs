@@ -31,142 +31,82 @@ namespace BulkWriter.Internal
             "SchemaMapping Unsorted Index"
         };
 
-        private readonly DataColumn[] columnCache = new DataColumn[DbcolumnName.Length];
-        private readonly DataColumnCollection columns;
-        private readonly bool returnProviderSpecificTypes;
+        private readonly DataColumn[] _columnCache = new DataColumn[DbcolumnName.Length];
+        private readonly DataColumnCollection _columns;
+        private readonly bool _returnProviderSpecificTypes;
 
         public DbSchemaTable(DataTable dataTable, bool returnProviderSpecificTypes)
         {
-            this.columns = dataTable.Columns;
-            this.returnProviderSpecificTypes = returnProviderSpecificTypes;
+            _columns = dataTable.Columns;
+            _returnProviderSpecificTypes = returnProviderSpecificTypes;
         }
 
-        public DataColumn ColumnName
-        {
-            get { return this.CachedDataColumn(ColumnEnum.ColumnName); }
-        }
+        public DataColumn ColumnName => CachedDataColumn(ColumnEnum.ColumnName);
 
-        public DataColumn Size
-        {
-            get { return this.CachedDataColumn(ColumnEnum.ColumnSize); }
-        }
+        public DataColumn Size => CachedDataColumn(ColumnEnum.ColumnSize);
 
-        public DataColumn BaseServerName
-        {
-            get { return this.CachedDataColumn(ColumnEnum.BaseServerName); }
-        }
+        public DataColumn BaseServerName => CachedDataColumn(ColumnEnum.BaseServerName);
 
-        public DataColumn BaseColumnName
-        {
-            get { return this.CachedDataColumn(ColumnEnum.BaseColumnName); }
-        }
+        public DataColumn BaseColumnName => CachedDataColumn(ColumnEnum.BaseColumnName);
 
-        public DataColumn BaseTableName
-        {
-            get { return this.CachedDataColumn(ColumnEnum.BaseTableName); }
-        }
+        public DataColumn BaseTableName => CachedDataColumn(ColumnEnum.BaseTableName);
 
-        public DataColumn BaseCatalogName
-        {
-            get { return this.CachedDataColumn(ColumnEnum.BaseCatalogName); }
-        }
+        public DataColumn BaseCatalogName => CachedDataColumn(ColumnEnum.BaseCatalogName);
 
-        public DataColumn BaseSchemaName
-        {
-            get { return this.CachedDataColumn(ColumnEnum.BaseSchemaName); }
-        }
+        public DataColumn BaseSchemaName => CachedDataColumn(ColumnEnum.BaseSchemaName);
 
-        public DataColumn IsAutoIncrement
-        {
-            get { return this.CachedDataColumn(ColumnEnum.IsAutoIncrement); }
-        }
+        public DataColumn IsAutoIncrement => CachedDataColumn(ColumnEnum.IsAutoIncrement);
 
-        public DataColumn IsUnique
-        {
-            get { return this.CachedDataColumn(ColumnEnum.IsUnique); }
-        }
+        public DataColumn IsUnique => CachedDataColumn(ColumnEnum.IsUnique);
 
-        public DataColumn IsKey
-        {
-            get { return this.CachedDataColumn(ColumnEnum.IsKey); }
-        }
+        public DataColumn IsKey => CachedDataColumn(ColumnEnum.IsKey);
 
-        public DataColumn IsRowVersion
-        {
-            get { return this.CachedDataColumn(ColumnEnum.IsRowVersion); }
-        }
+        public DataColumn IsRowVersion => CachedDataColumn(ColumnEnum.IsRowVersion);
 
-        public DataColumn AllowDbNull
-        {
-            get { return this.CachedDataColumn(ColumnEnum.AllowDbNull); }
-        }
+        public DataColumn AllowDbNull => CachedDataColumn(ColumnEnum.AllowDbNull);
 
-        public DataColumn IsExpression
-        {
-            get { return this.CachedDataColumn(ColumnEnum.IsExpression); }
-        }
+        public DataColumn IsExpression => CachedDataColumn(ColumnEnum.IsExpression);
 
-        public DataColumn IsHidden
-        {
-            get { return this.CachedDataColumn(ColumnEnum.IsHidden); }
-        }
+        public DataColumn IsHidden => CachedDataColumn(ColumnEnum.IsHidden);
 
-        public DataColumn IsLong
-        {
-            get { return this.CachedDataColumn(ColumnEnum.IsLong); }
-        }
+        public DataColumn IsLong => CachedDataColumn(ColumnEnum.IsLong);
 
-        public DataColumn IsReadOnly
-        {
-            get { return this.CachedDataColumn(ColumnEnum.IsReadOnly); }
-        }
+        public DataColumn IsReadOnly => CachedDataColumn(ColumnEnum.IsReadOnly);
 
-        public DataColumn UnsortedIndex
-        {
-            get { return this.CachedDataColumn(ColumnEnum.SchemaMappingUnsortedIndex); }
-        }
+        public DataColumn UnsortedIndex => CachedDataColumn(ColumnEnum.SchemaMappingUnsortedIndex);
 
-        public DataColumn ColumnOrdinal
-        {
-            get { return this.CachedDataColumn(ColumnEnum.ColumnOrdinal); }
-        }
+        public DataColumn ColumnOrdinal => CachedDataColumn(ColumnEnum.ColumnOrdinal);
 
         public DataColumn DataType
         {
             get
             {
-                if (this.returnProviderSpecificTypes)
+                if (_returnProviderSpecificTypes)
                 {
-                    return this.CachedDataColumn(ColumnEnum.ProviderSpecificDataType, ColumnEnum.DataType);
+                    return CachedDataColumn(ColumnEnum.ProviderSpecificDataType, ColumnEnum.DataType);
                 }
-                return this.CachedDataColumn(ColumnEnum.DataType);
+                return CachedDataColumn(ColumnEnum.DataType);
             }
         }
 
-        public DataColumn DataTypeName
-        {
-            get { return this.CachedDataColumn(ColumnEnum.DataTypeName); }
-        }
+        public DataColumn DataTypeName => CachedDataColumn(ColumnEnum.DataTypeName);
 
-        private DataColumn CachedDataColumn(ColumnEnum column)
-        {
-            return this.CachedDataColumn(column, column);
-        }
+        private DataColumn CachedDataColumn(ColumnEnum column) => CachedDataColumn(column, column);
 
         private DataColumn CachedDataColumn(ColumnEnum column, ColumnEnum column2)
         {
-            DataColumn dataColumn = this.columnCache[(int)column];
+            var dataColumn = _columnCache[(int)column];
             if (dataColumn == null)
             {
-                int index = this.columns.IndexOf(DbcolumnName[(int)column]);
+                var index = _columns.IndexOf(DbcolumnName[(int)column]);
                 if (-1 == index && column != column2)
                 {
-                    index = this.columns.IndexOf(DbcolumnName[(int)column2]);
+                    index = _columns.IndexOf(DbcolumnName[(int)column2]);
                 }
                 if (-1 != index)
                 {
-                    dataColumn = this.columns[index];
-                    this.columnCache[(int)column] = dataColumn;
+                    dataColumn = _columns[index];
+                    _columnCache[(int)column] = dataColumn;
                 }
             }
             return dataColumn;
@@ -189,7 +129,6 @@ namespace BulkWriter.Internal
             DataType,
             ProviderSpecificDataType,
             AllowDbNull,
-            ProviderType,
             IsExpression,
             IsHidden,
             IsLong,

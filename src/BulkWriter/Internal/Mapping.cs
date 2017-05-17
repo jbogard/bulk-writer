@@ -9,19 +9,14 @@ namespace BulkWriter.Internal
 {
     public class Mapping<TResult> : IMapping<TResult>
     {
-        private readonly IEnumerable<PropertyMapping> propertyMappings;
+        private readonly IEnumerable<PropertyMapping> _propertyMappings;
 
-        private string destinationTableName;
+        private string _destinationTableName;
 
         public Mapping(string destinationTableName, IEnumerable<PropertyMapping> propertyMappings)
         {
-            if (null == propertyMappings)
-            {
-                throw new ArgumentNullException("propertyMappings");
-            }
-
-            this.destinationTableName = destinationTableName;
-            this.propertyMappings = propertyMappings;
+            _destinationTableName = destinationTableName;
+            _propertyMappings = propertyMappings ?? throw new ArgumentNullException(nameof(propertyMappings));
         }
 
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller is responsible for disposing.")]
@@ -29,57 +24,52 @@ namespace BulkWriter.Internal
         {
             if (null == connectionString)
             {
-                throw new ArgumentNullException("connectionString");
+                throw new ArgumentNullException(nameof(connectionString));
             }
 
             if (0 == connectionString.Length)
             {
-                throw new ArgumentException(Resources.Mapping_CreateBulkWriter_InvalidConnectionString, "connectionString");
+                throw new ArgumentException(Resources.Mapping_CreateBulkWriter_InvalidConnectionString, nameof(connectionString));
             }
 
-            this.AutoDiscoverIfNeeded(connectionString);
+            AutoDiscoverIfNeeded(connectionString);
 
-            bool hasAnyKeys = Enumerable.Any<PropertyMapping>(this.propertyMappings, x => x.Destination.IsPropertySet(MappingProperty.IsKey) && x.Destination.IsKey);
-            SqlBulkCopyOptions sqlBulkCopyOptions = hasAnyKeys ? SqlBulkCopyOptions.KeepIdentity : SqlBulkCopyOptions.Default;
+            var hasAnyKeys = _propertyMappings.Any(x => x.Destination.IsPropertySet(MappingProperty.IsKey) && x.Destination.IsKey);
+            var sqlBulkCopyOptions = hasAnyKeys ? SqlBulkCopyOptions.KeepIdentity : SqlBulkCopyOptions.Default;
             var sqlBulkCopy = new SqlBulkCopy(connectionString, sqlBulkCopyOptions)
             {
-                DestinationTableName = this.destinationTableName
+                DestinationTableName = _destinationTableName
             };
 
-            foreach (PropertyMapping propertyMapping in this.propertyMappings)
+            foreach (var propertyMapping in _propertyMappings.Where(propertyMapping => propertyMapping.ShouldMap))
             {
-                if (propertyMapping.ShouldMap)
-                {
-                    sqlBulkCopy.ColumnMappings.Add(new SqlBulkCopyColumnMapping(propertyMapping.Source.Ordinal, propertyMapping.Destination.ColumnOrdinal));
-                }
+                sqlBulkCopy.ColumnMappings.Add(new SqlBulkCopyColumnMapping(propertyMapping.Source.Ordinal, propertyMapping.Destination.ColumnOrdinal));
             }
 
-            return new BulkWriter<TResult>(sqlBulkCopy, this.propertyMappings);
+            return new BulkWriter<TResult>(sqlBulkCopy, _propertyMappings);
         }
 
         private void AutoDiscoverIfNeeded(string connectionString)
         {
-            if (this.NeedsAutoDiscovery())
+            if (!NeedsAutoDiscovery()) return;
+            if (null == _destinationTableName)
             {
-                if (null == this.destinationTableName)
-                {
-                    this.destinationTableName = AutoDiscover.TableName<TResult>(true);
-                }
-
-                AutoDiscover.Mappings(connectionString, this.destinationTableName, this.propertyMappings);
+                _destinationTableName = AutoDiscover.TableName<TResult>(true);
             }
+
+            AutoDiscover.Mappings(connectionString, _destinationTableName, _propertyMappings);
         }
 
         private bool NeedsAutoDiscovery()
         {
-            if (null == this.destinationTableName)
+            if (null == _destinationTableName)
             {
                 return true;
             }
 
-            foreach (PropertyMapping propertyMapping in this.propertyMappings)
+            foreach (var propertyMapping in _propertyMappings)
             {
-                for (int i = 0; i < MappingDestination.PropertyIndexCount; i++)
+                for (var i = 0; i < MappingDestination.PropertyIndexCount; i++)
                 {
                     if (!propertyMapping.Destination.IsPropertySet(i))
                     {

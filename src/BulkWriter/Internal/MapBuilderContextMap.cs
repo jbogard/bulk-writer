@@ -5,31 +5,23 @@ namespace BulkWriter.Internal
 {
     public class MapBuilderContextMap : IMapBuilderContextMap
     {
-        private readonly PropertyMapping propertyMapping;
+        private readonly PropertyMapping _propertyMapping;
 
-        public MapBuilderContextMap(PropertyMapping propertyMapping)
-        {
-            if (null == propertyMapping)
-            {
-                throw new ArgumentNullException("propertyMapping");
-            }
-
-            this.propertyMapping = propertyMapping;
-        }
+        public MapBuilderContextMap(PropertyMapping propertyMapping) => _propertyMapping = propertyMapping ?? throw new ArgumentNullException(nameof(propertyMapping));
 
         public IMapBuilderContextMap ToColumnName(string name)
         {
             if (null == name)
             {
-                throw new ArgumentNullException("name");
+                throw new ArgumentNullException(nameof(name));
             }
 
             if (0 == name.Length)
             {
-                throw new ArgumentException(Resources.MapBuilderContextMap_ToColumnName_InvalidColumName, "name");
+                throw new ArgumentException(Resources.MapBuilderContextMap_ToColumnName_InvalidColumName, nameof(name));
             }
 
-            this.propertyMapping.Destination.ColumnName = name;
+            _propertyMapping.Destination.ColumnName = name;
 
             return this;
         }
@@ -38,10 +30,10 @@ namespace BulkWriter.Internal
         {
             if (0 > ordinal)
             {
-                throw new ArgumentException(Resources.MapBuilderContextMap_ToColumnOrdinal_InvalidOrdinal, "ordinal");
+                throw new ArgumentException(Resources.MapBuilderContextMap_ToColumnOrdinal_InvalidOrdinal, nameof(ordinal));
             }
 
-            this.propertyMapping.Destination.ColumnOrdinal = ordinal;
+            _propertyMapping.Destination.ColumnOrdinal = ordinal;
 
             return this;
         }
@@ -50,10 +42,10 @@ namespace BulkWriter.Internal
         {
             if (0 > size)
             {
-                throw new ArgumentException(Resources.MapBuilderContextMap_ToColumnSize_InvalidColumnSize, "size");
+                throw new ArgumentException(Resources.MapBuilderContextMap_ToColumnSize_InvalidColumnSize, nameof(size));
             }
 
-            this.propertyMapping.Destination.ColumnSize = size;
+            _propertyMapping.Destination.ColumnSize = size;
 
             return this;
         }
@@ -62,29 +54,29 @@ namespace BulkWriter.Internal
         {
             if (null == name)
             {
-                throw new ArgumentNullException("name");
+                throw new ArgumentNullException(nameof(name));
             }
 
             if (0 == name.Length)
             {
-                throw new ArgumentException(Resources.MapBuilderContextMap_ToDataTypeName_InvalidName, "name");
+                throw new ArgumentException(Resources.MapBuilderContextMap_ToDataTypeName_InvalidName, nameof(name));
             }
 
-            this.propertyMapping.Destination.DataTypeName = name;
+            _propertyMapping.Destination.DataTypeName = name;
 
             return this;
         }
 
         public IMapBuilderContextMap AsKey()
         {
-            this.propertyMapping.Destination.IsKey = true;
+            _propertyMapping.Destination.IsKey = true;
 
             return this;
         }
 
         public void DoNotMap()
         {
-            this.propertyMapping.ShouldMap = false;
+            _propertyMapping.ShouldMap = false;
         }
     }
 }

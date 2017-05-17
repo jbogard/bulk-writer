@@ -3,55 +3,43 @@ using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using BulkWriter.Internal;
 using BulkWriter.Properties;
 
 namespace BulkWriter.Internal
 {
     public class EnumerableDataReader<TResult> : IDataReader
     {
-        private readonly IEnumerable<TResult> items;
-        private readonly Dictionary<string, int> nameToOrdinalMappings;
-        private readonly Dictionary<int, PropertyMapping> ordinalToPropertyMappings;
-        private readonly PropertyMapping[] propertyMappings;
+        private readonly IEnumerable<TResult> _items;
+        private readonly Dictionary<string, int> _nameToOrdinalMappings;
+        private readonly Dictionary<int, PropertyMapping> _ordinalToPropertyMappings;
+        private readonly PropertyMapping[] _propertyMappings;
 
-        private bool disposed;
-        private IEnumerator<TResult> enumerator;
+        private bool _disposed;
+        private IEnumerator<TResult> _enumerator;
 
         public EnumerableDataReader(IEnumerable<TResult> items, IEnumerable<PropertyMapping> propertyMappings)
         {
-            if (null == items)
-            {
-                throw new ArgumentNullException("items");
-            }
+            _items = items ?? throw new ArgumentNullException(nameof(items));
+            _propertyMappings = propertyMappings?.OrderBy(x => x.Source.Ordinal).ToArray() ?? throw new ArgumentNullException(nameof(propertyMappings));
 
-            if (null == propertyMappings)
-            {
-                throw new ArgumentNullException("propertyMappings");
-            }
-
-            this.items = items;
-            this.propertyMappings = propertyMappings.OrderBy(x => x.Source.Ordinal).ToArray();
-
-            this.ordinalToPropertyMappings = Enumerable.ToDictionary<PropertyMapping, int>(this.propertyMappings, x => x.Source.Ordinal);
-            this.nameToOrdinalMappings = Enumerable.ToDictionary<PropertyMapping, string, int>(this.propertyMappings, x => x.Source.Property.Name, x => x.Source.Ordinal);
+            _ordinalToPropertyMappings = _propertyMappings.ToDictionary(x => x.Source.Ordinal);
+            _nameToOrdinalMappings = _propertyMappings.ToDictionary(x => x.Source.Property.Name, x => x.Source.Ordinal);
         }
 
         public TResult Current
         {
             get
             {
-                this.EnsureNotDisposed();
-                return (null != this.enumerator) ? this.enumerator.Current : default(TResult);
+                EnsureNotDisposed();
+                return null != _enumerator ? _enumerator.Current : default(TResult);
             }
         }
 
         public int GetOrdinal(string name)
         {
-            this.EnsureNotDisposed();
+            EnsureNotDisposed();
 
-            int ordinal;
-            if (!this.nameToOrdinalMappings.TryGetValue(name, out ordinal))
+            if (!_nameToOrdinalMappings.TryGetValue(name, out int ordinal))
             {
                 throw new InvalidOperationException(Resources.EnumerableDataReader_GetOrdinal_NameDoesNotMapToOrdinal);
             }
@@ -61,51 +49,49 @@ namespace BulkWriter.Internal
 
         public bool Read()
         {
-            this.EnsureNotDisposed();
+            EnsureNotDisposed();
 
-            if (null == this.enumerator)
+            if (null == _enumerator)
             {
-                this.enumerator = this.items.GetEnumerator();
+                _enumerator = _items.GetEnumerator();
             }
 
-            return this.enumerator.MoveNext();
+            return _enumerator.MoveNext();
         }
 
         public bool IsDBNull(int i)
         {
-            this.EnsureNotDisposed();
+            EnsureNotDisposed();
 
-            object value = this.GetValue(i);
-            return (null == value);
+            var value = GetValue(i);
+            return null == value;
         }
 
         public object GetValue(int i)
         {
-            this.EnsureNotDisposed();
+            EnsureNotDisposed();
 
-            PropertyMapping mapping;
-            if (!this.ordinalToPropertyMappings.TryGetValue(i, out mapping))
+            if (!_ordinalToPropertyMappings.TryGetValue(i, out PropertyMapping mapping))
             {
                 throw new InvalidOperationException(Resources.EnumerableDataReader_GetValue_OrdinalDoesNotMapToProperty);
             }
 
-            GetPropertyValueHandler valueGetter = mapping.Source.Property.GetValueGetter();
+            var valueGetter = mapping.Source.Property.GetValueGetter();
 
-            object value = valueGetter(this.enumerator.Current);
+            var value = valueGetter(_enumerator.Current);
             return value;
         }
 
         public string GetName(int i)
         {
-            this.EnsureNotDisposed();
+            EnsureNotDisposed();
 
-            PropertyMapping mapping;
-            if (!this.ordinalToPropertyMappings.TryGetValue(i, out mapping))
+            if (!_ordinalToPropertyMappings.TryGetValue(i, out PropertyMapping mapping))
             {
                 throw new InvalidOperationException(Resources.EnumerableDataReader_GetName_OrdinalDoesNotMapToName);
             }
 
-            string name = mapping.Source.Property.Name;
+            var name = mapping.Source.Property.Name;
             return name;
         }
 
@@ -113,30 +99,30 @@ namespace BulkWriter.Internal
         {
             get
             {
-                this.EnsureNotDisposed();
-                return this.propertyMappings.Length;
+                EnsureNotDisposed();
+                return _propertyMappings.Length;
             }
         }
 
         public void Dispose()
         {
-            if (null != this.enumerator)
+            if (null != _enumerator)
             {
-                this.enumerator.Dispose();
-                this.enumerator = null;
+                _enumerator.Dispose();
+                _enumerator = null;
             }
 
-            this.disposed = true;
+            _disposed = true;
         }
 
         public void Close()
         {
-            this.Dispose();
+            Dispose();
         }
 
         private void EnsureNotDisposed()
         {
-            if (this.disposed)
+            if (_disposed)
             {
                 throw new ObjectDisposedException("EnumerableDataReader");
             }
@@ -144,133 +130,58 @@ namespace BulkWriter.Internal
 
         #region Not used by SqlBulkCopy
 
-        public string GetDataTypeName(int i)
-        {
-            throw new NotSupportedException();
-        }
+        public string GetDataTypeName(int i) => throw new NotSupportedException();
 
-        public Type GetFieldType(int i)
-        {
-            throw new NotSupportedException();
-        }
+        public Type GetFieldType(int i) => throw new NotSupportedException();
 
-        public int GetValues(object[] values)
-        {
-            throw new NotSupportedException();
-        }
+        public int GetValues(object[] values) => throw new NotSupportedException();
 
-        public bool GetBoolean(int i)
-        {
-            throw new NotSupportedException();
-        }
+        public bool GetBoolean(int i) => throw new NotSupportedException();
 
-        public byte GetByte(int i)
-        {
-            throw new NotSupportedException();
-        }
+        public byte GetByte(int i) => throw new NotSupportedException();
 
-        public long GetBytes(int i, long fieldOffset, byte[] buffer, int bufferoffset, int length)
-        {
-            throw new NotSupportedException();
-        }
+        public long GetBytes(int i, long fieldOffset, byte[] buffer, int bufferoffset, int length) => throw new NotSupportedException();
 
-        public char GetChar(int i)
-        {
-            throw new NotSupportedException();
-        }
+        public char GetChar(int i) => throw new NotSupportedException();
 
-        public long GetChars(int i, long fieldoffset, char[] buffer, int bufferoffset, int length)
-        {
-            throw new NotSupportedException();
-        }
+        public long GetChars(int i, long fieldoffset, char[] buffer, int bufferoffset, int length) => throw new NotSupportedException();
 
-        public Guid GetGuid(int i)
-        {
-            throw new NotSupportedException();
-        }
+        public Guid GetGuid(int i) => throw new NotSupportedException();
 
-        public short GetInt16(int i)
-        {
-            throw new NotSupportedException();
-        }
+        public short GetInt16(int i) => throw new NotSupportedException();
 
-        public int GetInt32(int i)
-        {
-            throw new NotSupportedException();
-        }
+        public int GetInt32(int i) => throw new NotSupportedException();
 
-        public long GetInt64(int i)
-        {
-            throw new NotSupportedException();
-        }
+        public long GetInt64(int i) => throw new NotSupportedException();
 
-        public float GetFloat(int i)
-        {
-            throw new NotSupportedException();
-        }
+        public float GetFloat(int i) => throw new NotSupportedException();
 
-        public double GetDouble(int i)
-        {
-            throw new NotSupportedException();
-        }
+        public double GetDouble(int i) => throw new NotSupportedException();
 
-        public string GetString(int i)
-        {
-            throw new NotSupportedException();
-        }
+        public string GetString(int i) => throw new NotSupportedException();
 
-        public decimal GetDecimal(int i)
-        {
-            throw new NotSupportedException();
-        }
+        public decimal GetDecimal(int i) => throw new NotSupportedException();
 
-        public DateTime GetDateTime(int i)
-        {
-            throw new NotSupportedException();
-        }
+        public DateTime GetDateTime(int i) => throw new NotSupportedException();
 
-        public IDataReader GetData(int i)
-        {
-            throw new NotSupportedException();
-        }
+        public IDataReader GetData(int i) => throw new NotSupportedException();
 
-        object IDataRecord.this[int i]
-        {
-            get { throw new NotSupportedException(); }
-        }
+        object IDataRecord.this[int i] => throw new NotSupportedException();
 
-        object IDataRecord.this[string name]
-        {
-            get { throw new NotSupportedException(); }
-        }
+        object IDataRecord.this[string name] => throw new NotSupportedException();
 
-        public DataTable GetSchemaTable()
-        {
-            throw new NotSupportedException();
-        }
+        public DataTable GetSchemaTable() => throw new NotSupportedException();
 
-        public bool NextResult()
-        {
-            throw new NotSupportedException();
-        }
+        public bool NextResult() => throw new NotSupportedException();
 
         [SuppressMessage("Microsoft.Design", "CA1065:DoNotRaiseExceptionsInUnexpectedLocations")]
-        public int Depth
-        {
-            get { throw new NotSupportedException(); }
-        }
+        public int Depth => throw new NotSupportedException();
 
         [SuppressMessage("Microsoft.Design", "CA1065:DoNotRaiseExceptionsInUnexpectedLocations")]
-        public bool IsClosed
-        {
-            get { throw new NotSupportedException(); }
-        }
+        public bool IsClosed => throw new NotSupportedException();
 
         [SuppressMessage("Microsoft.Design", "CA1065:DoNotRaiseExceptionsInUnexpectedLocations")]
-        public int RecordsAffected
-        {
-            get { throw new NotSupportedException(); }
-        }
+        public int RecordsAffected => throw new NotSupportedException();
 
         #endregion
     }

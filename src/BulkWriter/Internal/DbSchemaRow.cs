@@ -6,25 +6,21 @@ namespace BulkWriter.Internal
 {
     public sealed class DbSchemaRow
     {
-        private readonly DataRow dataRow;
-        private readonly DbSchemaTable schemaTable;
+        private readonly DbSchemaTable _schemaTable;
 
         public DbSchemaRow(DbSchemaTable schemaTable, DataRow dataRow)
         {
-            this.schemaTable = schemaTable;
-            this.dataRow = dataRow;
+            _schemaTable = schemaTable;
+            DataRow = dataRow;
         }
 
-        public DataRow DataRow
-        {
-            get { return this.dataRow; }
-        }
+        public DataRow DataRow { get; }
 
         public string ColumnName
         {
             get
             {
-                object value = this.dataRow[this.schemaTable.ColumnName, DataRowVersion.Default];
+                var value = DataRow[_schemaTable.ColumnName, DataRowVersion.Default];
                 return !Convert.IsDBNull(value) ? Convert.ToString(value, CultureInfo.InvariantCulture) : string.Empty;
             }
         }
@@ -33,7 +29,7 @@ namespace BulkWriter.Internal
         {
             get
             {
-                object value = this.dataRow[this.schemaTable.ColumnOrdinal, DataRowVersion.Default];
+                var value = DataRow[_schemaTable.ColumnOrdinal, DataRowVersion.Default];
                 return !Convert.IsDBNull(value) ? Convert.ToInt32(value, CultureInfo.InvariantCulture) : -1;
             }
         }
@@ -42,7 +38,7 @@ namespace BulkWriter.Internal
         {
             get
             {
-                object value = this.dataRow[this.schemaTable.Size, DataRowVersion.Default];
+                var value = DataRow[_schemaTable.Size, DataRowVersion.Default];
                 return !Convert.IsDBNull(value) ? Convert.ToInt32(value, CultureInfo.InvariantCulture) : 0;
             }
         }
@@ -51,9 +47,9 @@ namespace BulkWriter.Internal
         {
             get
             {
-                if (this.schemaTable.BaseColumnName != null)
+                if (_schemaTable.BaseColumnName != null)
                 {
-                    object value = this.dataRow[this.schemaTable.BaseColumnName, DataRowVersion.Default];
+                    var value = DataRow[_schemaTable.BaseColumnName, DataRowVersion.Default];
                     return !Convert.IsDBNull(value) ? Convert.ToString(value, CultureInfo.InvariantCulture) : string.Empty;
                 }
                 return string.Empty;
@@ -64,9 +60,9 @@ namespace BulkWriter.Internal
         {
             get
             {
-                if (this.schemaTable.BaseServerName != null)
+                if (_schemaTable.BaseServerName != null)
                 {
-                    object value = this.dataRow[this.schemaTable.BaseServerName, DataRowVersion.Default];
+                    var value = DataRow[_schemaTable.BaseServerName, DataRowVersion.Default];
                     return !Convert.IsDBNull(value) ? Convert.ToString(value, CultureInfo.InvariantCulture) : string.Empty;
                 }
                 return string.Empty;
@@ -77,9 +73,9 @@ namespace BulkWriter.Internal
         {
             get
             {
-                if (this.schemaTable.BaseCatalogName != null)
+                if (_schemaTable.BaseCatalogName != null)
                 {
-                    object value = this.dataRow[this.schemaTable.BaseCatalogName, DataRowVersion.Default];
+                    var value = DataRow[_schemaTable.BaseCatalogName, DataRowVersion.Default];
                     return !Convert.IsDBNull(value) ? Convert.ToString(value, CultureInfo.InvariantCulture) : string.Empty;
                 }
                 return string.Empty;
@@ -90,9 +86,9 @@ namespace BulkWriter.Internal
         {
             get
             {
-                if (this.schemaTable.BaseSchemaName != null)
+                if (_schemaTable.BaseSchemaName != null)
                 {
-                    object value = this.dataRow[this.schemaTable.BaseSchemaName, DataRowVersion.Default];
+                    var value = DataRow[_schemaTable.BaseSchemaName, DataRowVersion.Default];
                     return !Convert.IsDBNull(value) ? Convert.ToString(value, CultureInfo.InvariantCulture) : string.Empty;
                 }
                 return string.Empty;
@@ -103,9 +99,9 @@ namespace BulkWriter.Internal
         {
             get
             {
-                if (this.schemaTable.BaseTableName != null)
+                if (_schemaTable.BaseTableName != null)
                 {
-                    object value = this.dataRow[this.schemaTable.BaseTableName, DataRowVersion.Default];
+                    var value = DataRow[_schemaTable.BaseTableName, DataRowVersion.Default];
                     return !Convert.IsDBNull(value) ? Convert.ToString(value, CultureInfo.InvariantCulture) : string.Empty;
                 }
                 return string.Empty;
@@ -116,9 +112,9 @@ namespace BulkWriter.Internal
         {
             get
             {
-                if (this.schemaTable.IsAutoIncrement != null)
+                if (_schemaTable.IsAutoIncrement != null)
                 {
-                    object value = this.dataRow[this.schemaTable.IsAutoIncrement, DataRowVersion.Default];
+                    var value = DataRow[_schemaTable.IsAutoIncrement, DataRowVersion.Default];
                     return !Convert.IsDBNull(value) && Convert.ToBoolean(value, CultureInfo.InvariantCulture);
                 }
                 return false;
@@ -129,9 +125,9 @@ namespace BulkWriter.Internal
         {
             get
             {
-                if (this.schemaTable.IsUnique != null)
+                if (_schemaTable.IsUnique != null)
                 {
-                    object value = this.dataRow[this.schemaTable.IsUnique, DataRowVersion.Default];
+                    var value = DataRow[_schemaTable.IsUnique, DataRowVersion.Default];
                     return !Convert.IsDBNull(value) && Convert.ToBoolean(value, CultureInfo.InvariantCulture);
                 }
                 return false;
@@ -142,9 +138,9 @@ namespace BulkWriter.Internal
         {
             get
             {
-                if (this.schemaTable.IsRowVersion != null)
+                if (_schemaTable.IsRowVersion != null)
                 {
-                    object value = this.dataRow[this.schemaTable.IsRowVersion, DataRowVersion.Default];
+                    var value = DataRow[_schemaTable.IsRowVersion, DataRowVersion.Default];
                     return !Convert.IsDBNull(value) && Convert.ToBoolean(value, CultureInfo.InvariantCulture);
                 }
                 return false;
@@ -155,9 +151,9 @@ namespace BulkWriter.Internal
         {
             get
             {
-                if (this.schemaTable.IsKey != null)
+                if (_schemaTable.IsKey != null)
                 {
-                    object value = this.dataRow[this.schemaTable.IsKey, DataRowVersion.Default];
+                    var value = DataRow[_schemaTable.IsKey, DataRowVersion.Default];
                     return !Convert.IsDBNull(value) && Convert.ToBoolean(value, CultureInfo.InvariantCulture);
                 }
                 return false;
@@ -168,9 +164,9 @@ namespace BulkWriter.Internal
         {
             get
             {
-                if (this.schemaTable.IsExpression != null)
+                if (_schemaTable.IsExpression != null)
                 {
-                    object value = this.dataRow[this.schemaTable.IsExpression, DataRowVersion.Default];
+                    var value = DataRow[_schemaTable.IsExpression, DataRowVersion.Default];
                     return !Convert.IsDBNull(value) && Convert.ToBoolean(value, CultureInfo.InvariantCulture);
                 }
                 return false;
@@ -181,9 +177,9 @@ namespace BulkWriter.Internal
         {
             get
             {
-                if (this.schemaTable.IsHidden != null)
+                if (_schemaTable.IsHidden != null)
                 {
-                    object value = this.dataRow[this.schemaTable.IsHidden, DataRowVersion.Default];
+                    var value = DataRow[_schemaTable.IsHidden, DataRowVersion.Default];
                     return !Convert.IsDBNull(value) && Convert.ToBoolean(value, CultureInfo.InvariantCulture);
                 }
                 return false;
@@ -194,9 +190,9 @@ namespace BulkWriter.Internal
         {
             get
             {
-                if (this.schemaTable.IsLong != null)
+                if (_schemaTable.IsLong != null)
                 {
-                    object value = this.dataRow[this.schemaTable.IsLong, DataRowVersion.Default];
+                    var value = DataRow[_schemaTable.IsLong, DataRowVersion.Default];
                     return !Convert.IsDBNull(value) && Convert.ToBoolean(value, CultureInfo.InvariantCulture);
                 }
                 return false;
@@ -207,9 +203,9 @@ namespace BulkWriter.Internal
         {
             get
             {
-                if (this.schemaTable.IsReadOnly != null)
+                if (_schemaTable.IsReadOnly != null)
                 {
-                    object value = this.dataRow[this.schemaTable.IsReadOnly, DataRowVersion.Default];
+                    var value = DataRow[_schemaTable.IsReadOnly, DataRowVersion.Default];
                     return !Convert.IsDBNull(value) && Convert.ToBoolean(value, CultureInfo.InvariantCulture);
                 }
                 return false;
@@ -220,9 +216,9 @@ namespace BulkWriter.Internal
         {
             get
             {
-                if (this.schemaTable.DataType != null)
+                if (_schemaTable.DataType != null)
                 {
-                    object value = this.dataRow[this.schemaTable.DataType, DataRowVersion.Default];
+                    var value = DataRow[_schemaTable.DataType, DataRowVersion.Default];
                     return !Convert.IsDBNull(value) ? (Type)value : null;
                 }
                 return null;
@@ -233,9 +229,9 @@ namespace BulkWriter.Internal
         {
             get
             {
-                if (this.schemaTable.DataTypeName != null)
+                if (_schemaTable.DataTypeName != null)
                 {
-                    object value = this.dataRow[this.schemaTable.DataTypeName, DataRowVersion.Default];
+                    var value = DataRow[_schemaTable.DataTypeName, DataRowVersion.Default];
                     return !Convert.IsDBNull(value) ? Convert.ToString(value, CultureInfo.InvariantCulture) : string.Empty;
                 }
 
@@ -247,19 +243,16 @@ namespace BulkWriter.Internal
         {
             get
             {
-                if (this.schemaTable.AllowDbNull != null)
+                if (_schemaTable.AllowDbNull != null)
                 {
-                    object value = this.dataRow[this.schemaTable.AllowDbNull, DataRowVersion.Default];
+                    var value = DataRow[_schemaTable.AllowDbNull, DataRowVersion.Default];
                     return Convert.IsDBNull(value) || Convert.ToBoolean(value, CultureInfo.InvariantCulture);
                 }
                 return true;
             }
         }
 
-        public int UnsortedIndex
-        {
-            get { return (int)this.dataRow[this.schemaTable.UnsortedIndex, DataRowVersion.Default]; }
-        }
+        public int UnsortedIndex => (int)DataRow[_schemaTable.UnsortedIndex, DataRowVersion.Default];
     }
 
 }

@@ -1,6 +1,6 @@
 ﻿namespace BulkWriter
 {
-    public interface IMapping<TResult>
+    public interface IMapping<in TResult>
     {
         IBulkWriter<TResult> CreateBulkWriter(string connectionString);
     }
