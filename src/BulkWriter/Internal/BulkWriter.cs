@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Data.SqlClient;
 
-namespace BulkWriter
+namespace BulkWriter.Internal
 {
     public sealed class BulkWriter<TResult> : IBulkWriter<TResult>
     {

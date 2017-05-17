@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using BulkWriter;
+using BulkWriter.Internal;
 using Xunit;
 
 namespace BulkWriter.Tests
@@ -11,10 +11,10 @@ namespace BulkWriter.Tests
     {
         string connectionString = TestHelpers.ConnectionString;
 
-        private readonly string tableName = BulkWriter.AutoDiscover.TableName<MyTestClass>(false);
+        private readonly string tableName = BulkWriter.Internal.AutoDiscover.TableName<MyTestClass>(false);
 
         private IEnumerable<MyTestClass> enumerable;
-        private BulkWriter.EnumerableDataReader<MyTestClass> dataReader;
+        private EnumerableDataReader<MyTestClass> dataReader;
         
         public EnumerableDataReaderTests()
         {
@@ -28,10 +28,10 @@ namespace BulkWriter.Tests
                 ")");
 
             var mapping = MapBuilder.MapAllProperties<MyTestClass>();
-            var propertyMappings = ((BulkWriter.MapBuilderContext<MyTestClass>)mapping).GetPropertyMappings();
-            BulkWriter.AutoDiscover.Mappings(connectionString, tableName, propertyMappings);
+            var propertyMappings = ((BulkWriter.Internal.MapBuilderContext<MyTestClass>)mapping).GetPropertyMappings();
+            BulkWriter.Internal.AutoDiscover.Mappings(connectionString, tableName, propertyMappings);
 
-            this.dataReader = new BulkWriter.EnumerableDataReader<MyTestClass>(enumerable, propertyMappings);
+            this.dataReader = new EnumerableDataReader<MyTestClass>(enumerable, propertyMappings);
             dataReader.Read();
         }
 

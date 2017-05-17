@@ -1,7 +1,7 @@
 ﻿using System.Data;
 using System.Data.Common;
 
-namespace BulkWriter
+namespace BulkWriter.Internal
 {
     public sealed class DbSchemaTable
     {

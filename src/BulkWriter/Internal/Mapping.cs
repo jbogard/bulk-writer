@@ -5,7 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using BulkWriter.Properties;
 
-namespace BulkWriter
+namespace BulkWriter.Internal
 {
     public class Mapping<TResult> : IMapping<TResult>
     {
@@ -39,7 +39,7 @@ namespace BulkWriter
 
             this.AutoDiscoverIfNeeded(connectionString);
 
-            bool hasAnyKeys = this.propertyMappings.Any(x => x.Destination.IsPropertySet(MappingProperty.IsKey) && x.Destination.IsKey);
+            bool hasAnyKeys = Enumerable.Any<PropertyMapping>(this.propertyMappings, x => x.Destination.IsPropertySet(MappingProperty.IsKey) && x.Destination.IsKey);
             SqlBulkCopyOptions sqlBulkCopyOptions = hasAnyKeys ? SqlBulkCopyOptions.KeepIdentity : SqlBulkCopyOptions.Default;
             var sqlBulkCopy = new SqlBulkCopy(connectionString, sqlBulkCopyOptions)
             {

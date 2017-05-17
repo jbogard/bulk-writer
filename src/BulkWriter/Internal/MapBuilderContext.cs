@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using BulkWriter.Properties;
 
-namespace BulkWriter
+namespace BulkWriter.Internal
 {
     public class MapBuilderContext<TResult> : IMapBuilderContext<TResult>
     {

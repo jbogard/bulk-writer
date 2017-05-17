@@ -3,7 +3,7 @@ using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using BulkWriter.Properties;
 
-namespace BulkWriter
+namespace BulkWriter.Internal
 {
     public class MappingDestination
     {

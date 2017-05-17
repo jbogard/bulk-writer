@@ -1,7 +1,7 @@
 ﻿using System;
 using BulkWriter.Properties;
 
-namespace BulkWriter
+namespace BulkWriter.Internal
 {
     public class MapBuilderContextMap : IMapBuilderContextMap
     {

@@ -1,9 +1,8 @@
 ﻿using System.Data;
 using System.Data.SqlClient;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 
-namespace BulkWriter
+namespace BulkWriter.Internal
 {
     public static class SchemaReader
     {
@@ -33,7 +32,7 @@ namespace BulkWriter
 
         private static DbSchemaRow[] GetSortedSchemaRows(DataTable dataTable, bool returnProviderSpecificTypes)
         {
-            DataColumn column = dataTable.Columns[SchemaMappingUnsortedIndex];
+            DataColumn column = dataTable.Columns[(string) SchemaMappingUnsortedIndex];
             if (column == null)
             {
                 column = new DataColumn(SchemaMappingUnsortedIndex, typeof (int));

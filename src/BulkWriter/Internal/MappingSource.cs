@@ -2,7 +2,7 @@
 using System.Reflection;
 using BulkWriter.Properties;
 
-namespace BulkWriter
+namespace BulkWriter.Internal
 {
     public class MappingSource
     {

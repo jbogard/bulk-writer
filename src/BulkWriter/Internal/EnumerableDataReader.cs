@@ -6,7 +6,7 @@ using System.Linq;
 using BulkWriter.Internal;
 using BulkWriter.Properties;
 
-namespace BulkWriter
+namespace BulkWriter.Internal
 {
     public class EnumerableDataReader<TResult> : IDataReader
     {
@@ -33,8 +33,8 @@ namespace BulkWriter
             this.items = items;
             this.propertyMappings = propertyMappings.OrderBy(x => x.Source.Ordinal).ToArray();
 
-            this.ordinalToPropertyMappings = this.propertyMappings.ToDictionary(x => x.Source.Ordinal);
-            this.nameToOrdinalMappings = this.propertyMappings.ToDictionary(x => x.Source.Property.Name, x => x.Source.Ordinal);
+            this.ordinalToPropertyMappings = Enumerable.ToDictionary<PropertyMapping, int>(this.propertyMappings, x => x.Source.Ordinal);
+            this.nameToOrdinalMappings = Enumerable.ToDictionary<PropertyMapping, string, int>(this.propertyMappings, x => x.Source.Property.Name, x => x.Source.Ordinal);
         }
 
         public TResult Current

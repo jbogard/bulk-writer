@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BulkWriter
+namespace BulkWriter.Internal
 {
     public class PropertyMapping
     {

@@ -24,7 +24,7 @@ namespace BulkWriter.Tests
 
             TestHelpers.ExecuteNonQuery(connectionString, createTableScript);
 
-            var schemaRows = BulkWriter.SchemaReader.GetSortedSchemaRows(connectionString, tableName);
+            var schemaRows = BulkWriter.Internal.SchemaReader.GetSortedSchemaRows(connectionString, tableName);
 
             TestHelpers.ExecuteNonQuery(connectionString, dropTableScript);
 

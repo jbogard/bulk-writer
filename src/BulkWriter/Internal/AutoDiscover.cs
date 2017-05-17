@@ -5,7 +5,7 @@ using System.Globalization;
 using System.Linq;
 using BulkWriter.Properties;
 
-namespace BulkWriter
+namespace BulkWriter.Internal
 {
     public static class AutoDiscover
     {

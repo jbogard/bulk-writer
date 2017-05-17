@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using BulkWriter;
+using BulkWriter.Internal;
 using Xunit;
 
 namespace BulkWriter.Tests
@@ -11,7 +12,7 @@ namespace BulkWriter.Tests
         [Fact]
         public void Discovers_Quoted_Table_Name()
         {
-            string tableName = BulkWriter.AutoDiscover.TableName<MyTestClass>(true);
+            string tableName = BulkWriter.Internal.AutoDiscover.TableName<MyTestClass>(true);
             Assert.StartsWith("[", tableName);
             Assert.EndsWith("]", tableName);
         }
@@ -20,7 +21,7 @@ namespace BulkWriter.Tests
         public void Maps_Only_Appropriate_Properties()
         {
             string connectionString = TestHelpers.ConnectionString;
-            string tableName = BulkWriter.AutoDiscover.TableName<MyTestClass>(false);
+            string tableName = BulkWriter.Internal.AutoDiscover.TableName<MyTestClass>(false);
 
             TestHelpers.ExecuteNonQuery(connectionString,
                 "CREATE TABLE [dbo].[" + tableName + "](" +
@@ -33,19 +34,19 @@ namespace BulkWriter.Tests
                 .MapAllProperties<MyTestClass>()
                 .MapProperty(x => x.Id, x => x.DoNotMap()); // Do not map this property
 
-            IEnumerable<BulkWriter.PropertyMapping> propertyMappings = ((BulkWriter.MapBuilderContext<MyTestClass>) mapping).GetPropertyMappings();
+            IEnumerable<BulkWriter.Internal.PropertyMapping> propertyMappings = ((BulkWriter.Internal.MapBuilderContext<MyTestClass>) mapping).GetPropertyMappings();
 
-            BulkWriter.AutoDiscover.Mappings(connectionString, tableName, propertyMappings);
+            BulkWriter.Internal.AutoDiscover.Mappings(connectionString, tableName, propertyMappings);
 
             TestHelpers.ExecuteNonQuery(connectionString, "DROP TABLE " + tableName);
 
-            foreach (BulkWriter.PropertyMapping propertyMapping in propertyMappings)
+            foreach (BulkWriter.Internal.PropertyMapping propertyMapping in propertyMappings)
             {
                 if (propertyMapping.ShouldMap)
                 {
-                    for (int i = 0; i < BulkWriter.MappingDestination.PropertyIndexCount; i++)
+                    for (int i = 0; i < BulkWriter.Internal.MappingDestination.PropertyIndexCount; i++)
                     {
-                        Assert.True(propertyMapping.Destination.IsPropertySet((BulkWriter.MappingProperty) i));
+                        Assert.True(propertyMapping.Destination.IsPropertySet((BulkWriter.Internal.MappingProperty) i));
                     }
                 }
             }
@@ -55,7 +56,7 @@ namespace BulkWriter.Tests
         public void Fails_On_MisMatch_Column_Auto_Map()
         {
             string connectionString = TestHelpers.ConnectionString;
-            string tableName = BulkWriter.AutoDiscover.TableName<MyTestClass>(false);
+            string tableName = BulkWriter.Internal.AutoDiscover.TableName<MyTestClass>(false);
 
             TestHelpers.ExecuteNonQuery(connectionString,
                 "CREATE TABLE [dbo].[" + tableName + "](" +
@@ -66,7 +67,7 @@ namespace BulkWriter.Tests
 
             IMapBuilderContext<MyTestClass> mapping = MapBuilder.MapAllProperties<MyTestClass>();
 
-            IEnumerable<BulkWriter.PropertyMapping> propertyMappings = ((BulkWriter.MapBuilderContext<MyTestClass>) mapping).GetPropertyMappings();
+            IEnumerable<BulkWriter.Internal.PropertyMapping> propertyMappings = ((BulkWriter.Internal.MapBuilderContext<MyTestClass>) mapping).GetPropertyMappings();
 
             try
             {
@@ -82,7 +83,7 @@ namespace BulkWriter.Tests
         public void Fails_On_MisMatch_Column_Manual_Map()
         {
             string connectionString = TestHelpers.ConnectionString;
-            string tableName = BulkWriter.AutoDiscover.TableName<MyTestClass>(false);
+            string tableName = BulkWriter.Internal.AutoDiscover.TableName<MyTestClass>(false);
 
             TestHelpers.ExecuteNonQuery(connectionString,
                 "CREATE TABLE [dbo].[" + tableName + "](" +
@@ -95,7 +96,7 @@ namespace BulkWriter.Tests
                 .MapAllProperties<MyTestClass>()
                 .MapProperty(x => x.Name, x => x.ToColumnName("MisMatchColumn"));
 
-            IEnumerable<BulkWriter.PropertyMapping> propertyMappings = ((BulkWriter.MapBuilderContext<MyTestClass>)mapping).GetPropertyMappings();
+            IEnumerable<BulkWriter.Internal.PropertyMapping> propertyMappings = ((BulkWriter.Internal.MapBuilderContext<MyTestClass>)mapping).GetPropertyMappings();
 
             try
             {
@@ -124,21 +125,21 @@ namespace BulkWriter.Tests
                 .MapAllProperties<MyTestClass>()
                 .DestinationTable(tableName);
 
-            IEnumerable<BulkWriter.PropertyMapping> propertyMappings = ((BulkWriter.MapBuilderContext<MyTestClass>)mapping).GetPropertyMappings();
+            IEnumerable<BulkWriter.Internal.PropertyMapping> propertyMappings = ((BulkWriter.Internal.MapBuilderContext<MyTestClass>)mapping).GetPropertyMappings();
 
-            BulkWriter.AutoDiscover.Mappings(connectionString, tableName, propertyMappings);
+            BulkWriter.Internal.AutoDiscover.Mappings(connectionString, tableName, propertyMappings);
 
             TestHelpers.ExecuteNonQuery(connectionString, "DROP TABLE " + tableName);
 
-            foreach (BulkWriter.PropertyMapping propertyMapping in propertyMappings)
+            foreach (BulkWriter.Internal.PropertyMapping propertyMapping in propertyMappings)
             {
                 Assert.True(propertyMapping.ShouldMap);
 
                 if (propertyMapping.ShouldMap)
                 {
-                    for (int i = 0; i < BulkWriter.MappingDestination.PropertyIndexCount; i++)
+                    for (int i = 0; i < BulkWriter.Internal.MappingDestination.PropertyIndexCount; i++)
                     {
-                        Assert.True(propertyMapping.Destination.IsPropertySet((BulkWriter.MappingProperty)i));
+                        Assert.True(propertyMapping.Destination.IsPropertySet((BulkWriter.Internal.MappingProperty)i));
                     }
                 }
             }
@@ -162,21 +163,21 @@ namespace BulkWriter.Tests
                 .DestinationTable(tableName)
                 .MapProperty(x => x.Name, x => x.ToColumnName("ManualColumnName"));
 
-            IEnumerable<BulkWriter.PropertyMapping> propertyMappings = ((BulkWriter.MapBuilderContext<MyTestClass>)mapping).GetPropertyMappings();
+            IEnumerable<BulkWriter.Internal.PropertyMapping> propertyMappings = ((BulkWriter.Internal.MapBuilderContext<MyTestClass>)mapping).GetPropertyMappings();
 
-            BulkWriter.AutoDiscover.Mappings(connectionString, tableName, propertyMappings);
+            BulkWriter.Internal.AutoDiscover.Mappings(connectionString, tableName, propertyMappings);
 
             TestHelpers.ExecuteNonQuery(connectionString, "DROP TABLE " + tableName);
 
-            foreach (BulkWriter.PropertyMapping propertyMapping in propertyMappings)
+            foreach (BulkWriter.Internal.PropertyMapping propertyMapping in propertyMappings)
             {
                 Assert.True(propertyMapping.ShouldMap);
 
                 if (propertyMapping.ShouldMap)
                 {
-                    for (int i = 0; i < BulkWriter.MappingDestination.PropertyIndexCount; i++)
+                    for (int i = 0; i < BulkWriter.Internal.MappingDestination.PropertyIndexCount; i++)
                     {
-                        Assert.True(propertyMapping.Destination.IsPropertySet((BulkWriter.MappingProperty)i));
+                        Assert.True(propertyMapping.Destination.IsPropertySet((BulkWriter.Internal.MappingProperty)i));
                     }
                 }
             }
@@ -186,7 +187,7 @@ namespace BulkWriter.Tests
         public void Can_Find_All_Columns_Auto_Map()
         {
             string connectionString = TestHelpers.ConnectionString;
-            string tableName = BulkWriter.AutoDiscover.TableName<MyTestClass>(false);
+            string tableName = BulkWriter.Internal.AutoDiscover.TableName<MyTestClass>(false);
 
             TestHelpers.ExecuteNonQuery(connectionString,
                 "CREATE TABLE [dbo].[" + tableName + "](" +
@@ -197,21 +198,21 @@ namespace BulkWriter.Tests
 
             IMapBuilderContext<MyTestClass> mapping = MapBuilder.MapAllProperties<MyTestClass>();
 
-            IEnumerable<BulkWriter.PropertyMapping> propertyMappings = ((BulkWriter.MapBuilderContext<MyTestClass>)mapping).GetPropertyMappings();
+            IEnumerable<BulkWriter.Internal.PropertyMapping> propertyMappings = ((BulkWriter.Internal.MapBuilderContext<MyTestClass>)mapping).GetPropertyMappings();
 
-            BulkWriter.AutoDiscover.Mappings(connectionString, tableName, propertyMappings);
+            BulkWriter.Internal.AutoDiscover.Mappings(connectionString, tableName, propertyMappings);
 
             TestHelpers.ExecuteNonQuery(connectionString, "DROP TABLE " + tableName);
 
-            foreach (BulkWriter.PropertyMapping propertyMapping in propertyMappings)
+            foreach (BulkWriter.Internal.PropertyMapping propertyMapping in propertyMappings)
             {
                 Assert.True(propertyMapping.ShouldMap);
 
                 if (propertyMapping.ShouldMap)
                 {
-                    for (int i = 0; i < BulkWriter.MappingDestination.PropertyIndexCount; i++)
+                    for (int i = 0; i < BulkWriter.Internal.MappingDestination.PropertyIndexCount; i++)
                     {
-                        Assert.True(propertyMapping.Destination.IsPropertySet((BulkWriter.MappingProperty)i));
+                        Assert.True(propertyMapping.Destination.IsPropertySet((BulkWriter.Internal.MappingProperty)i));
                     }
                 }
             }

@@ -2,7 +2,7 @@
 using System.Data;
 using System.Globalization;
 
-namespace BulkWriter
+namespace BulkWriter.Internal
 {
     public sealed class DbSchemaRow
     {
