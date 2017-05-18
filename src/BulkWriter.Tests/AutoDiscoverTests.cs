@@ -22,6 +22,8 @@ namespace BulkWriter.Tests
             var connectionString = TestHelpers.ConnectionString;
             var tableName = AutoDiscover.TableName<MyTestClass>(false);
 
+            TestHelpers.ExecuteNonQuery(connectionString, $"DROP TABLE IF EXISTS [dbo].[{tableName}]");
+
             TestHelpers.ExecuteNonQuery(connectionString,
                 "CREATE TABLE [dbo].[" + tableName + "](" +
                 "[Id] [int] IDENTITY(1,1) NOT NULL," +
@@ -57,6 +59,8 @@ namespace BulkWriter.Tests
             var connectionString = TestHelpers.ConnectionString;
             var tableName = AutoDiscover.TableName<MyTestClass>(false);
 
+            TestHelpers.ExecuteNonQuery(connectionString, $"DROP TABLE IF EXISTS [dbo].[{tableName}]");
+
             TestHelpers.ExecuteNonQuery(connectionString,
                 "CREATE TABLE [dbo].[" + tableName + "](" +
                 "[Id] [int] IDENTITY(1,1) NOT NULL," +
@@ -83,6 +87,8 @@ namespace BulkWriter.Tests
         {
             var connectionString = TestHelpers.ConnectionString;
             var tableName = AutoDiscover.TableName<MyTestClass>(false);
+
+            TestHelpers.ExecuteNonQuery(connectionString, $"DROP TABLE IF EXISTS [dbo].[{tableName}]");
 
             TestHelpers.ExecuteNonQuery(connectionString,
                 "CREATE TABLE [dbo].[" + tableName + "](" +
@@ -112,6 +118,8 @@ namespace BulkWriter.Tests
         {
             var connectionString = TestHelpers.ConnectionString;
             const string tableName = "TempTestTable";
+
+            TestHelpers.ExecuteNonQuery(connectionString, $"DROP TABLE IF EXISTS [dbo].[{tableName}]");
 
             TestHelpers.ExecuteNonQuery(connectionString,
                 "CREATE TABLE [dbo].[" + tableName + "](" +
@@ -150,6 +158,8 @@ namespace BulkWriter.Tests
             var connectionString = TestHelpers.ConnectionString;
             const string tableName = "TempTestTable";
 
+            TestHelpers.ExecuteNonQuery(connectionString, $"DROP TABLE IF EXISTS [dbo].[{tableName}]");
+
             TestHelpers.ExecuteNonQuery(connectionString,
                 "CREATE TABLE [dbo].[" + tableName + "](" +
                 "[Id] [int] IDENTITY(1,1) NOT NULL," +
@@ -187,6 +197,8 @@ namespace BulkWriter.Tests
         {
             var connectionString = TestHelpers.ConnectionString;
             var tableName = AutoDiscover.TableName<MyTestClass>(false);
+
+            TestHelpers.ExecuteNonQuery(connectionString, $"DROP TABLE IF EXISTS [dbo].[{tableName}]");
 
             TestHelpers.ExecuteNonQuery(connectionString,
                 "CREATE TABLE [dbo].[" + tableName + "](" +

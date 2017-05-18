@@ -20,6 +20,8 @@ namespace BulkWriter.Tests
         {
             _enumerable = new[] { new MyTestClass() };
 
+            TestHelpers.ExecuteNonQuery(_connectionString, $"DROP TABLE IF EXISTS [dbo].[{_tableName}]");
+
             TestHelpers.ExecuteNonQuery(_connectionString,
                 "CREATE TABLE [dbo].[" + _tableName + "](" +
                 "[Id] [int] IDENTITY(1,1) NOT NULL," +

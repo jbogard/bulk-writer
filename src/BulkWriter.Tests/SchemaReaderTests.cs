@@ -20,6 +20,8 @@ namespace BulkWriter.Tests
             
             const string dropTableScript = "drop table [" + tableName + "]";
 
+            TestHelpers.ExecuteNonQuery(connectionString, $"DROP TABLE IF EXISTS [dbo].[{tableName}]");
+
             TestHelpers.ExecuteNonQuery(connectionString, createTableScript);
 
             var schemaRows = Internal.SchemaReader.GetSortedSchemaRows(connectionString, tableName);

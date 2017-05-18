@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFrameworks>net452</TargetFrameworks>
+        <TargetFrameworks>net452;netcoreapp2.0</TargetFrameworks>
         <AssemblyName>BulkWriter.Tests</AssemblyName>
     </PropertyGroup>
     <ItemGroup>
@@ -10,9 +10,6 @@
     </ItemGroup>
     <ItemGroup>
       <ProjectReference Include="..\BulkWriter\BulkWriter.csproj" />
-    </ItemGroup>
-    <ItemGroup>
-      <Reference Include="System.Configuration" />
     </ItemGroup>
     <ItemGroup>
       <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
