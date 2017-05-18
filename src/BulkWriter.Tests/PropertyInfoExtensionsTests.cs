@@ -18,12 +18,12 @@ namespace BulkWriter.Tests
             
             var testClass = new MyTestClass();
 
-            object zeroValue = valueTypePropertyValueGetter(testClass);
+            var zeroValue = valueTypePropertyValueGetter(testClass);
             Assert.IsType(typeof (int), zeroValue);
             Assert.Equal(0, zeroValue);
 
             testClass.ValueTypeProperty = 418;
-            object fourOneEightValue = valueTypePropertyValueGetter(testClass);
+            var fourOneEightValue = valueTypePropertyValueGetter(testClass);
             Assert.IsType(typeof(int), fourOneEightValue);
             Assert.Equal(418, fourOneEightValue);
         }
@@ -38,13 +38,13 @@ namespace BulkWriter.Tests
 
             var testClass = new MyTestClass();
 
-            object nullValue = referenceTypePropertyValueGetter(testClass);
+            var nullValue = referenceTypePropertyValueGetter(testClass);
             Assert.Null(nullValue);
 
             testClass.ReferenceTypeProperty = "418";
-            object fourOneEightValue = referenceTypePropertyValueGetter(testClass);
+            var fourOneEightValue = referenceTypePropertyValueGetter(testClass);
             Assert.IsType(typeof(string), fourOneEightValue);
-            Assert.Equal(fourOneEightValue, "418");
+            Assert.Equal("418", fourOneEightValue);
         }
 
         [Fact(Skip="I hate nullables")]
@@ -57,11 +57,11 @@ namespace BulkWriter.Tests
 
             var testClass = new MyTestClass();
 
-            object nullValue = nullableTypePropertyValueGetter(testClass);
+            var nullValue = nullableTypePropertyValueGetter(testClass);
             Assert.Null(nullValue);
 
             testClass.NullableTypeProperty = 418;
-            object fourOneEightValue = nullableTypePropertyValueGetter(testClass);
+            var fourOneEightValue = nullableTypePropertyValueGetter(testClass);
             Assert.Equal(typeof(int?), Nullable.GetUnderlyingType(fourOneEightValue.GetType()));
             Assert.Equal(418, fourOneEightValue);
         }

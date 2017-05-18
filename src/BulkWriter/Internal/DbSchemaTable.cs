@@ -129,6 +129,7 @@ namespace BulkWriter.Internal
             DataType,
             ProviderSpecificDataType,
             AllowDbNull,
+            ProviderType,
             IsExpression,
             IsHidden,
             IsLong,

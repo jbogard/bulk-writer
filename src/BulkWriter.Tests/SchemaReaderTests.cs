@@ -1,6 +1,4 @@
-﻿using System.IO;
-using System.Linq;
-using BulkWriter;
+﻿using System.Linq;
 using Xunit;
 
 namespace BulkWriter.Tests
@@ -11,7 +9,7 @@ namespace BulkWriter.Tests
         [Fact]
         public void Can_Read_Table_Schema()
         {
-            string connectionString = TestHelpers.ConnectionString;
+            var connectionString = TestHelpers.ConnectionString;
             const string tableName = "TempTestTable";
             
             const string createTableScript = "CREATE TABLE [dbo].[" + tableName + "](" +
@@ -24,7 +22,7 @@ namespace BulkWriter.Tests
 
             TestHelpers.ExecuteNonQuery(connectionString, createTableScript);
 
-            var schemaRows = BulkWriter.Internal.SchemaReader.GetSortedSchemaRows(connectionString, tableName);
+            var schemaRows = Internal.SchemaReader.GetSortedSchemaRows(connectionString, tableName);
 
             TestHelpers.ExecuteNonQuery(connectionString, dropTableScript);
 
