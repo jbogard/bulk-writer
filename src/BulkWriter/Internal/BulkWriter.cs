@@ -23,9 +23,6 @@ namespace BulkWriter.Internal
             }
         }
 
-        public void Dispose()
-        {
-            ((IDisposable) _sqlBulkCopy).Dispose();
-        }
+        public void Dispose() => ((IDisposable)_sqlBulkCopy).Dispose();
     }
 }

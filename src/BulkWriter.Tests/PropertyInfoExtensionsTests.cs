@@ -19,12 +19,12 @@ namespace BulkWriter.Tests
             var testClass = new MyTestClass();
 
             var zeroValue = valueTypePropertyValueGetter(testClass);
-            Assert.IsType(typeof (int), zeroValue);
+            Assert.IsType<int>(zeroValue);
             Assert.Equal(0, zeroValue);
 
             testClass.ValueTypeProperty = 418;
             var fourOneEightValue = valueTypePropertyValueGetter(testClass);
-            Assert.IsType(typeof(int), fourOneEightValue);
+            Assert.IsType<int>(fourOneEightValue);
             Assert.Equal(418, fourOneEightValue);
         }
 
@@ -43,7 +43,7 @@ namespace BulkWriter.Tests
 
             testClass.ReferenceTypeProperty = "418";
             var fourOneEightValue = referenceTypePropertyValueGetter(testClass);
-            Assert.IsType(typeof(string), fourOneEightValue);
+            Assert.IsType<string>(fourOneEightValue);
             Assert.Equal("418", fourOneEightValue);
         }
 

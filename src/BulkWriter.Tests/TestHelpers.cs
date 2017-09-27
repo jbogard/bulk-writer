@@ -4,7 +4,15 @@ namespace BulkWriter.Tests
 {
     internal static class TestHelpers
     {
-        static TestHelpers() => ConnectionString = @"Data Source=(local)\sqlexpress;Initial Catalog=BulkWriter.Tests;Integrated Security=SSPI";
+        static TestHelpers()
+        {
+            ConnectionString = @"Data Source=(localdb)\mssqllocaldb;Database=BulkWriter.Tests;Trusted_Connection=True;";
+
+            string admin = @"Data Source=(localdb)\mssqllocaldb;Trusted_Connection=True;";
+            ExecuteNonQuery(admin, @"IF NOT EXISTS (SELECT name FROM master.dbo.sysdatabases WHERE name = N'BulkWriter.Tests')
+CREATE DATABASE [BulkWriter.Tests]");
+        }
+
 
         public static void ExecuteNonQuery(string connectionString, string commandText)
         {
