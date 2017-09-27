@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using BulkWriter;
+using BulkWriter.Internal;
 using Xunit;
 
 namespace BulkWriter.Tests
@@ -11,7 +11,7 @@ namespace BulkWriter.Tests
         [Fact]
         public void Discovers_Quoted_Table_Name()
         {
-            string tableName = BulkWriter.AutoDiscover.TableName<MyTestClass>(true);
+            var tableName = AutoDiscover.TableName<MyTestClass>(true);
             Assert.StartsWith("[", tableName);
             Assert.EndsWith("]", tableName);
         }
@@ -19,8 +19,10 @@ namespace BulkWriter.Tests
         [Fact]
         public void Maps_Only_Appropriate_Properties()
         {
-            string connectionString = TestHelpers.ConnectionString;
-            string tableName = BulkWriter.AutoDiscover.TableName<MyTestClass>(false);
+            var connectionString = TestHelpers.ConnectionString;
+            var tableName = AutoDiscover.TableName<MyTestClass>(false);
+
+            TestHelpers.ExecuteNonQuery(connectionString, $"DROP TABLE IF EXISTS [dbo].[{tableName}]");
 
             TestHelpers.ExecuteNonQuery(connectionString,
                 "CREATE TABLE [dbo].[" + tableName + "](" +
@@ -29,23 +31,23 @@ namespace BulkWriter.Tests
                 "CONSTRAINT [PK_" + tableName + "] PRIMARY KEY CLUSTERED ([Id] ASC)" +
                 ")");
 
-            IMapBuilderContext<MyTestClass> mapping = MapBuilder
+            var mapping = MapBuilder
                 .MapAllProperties<MyTestClass>()
                 .MapProperty(x => x.Id, x => x.DoNotMap()); // Do not map this property
 
-            IEnumerable<BulkWriter.PropertyMapping> propertyMappings = ((BulkWriter.MapBuilderContext<MyTestClass>) mapping).GetPropertyMappings();
+            var propertyMappings = ((MapBuilderContext<MyTestClass>) mapping).GetPropertyMappings();
 
-            BulkWriter.AutoDiscover.Mappings(connectionString, tableName, propertyMappings);
+            AutoDiscover.Mappings(connectionString, tableName, propertyMappings);
 
             TestHelpers.ExecuteNonQuery(connectionString, "DROP TABLE " + tableName);
 
-            foreach (BulkWriter.PropertyMapping propertyMapping in propertyMappings)
+            foreach (var propertyMapping in propertyMappings)
             {
                 if (propertyMapping.ShouldMap)
                 {
-                    for (int i = 0; i < BulkWriter.MappingDestination.PropertyIndexCount; i++)
+                    for (var i = 0; i < MappingDestination.PropertyIndexCount; i++)
                     {
-                        Assert.True(propertyMapping.Destination.IsPropertySet((BulkWriter.MappingProperty) i));
+                        Assert.True(propertyMapping.Destination.IsPropertySet((MappingProperty) i));
                     }
                 }
             }
@@ -54,8 +56,10 @@ namespace BulkWriter.Tests
         [Fact]
         public void Fails_On_MisMatch_Column_Auto_Map()
         {
-            string connectionString = TestHelpers.ConnectionString;
-            string tableName = BulkWriter.AutoDiscover.TableName<MyTestClass>(false);
+            var connectionString = TestHelpers.ConnectionString;
+            var tableName = AutoDiscover.TableName<MyTestClass>(false);
+
+            TestHelpers.ExecuteNonQuery(connectionString, $"DROP TABLE IF EXISTS [dbo].[{tableName}]");
 
             TestHelpers.ExecuteNonQuery(connectionString,
                 "CREATE TABLE [dbo].[" + tableName + "](" +
@@ -64,9 +68,9 @@ namespace BulkWriter.Tests
                 "CONSTRAINT [PK_" + tableName + "] PRIMARY KEY CLUSTERED ([Id] ASC)" +
                 ")");
 
-            IMapBuilderContext<MyTestClass> mapping = MapBuilder.MapAllProperties<MyTestClass>();
+            var mapping = MapBuilder.MapAllProperties<MyTestClass>();
 
-            IEnumerable<BulkWriter.PropertyMapping> propertyMappings = ((BulkWriter.MapBuilderContext<MyTestClass>) mapping).GetPropertyMappings();
+            var propertyMappings = ((MapBuilderContext<MyTestClass>) mapping).GetPropertyMappings();
 
             try
             {
@@ -81,8 +85,10 @@ namespace BulkWriter.Tests
         [Fact]
         public void Fails_On_MisMatch_Column_Manual_Map()
         {
-            string connectionString = TestHelpers.ConnectionString;
-            string tableName = BulkWriter.AutoDiscover.TableName<MyTestClass>(false);
+            var connectionString = TestHelpers.ConnectionString;
+            var tableName = AutoDiscover.TableName<MyTestClass>(false);
+
+            TestHelpers.ExecuteNonQuery(connectionString, $"DROP TABLE IF EXISTS [dbo].[{tableName}]");
 
             TestHelpers.ExecuteNonQuery(connectionString,
                 "CREATE TABLE [dbo].[" + tableName + "](" +
@@ -95,7 +101,7 @@ namespace BulkWriter.Tests
                 .MapAllProperties<MyTestClass>()
                 .MapProperty(x => x.Name, x => x.ToColumnName("MisMatchColumn"));
 
-            IEnumerable<BulkWriter.PropertyMapping> propertyMappings = ((BulkWriter.MapBuilderContext<MyTestClass>)mapping).GetPropertyMappings();
+            var propertyMappings = ((MapBuilderContext<MyTestClass>)mapping).GetPropertyMappings();
 
             try
             {
@@ -110,8 +116,10 @@ namespace BulkWriter.Tests
         [Fact]
         public void Can_Find_Destination_Table_Manual_Map()
         {
-            string connectionString = TestHelpers.ConnectionString;
+            var connectionString = TestHelpers.ConnectionString;
             const string tableName = "TempTestTable";
+
+            TestHelpers.ExecuteNonQuery(connectionString, $"DROP TABLE IF EXISTS [dbo].[{tableName}]");
 
             TestHelpers.ExecuteNonQuery(connectionString,
                 "CREATE TABLE [dbo].[" + tableName + "](" +
@@ -120,25 +128,25 @@ namespace BulkWriter.Tests
                 "CONSTRAINT [PK_" + tableName + "] PRIMARY KEY CLUSTERED ([Id] ASC)" +
                 ")");
 
-            IMapBuilderContext<MyTestClass> mapping = MapBuilder
+            var mapping = MapBuilder
                 .MapAllProperties<MyTestClass>()
                 .DestinationTable(tableName);
 
-            IEnumerable<BulkWriter.PropertyMapping> propertyMappings = ((BulkWriter.MapBuilderContext<MyTestClass>)mapping).GetPropertyMappings();
+            var propertyMappings = ((MapBuilderContext<MyTestClass>)mapping).GetPropertyMappings();
 
-            BulkWriter.AutoDiscover.Mappings(connectionString, tableName, propertyMappings);
+            AutoDiscover.Mappings(connectionString, tableName, propertyMappings);
 
             TestHelpers.ExecuteNonQuery(connectionString, "DROP TABLE " + tableName);
 
-            foreach (BulkWriter.PropertyMapping propertyMapping in propertyMappings)
+            foreach (var propertyMapping in propertyMappings)
             {
                 Assert.True(propertyMapping.ShouldMap);
 
                 if (propertyMapping.ShouldMap)
                 {
-                    for (int i = 0; i < BulkWriter.MappingDestination.PropertyIndexCount; i++)
+                    for (var i = 0; i < MappingDestination.PropertyIndexCount; i++)
                     {
-                        Assert.True(propertyMapping.Destination.IsPropertySet((BulkWriter.MappingProperty)i));
+                        Assert.True(propertyMapping.Destination.IsPropertySet((MappingProperty)i));
                     }
                 }
             }
@@ -147,8 +155,10 @@ namespace BulkWriter.Tests
         [Fact]
         public void Can_Find_Column_Manual_Map()
         {
-            string connectionString = TestHelpers.ConnectionString;
+            var connectionString = TestHelpers.ConnectionString;
             const string tableName = "TempTestTable";
+
+            TestHelpers.ExecuteNonQuery(connectionString, $"DROP TABLE IF EXISTS [dbo].[{tableName}]");
 
             TestHelpers.ExecuteNonQuery(connectionString,
                 "CREATE TABLE [dbo].[" + tableName + "](" +
@@ -157,26 +167,26 @@ namespace BulkWriter.Tests
                 "CONSTRAINT [PK_" + tableName + "] PRIMARY KEY CLUSTERED ([Id] ASC)" +
                 ")");
 
-            IMapBuilderContext<MyTestClass> mapping = MapBuilder
+            var mapping = MapBuilder
                 .MapAllProperties<MyTestClass>()
                 .DestinationTable(tableName)
                 .MapProperty(x => x.Name, x => x.ToColumnName("ManualColumnName"));
 
-            IEnumerable<BulkWriter.PropertyMapping> propertyMappings = ((BulkWriter.MapBuilderContext<MyTestClass>)mapping).GetPropertyMappings();
+            var propertyMappings = ((MapBuilderContext<MyTestClass>)mapping).GetPropertyMappings();
 
-            BulkWriter.AutoDiscover.Mappings(connectionString, tableName, propertyMappings);
+            AutoDiscover.Mappings(connectionString, tableName, propertyMappings);
 
             TestHelpers.ExecuteNonQuery(connectionString, "DROP TABLE " + tableName);
 
-            foreach (BulkWriter.PropertyMapping propertyMapping in propertyMappings)
+            foreach (var propertyMapping in propertyMappings)
             {
                 Assert.True(propertyMapping.ShouldMap);
 
                 if (propertyMapping.ShouldMap)
                 {
-                    for (int i = 0; i < BulkWriter.MappingDestination.PropertyIndexCount; i++)
+                    for (var i = 0; i < MappingDestination.PropertyIndexCount; i++)
                     {
-                        Assert.True(propertyMapping.Destination.IsPropertySet((BulkWriter.MappingProperty)i));
+                        Assert.True(propertyMapping.Destination.IsPropertySet((MappingProperty)i));
                     }
                 }
             }
@@ -185,8 +195,10 @@ namespace BulkWriter.Tests
         [Fact]
         public void Can_Find_All_Columns_Auto_Map()
         {
-            string connectionString = TestHelpers.ConnectionString;
-            string tableName = BulkWriter.AutoDiscover.TableName<MyTestClass>(false);
+            var connectionString = TestHelpers.ConnectionString;
+            var tableName = AutoDiscover.TableName<MyTestClass>(false);
+
+            TestHelpers.ExecuteNonQuery(connectionString, $"DROP TABLE IF EXISTS [dbo].[{tableName}]");
 
             TestHelpers.ExecuteNonQuery(connectionString,
                 "CREATE TABLE [dbo].[" + tableName + "](" +
@@ -195,23 +207,23 @@ namespace BulkWriter.Tests
                 "CONSTRAINT [PK_" + tableName + "] PRIMARY KEY CLUSTERED ([Id] ASC)" +
                 ")");
 
-            IMapBuilderContext<MyTestClass> mapping = MapBuilder.MapAllProperties<MyTestClass>();
+            var mapping = MapBuilder.MapAllProperties<MyTestClass>();
 
-            IEnumerable<BulkWriter.PropertyMapping> propertyMappings = ((BulkWriter.MapBuilderContext<MyTestClass>)mapping).GetPropertyMappings();
+            var propertyMappings = ((MapBuilderContext<MyTestClass>)mapping).GetPropertyMappings();
 
-            BulkWriter.AutoDiscover.Mappings(connectionString, tableName, propertyMappings);
+            AutoDiscover.Mappings(connectionString, tableName, propertyMappings);
 
             TestHelpers.ExecuteNonQuery(connectionString, "DROP TABLE " + tableName);
 
-            foreach (BulkWriter.PropertyMapping propertyMapping in propertyMappings)
+            foreach (var propertyMapping in propertyMappings)
             {
                 Assert.True(propertyMapping.ShouldMap);
 
                 if (propertyMapping.ShouldMap)
                 {
-                    for (int i = 0; i < BulkWriter.MappingDestination.PropertyIndexCount; i++)
+                    for (var i = 0; i < MappingDestination.PropertyIndexCount; i++)
                     {
-                        Assert.True(propertyMapping.Destination.IsPropertySet((BulkWriter.MappingProperty)i));
+                        Assert.True(propertyMapping.Destination.IsPropertySet((MappingProperty)i));
                     }
                 }
             }

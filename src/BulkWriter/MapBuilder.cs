@@ -3,20 +3,15 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using BulkWriter.Internal;
 
 namespace BulkWriter
 {
     public static class MapBuilder
     {
-        public static IMapping<TResult> BuildAllProperties<TResult>()
-        {
-            return MapAllProperties<TResult>().Build();
-        }
+        public static IMapping<TResult> BuildAllProperties<TResult>() => MapAllProperties<TResult>().Build();
 
-        public static IMapBuilderContext<TResult> MapNoProperties<TResult>()
-        {
-            return new MapBuilderContext<TResult>();
-        }
+        public static IMapBuilderContext<TResult> MapNoProperties<TResult>() => new MapBuilderContext<TResult>();
 
         public static IMapBuilderContext<TResult> MapAllProperties<TResult>()
         {
@@ -31,10 +26,7 @@ namespace BulkWriter
             return context;
         }
 
-        private static bool IsAutoMappableProperty(PropertyInfo property)
-        {
-            return property.CanRead && (0 == property.GetIndexParameters().Length) && !IsCollectionType(property.PropertyType);
-        }
+        private static bool IsAutoMappableProperty(PropertyInfo property) => property.CanRead && 0 == property.GetIndexParameters().Length && !IsCollectionType(property.PropertyType);
 
         private static bool IsCollectionType(Type type)
         {
@@ -44,7 +36,7 @@ namespace BulkWriter
                 return false;
             }
 
-            var interfaces = type.GetInterfaces().Where(x => (x == typeof (IEnumerable)) || (x.IsGenericType && (x.GetGenericTypeDefinition() == typeof (IEnumerable<>))));
+            var interfaces = type.GetInterfaces().Where(x => x == typeof (IEnumerable) || x.IsGenericType && x.GetGenericTypeDefinition() == typeof (IEnumerable<>));
             return interfaces.Any();
         }
     }

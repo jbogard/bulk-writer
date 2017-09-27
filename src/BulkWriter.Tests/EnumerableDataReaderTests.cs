@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using BulkWriter;
+using BulkWriter.Internal;
 using Xunit;
 
 namespace BulkWriter.Tests
@@ -9,77 +9,79 @@ namespace BulkWriter.Tests
     
     public class EnumerableDataReaderTests : IDisposable
     {
-        string connectionString = TestHelpers.ConnectionString;
+        private readonly string _connectionString = TestHelpers.ConnectionString;
 
-        private readonly string tableName = BulkWriter.AutoDiscover.TableName<MyTestClass>(false);
+        private readonly string _tableName = AutoDiscover.TableName<MyTestClass>(false);
 
-        private IEnumerable<MyTestClass> enumerable;
-        private BulkWriter.EnumerableDataReader<MyTestClass> dataReader;
+        private readonly IEnumerable<MyTestClass> _enumerable;
+        private readonly EnumerableDataReader<MyTestClass> _dataReader;
         
         public EnumerableDataReaderTests()
         {
-            this.enumerable = new[] { new MyTestClass() };
+            _enumerable = new[] { new MyTestClass() };
 
-            TestHelpers.ExecuteNonQuery(connectionString,
-                "CREATE TABLE [dbo].[" + tableName + "](" +
+            TestHelpers.ExecuteNonQuery(_connectionString, $"DROP TABLE IF EXISTS [dbo].[{_tableName}]");
+
+            TestHelpers.ExecuteNonQuery(_connectionString,
+                "CREATE TABLE [dbo].[" + _tableName + "](" +
                 "[Id] [int] IDENTITY(1,1) NOT NULL," +
                 "[Name] [nvarchar](50) NULL," +
-                "CONSTRAINT [PK_" + tableName + "] PRIMARY KEY CLUSTERED ([Id] ASC)" +
+                "CONSTRAINT [PK_" + _tableName + "] PRIMARY KEY CLUSTERED ([Id] ASC)" +
                 ")");
 
             var mapping = MapBuilder.MapAllProperties<MyTestClass>();
-            var propertyMappings = ((BulkWriter.MapBuilderContext<MyTestClass>)mapping).GetPropertyMappings();
-            BulkWriter.AutoDiscover.Mappings(connectionString, tableName, propertyMappings);
+            var propertyMappings = ((MapBuilderContext<MyTestClass>)mapping).GetPropertyMappings();
+            AutoDiscover.Mappings(_connectionString, _tableName, propertyMappings);
 
-            this.dataReader = new BulkWriter.EnumerableDataReader<MyTestClass>(enumerable, propertyMappings);
-            dataReader.Read();
+            _dataReader = new EnumerableDataReader<MyTestClass>(_enumerable, propertyMappings);
+            _dataReader.Read();
         }
 
         public void Dispose()
         {
-            TestHelpers.ExecuteNonQuery(connectionString, "DROP TABLE " + tableName);
+            TestHelpers.ExecuteNonQuery(_connectionString, "DROP TABLE " + _tableName);
         }
 
         [Fact]
         public void Read_Advances_Enumerable()
         {
-            Assert.Same(enumerable.ElementAt(0), dataReader.Current);
+            Assert.Same(_enumerable.ElementAt(0), _dataReader.Current);
         }
 
         [Fact]
         public void GetOrdinal_Returns_Correct_Value()
         {
-            Assert.Equal(0, dataReader.GetOrdinal("Id"));
+            Assert.Equal(0, _dataReader.GetOrdinal("Id"));
         }
 
         [Fact]
         public void IsDbNull_Returns_Correct_Value()
         {
-            Assert.True(this.dataReader.IsDBNull(1));
+            Assert.True(_dataReader.IsDBNull(1));
         }
 
         [Fact]
         public void GetValue_Returns_Correct_Value()
         {
-            var element = this.enumerable.ElementAt(0);
+            var element = _enumerable.ElementAt(0);
             element.Id = 418;
             element.Name = "Michael";
 
-            Assert.Equal(418, this.dataReader.GetValue(0));
-            Assert.Equal("Michael", this.dataReader.GetValue(1));
+            Assert.Equal(418, _dataReader.GetValue(0));
+            Assert.Equal("Michael", _dataReader.GetValue(1));
         }
 
         [Fact]
         public void GetName_Returns_Correct_Value()
         {
-            Assert.Equal("Id", this.dataReader.GetName(0));
-            Assert.Equal("Name", this.dataReader.GetName(1));
+            Assert.Equal("Id", _dataReader.GetName(0));
+            Assert.Equal("Name", _dataReader.GetName(1));
         }
 
         [Fact]
         public void FieldCount_Returns_Correct_Value()
         {
-            Assert.Equal(2, this.dataReader.FieldCount);
+            Assert.Equal(2, _dataReader.FieldCount);
         }
         
         public class MyTestClass
