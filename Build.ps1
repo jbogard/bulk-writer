@@ -45,9 +45,9 @@ exec { & dotnet xunit -configuration Release }
 Pop-Location
 
 if ($suffix -eq "") {
-	exec { & dotnet pack .\src\BulkWriter\BulkWriter.csproj -c Release -o ..\artifacts --include-symbols --no-build }
+	exec { & dotnet pack .\src\BulkWriter\BulkWriter.csproj -c Release -o ..\..\artifacts --include-symbols --no-build }
 } else {
-	exec { & dotnet pack .\src\BulkWriter\BulkWriter.csproj -c Release -o ..\artifacts --include-symbols --no-build --version-suffix=$suffix }
+	exec { & dotnet pack .\src\BulkWriter\BulkWriter.csproj -c Release -o ..\..\artifacts --include-symbols --no-build --version-suffix=$suffix }
 }
 
 
