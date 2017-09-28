@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using BulkWriter.Internal;
 
 namespace BulkWriter
@@ -40,6 +41,14 @@ namespace BulkWriter
             using (var dataReader = new EnumerableDataReader<TResult>(items, _propertyMappings))
             {
                 _sqlBulkCopy.WriteToServer(dataReader);
+            }
+        }
+
+        public Task WriteToDatabaseAsync(IEnumerable<TResult> items)
+        {
+            using (var dataReader = new EnumerableDataReader<TResult>(items, _propertyMappings))
+            {
+                return _sqlBulkCopy.WriteToServerAsync(dataReader);
             }
         }
 
