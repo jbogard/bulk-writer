@@ -1,4 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.Data.SqlClient;
+using System.IO;
+using System.Threading.Tasks;
 using BulkWriter;
 
 namespace BulkWriter.Demo
@@ -7,16 +10,39 @@ namespace BulkWriter.Demo
     {
         private static void Main(string[] args)
         {
-            var mapping = MapBuilder
-                .MapAllProperties<MyDomainEntity>()
-                .DestinationTable("MyDomainEntities")       // Optional
-                .MapProperty(x => x.Id, x => x.DoNotMap())  // Required for ID properties where you want to use the DBs auto-increment feature.
-                .Build();
+            SetupDb();
 
-            using (var bulkWriter = mapping.CreateBulkWriter("Data Source=(local);Initial Catalog=BulkWriterTest;Integrated Security=SSPI"))
+            using (var bulkWriter = new BulkWriter<MyDomainEntity>(@"Data Source=(localdb)\mssqllocaldb;Database=BulkWriter.Demo;Trusted_Connection=True;"))
             {
                 var items = GetDomainEntities();
                 bulkWriter.WriteToDatabase(items);
+            }
+        }
+
+        private static void SetupDb()
+        {
+            using (var sqlConnection = new SqlConnection(@"Data Source=(localdb)\mssqllocaldb;Trusted_Connection=True;"))
+            {
+                sqlConnection.Open();
+                using (var command = new SqlCommand(
+                    @"IF NOT EXISTS (SELECT name FROM master.dbo.sysdatabases WHERE name = N'BulkWriter.Demo')
+CREATE DATABASE [BulkWriter.Demo]", sqlConnection))
+                {
+                    command.ExecuteNonQuery();
+                }
+                using (var command = new SqlCommand(@"USE [BulkWriter.Demo]; DROP TABLE IF EXISTS dbo.MyDomainEntities", sqlConnection))
+                {
+                    command.ExecuteNonQuery();
+                }
+                using (var command = new SqlCommand(@"USE [BulkWriter.Demo]; CREATE TABLE dbo.MyDomainEntities (
+    [Id] [int] IDENTITY(1, 1) NOT NULL,
+    [FirstName] [nvarchar](100),
+    [LastName] [nvarchar](100),
+    CONSTRAINT [PK_MyDomainEntities] PRIMARY KEY CLUSTERED ( [Id] ASC )
+)", sqlConnection))
+                {
+                    command.ExecuteNonQuery();
+                }
             }
         }
 
@@ -24,8 +50,13 @@ namespace BulkWriter.Demo
         {
             for (int i = 0; i < 1000; i++)
             {
-                yield return new MyDomainEntity();
+                yield return new MyDomainEntity
+                {
+                    Id = i,
+                    FirstName = $"Bob-{i}",
+                    LastName = $"Smith-{i}"
+                };
             }
-        } 
+        }
     }
 }

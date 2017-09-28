@@ -11,7 +11,11 @@ namespace BulkWriter.Internal
         public static PropertyMapping[] BuildMappings(this Type type) => type.GetRuntimeProperties()
             .Select((pi, i) => new PropertyMapping
             {
-                Source = new MappingSource(pi, i),
+                Source = new MappingSource
+                {
+                    Property = pi,
+                    Ordinal = i
+                },
                 ShouldMap = pi.GetCustomAttribute<NotMappedAttribute>() != null,
                 Destination = new MappingDestination
                 {

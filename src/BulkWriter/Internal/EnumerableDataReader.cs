@@ -122,11 +122,6 @@ namespace BulkWriter.Internal
             }
         }
 
-        public void Close()
-        {
-            Dispose();
-        }
-
         private void EnsureNotDisposed()
         {
             if (_disposed)
@@ -176,8 +171,6 @@ namespace BulkWriter.Internal
         public override object this[int i] => throw new NotSupportedException();
 
         public override object this[string name] => throw new NotSupportedException();
-
-        public DataTable GetSchemaTable() => throw new NotSupportedException();
 
         public override bool NextResult() => throw new NotSupportedException();
 
