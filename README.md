@@ -47,6 +47,10 @@ This technique does require you to reason differently about your ETL jobs: Most 
 
 It is technically possible to produce infinite data sets with `IEnumerable`, which can be pulled into a SQL Server table as soon as your `IEnumerable` can produce them while using very little memory.
 
+## Mapping ##
+
+Bulk Writer uses standard Data Annotations to map your DTO to tables and columns. Either name your table and properties to match your table, or use the `Table`, `Key`, and `Column` attributes to decorate your DTO.
+
 # Examples #
 
 By itself, Bulk Writer is a pretty simple concept and the code itself isn't really all that complicated. However, even simple implementations can enable very complex scenarios. The rest of this document shows examples of what you can do with Bulk Writer.
@@ -82,11 +86,15 @@ Note that this LINQ query does not execute until the `MoveNext()` method is call
 Next, all there is to do is let Bulk Writer write the results to your database table.
 
 ```csharp
-var mapping = MapBuilder.BuildAllProperties<EntityToZipCodeDistance>();
-using (var bulkWriter = mapping.CreateBulkWriter(connectionString))
+using (var bulkWriter = new BulkWriter<EntityToZipCodeDistance>(connectionString))
 {
-   var items = GetDomainEntities();
-   bulkWriter.WriteToDatabase(q);
+    bulkWriter.WriteToDatabase(q);
+}
+// or async
+
+using (var bulkWriter = new BulkWriter<EntityToZipCodeDistance>(connectionString))
+{
+    await bulkWriter.WriteToDatabaseAsync(q);
 }
 ```
 
@@ -225,8 +233,7 @@ var stage2 = taskFactory.StartNew(() => {
 
 var finalStage = taskFactory.StartNew(() => {
    var enumerable = finalStageInput.GetConsumingEnumerable();
-   var mapping = MapBuilder.BuildAllProperties<FinalStageInput>();
-   using (var bulkWriter = mapping.CreateBulkWriter(connectionString))
+   using (var bulkWriter = new BulkWriter<FinalStageInput>(connectionString))
    {
       bulkWriter.WriteToDatabase(enumerable);
    }
