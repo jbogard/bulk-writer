@@ -1,16 +1,17 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26228.4
+VisualStudioVersion = 15.0.26730.10
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BulkWriter", "src\BulkWriter\BulkWriter.csproj", "{A232D2EA-6E54-4941-9496-4DB98122B14C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BulkWriter", "src\BulkWriter\BulkWriter.csproj", "{A232D2EA-6E54-4941-9496-4DB98122B14C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BulkWriter.Demo", "src\BulkWriter.Demo\BulkWriter.Demo.csproj", "{09FA9E48-9696-4E1E-A1DB-B4D8ACE96B18}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BulkWriter.Tests", "src\BulkWriter.Tests\BulkWriter.Tests.csproj", "{6DAD0F01-655C-49BF-924F-01C8ED7CA62C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BulkWriter.Tests", "src\BulkWriter.Tests\BulkWriter.Tests.csproj", "{6DAD0F01-655C-49BF-924F-01C8ED7CA62C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{432DE5FB-310C-432E-8ADE-ED6FCBD45C18}"
 	ProjectSection(SolutionItems) = preProject
+		appveyor.yml = appveyor.yml
 		Build.ps1 = Build.ps1
 	EndProjectSection
 EndProject
@@ -35,5 +36,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {ED2FB9A8-E280-4ABA-9DC3-E19A8F9F669A}
 	EndGlobalSection
 EndGlobal

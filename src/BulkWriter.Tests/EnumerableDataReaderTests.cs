@@ -11,7 +11,7 @@ namespace BulkWriter.Tests
     {
         private readonly string _connectionString = TestHelpers.ConnectionString;
 
-        private readonly string _tableName = AutoDiscover.TableName<MyTestClass>(false);
+        private readonly string _tableName = nameof(MyTestClass);
 
         private readonly IEnumerable<MyTestClass> _enumerable;
         private readonly EnumerableDataReader<MyTestClass> _dataReader;
@@ -29,9 +29,7 @@ namespace BulkWriter.Tests
                 "CONSTRAINT [PK_" + _tableName + "] PRIMARY KEY CLUSTERED ([Id] ASC)" +
                 ")");
 
-            var mapping = MapBuilder.MapAllProperties<MyTestClass>();
-            var propertyMappings = ((MapBuilderContext<MyTestClass>)mapping).GetPropertyMappings();
-            AutoDiscover.Mappings(_connectionString, _tableName, propertyMappings);
+            var propertyMappings = typeof(MyTestClass).BuildMappings();
 
             _dataReader = new EnumerableDataReader<MyTestClass>(_enumerable, propertyMappings);
             _dataReader.Read();
