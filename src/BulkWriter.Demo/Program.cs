@@ -1,8 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Data.SqlClient;
-using System.IO;
-using System.Threading.Tasks;
-using BulkWriter;
 
 namespace BulkWriter.Demo
 {
@@ -48,7 +45,7 @@ CREATE DATABASE [BulkWriter.Demo]", sqlConnection))
 
         private static IEnumerable<MyDomainEntity> GetDomainEntities()
         {
-            for (int i = 0; i < 1000; i++)
+            for (var i = 0; i < 1000; i++)
             {
                 yield return new MyDomainEntity
                 {
