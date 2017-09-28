@@ -47,7 +47,7 @@ namespace BulkWriter.Tests
             Assert.Equal("418", fourOneEightValue);
         }
 
-        [Fact(Skip="I hate nullables")]
+        [Fact]
         public void Can_Get_Correct_NullableType_PropertyValue()
         {
             var nullableTypeProperty = typeof(MyTestClass).GetProperty("NullableTypeProperty", BindingFlags.Public | BindingFlags.Instance);
@@ -62,7 +62,7 @@ namespace BulkWriter.Tests
 
             testClass.NullableTypeProperty = 418;
             var fourOneEightValue = nullableTypePropertyValueGetter(testClass);
-            Assert.Equal(typeof(int?), Nullable.GetUnderlyingType(fourOneEightValue.GetType()));
+            Assert.Equal(typeof(int), fourOneEightValue.GetType());
             Assert.Equal(418, fourOneEightValue);
         }
 

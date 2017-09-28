@@ -1,13 +1,14 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics.CodeAnalysis;
+using System.Data.Common;
 using System.Linq;
 using BulkWriter.Properties;
 
 namespace BulkWriter.Internal
 {
-    public class EnumerableDataReader<TResult> : IDataReader
+    public class EnumerableDataReader<TResult> : DbDataReader
     {
         private readonly IEnumerable<TResult> _items;
         private readonly Dictionary<string, int> _nameToOrdinalMappings;
@@ -35,7 +36,7 @@ namespace BulkWriter.Internal
             }
         }
 
-        public int GetOrdinal(string name)
+        public override int GetOrdinal(string name)
         {
             EnsureNotDisposed();
 
@@ -47,7 +48,7 @@ namespace BulkWriter.Internal
             return ordinal;
         }
 
-        public bool Read()
+        public override bool Read()
         {
             EnsureNotDisposed();
 
@@ -59,7 +60,7 @@ namespace BulkWriter.Internal
             return _enumerator.MoveNext();
         }
 
-        public bool IsDBNull(int i)
+        public override bool IsDBNull(int i)
         {
             EnsureNotDisposed();
 
@@ -67,7 +68,7 @@ namespace BulkWriter.Internal
             return null == value;
         }
 
-        public object GetValue(int i)
+        public override object GetValue(int i)
         {
             EnsureNotDisposed();
 
@@ -82,7 +83,7 @@ namespace BulkWriter.Internal
             return value;
         }
 
-        public string GetName(int i)
+        public override string GetName(int i)
         {
             EnsureNotDisposed();
 
@@ -95,7 +96,7 @@ namespace BulkWriter.Internal
             return name;
         }
 
-        public int FieldCount
+        public override int FieldCount
         {
             get
             {
@@ -104,20 +105,21 @@ namespace BulkWriter.Internal
             }
         }
 
-        public void Dispose()
+
+        protected override void Dispose(bool disposing)
         {
-            if (null != _enumerator)
+            base.Dispose(disposing);
+
+            if (disposing)
             {
-                _enumerator.Dispose();
-                _enumerator = null;
+                if (null != _enumerator)
+                {
+                    _enumerator.Dispose();
+                    _enumerator = null;
+                }
+
+                _disposed = true;
             }
-
-            _disposed = true;
-        }
-
-        public void Close()
-        {
-            Dispose();
         }
 
         private void EnsureNotDisposed()
@@ -130,58 +132,55 @@ namespace BulkWriter.Internal
 
         #region Not used by SqlBulkCopy
 
-        public string GetDataTypeName(int i) => throw new NotSupportedException();
+        public override string GetDataTypeName(int i) => throw new NotSupportedException();
 
-        public Type GetFieldType(int i) => throw new NotSupportedException();
+        public override IEnumerator GetEnumerator() => throw new NotImplementedException();
 
-        public int GetValues(object[] values) => throw new NotSupportedException();
+        public override Type GetFieldType(int i) => throw new NotSupportedException();
 
-        public bool GetBoolean(int i) => throw new NotSupportedException();
+        public override int GetValues(object[] values) => throw new NotSupportedException();
 
-        public byte GetByte(int i) => throw new NotSupportedException();
+        public override bool GetBoolean(int i) => throw new NotSupportedException();
 
-        public long GetBytes(int i, long fieldOffset, byte[] buffer, int bufferoffset, int length) => throw new NotSupportedException();
+        public override byte GetByte(int i) => throw new NotSupportedException();
 
-        public char GetChar(int i) => throw new NotSupportedException();
+        public override long GetBytes(int i, long fieldOffset, byte[] buffer, int bufferoffset, int length) => throw new NotSupportedException();
 
-        public long GetChars(int i, long fieldoffset, char[] buffer, int bufferoffset, int length) => throw new NotSupportedException();
+        public override char GetChar(int i) => throw new NotSupportedException();
 
-        public Guid GetGuid(int i) => throw new NotSupportedException();
+        public override long GetChars(int i, long fieldoffset, char[] buffer, int bufferoffset, int length) => throw new NotSupportedException();
 
-        public short GetInt16(int i) => throw new NotSupportedException();
+        public override Guid GetGuid(int i) => throw new NotSupportedException();
 
-        public int GetInt32(int i) => throw new NotSupportedException();
+        public override short GetInt16(int i) => throw new NotSupportedException();
 
-        public long GetInt64(int i) => throw new NotSupportedException();
+        public override int GetInt32(int i) => throw new NotSupportedException();
 
-        public float GetFloat(int i) => throw new NotSupportedException();
+        public override long GetInt64(int i) => throw new NotSupportedException();
 
-        public double GetDouble(int i) => throw new NotSupportedException();
+        public override float GetFloat(int i) => throw new NotSupportedException();
 
-        public string GetString(int i) => throw new NotSupportedException();
+        public override double GetDouble(int i) => throw new NotSupportedException();
 
-        public decimal GetDecimal(int i) => throw new NotSupportedException();
+        public override string GetString(int i) => throw new NotSupportedException();
 
-        public DateTime GetDateTime(int i) => throw new NotSupportedException();
+        public override decimal GetDecimal(int i) => throw new NotSupportedException();
 
-        public IDataReader GetData(int i) => throw new NotSupportedException();
+        public override DateTime GetDateTime(int i) => throw new NotSupportedException();
 
-        object IDataRecord.this[int i] => throw new NotSupportedException();
+        public override object this[int i] => throw new NotSupportedException();
 
-        object IDataRecord.this[string name] => throw new NotSupportedException();
+        public override object this[string name] => throw new NotSupportedException();
 
-        public DataTable GetSchemaTable() => throw new NotSupportedException();
+        public override bool NextResult() => throw new NotSupportedException();
 
-        public bool NextResult() => throw new NotSupportedException();
+        public override bool HasRows => throw new NotSupportedException();
 
-        [SuppressMessage("Microsoft.Design", "CA1065:DoNotRaiseExceptionsInUnexpectedLocations")]
-        public int Depth => throw new NotSupportedException();
+        public override int Depth => throw new NotSupportedException();
 
-        [SuppressMessage("Microsoft.Design", "CA1065:DoNotRaiseExceptionsInUnexpectedLocations")]
-        public bool IsClosed => throw new NotSupportedException();
+        public override bool IsClosed => throw new NotSupportedException();
 
-        [SuppressMessage("Microsoft.Design", "CA1065:DoNotRaiseExceptionsInUnexpectedLocations")]
-        public int RecordsAffected => throw new NotSupportedException();
+        public override int RecordsAffected => throw new NotSupportedException();
 
         #endregion
     }

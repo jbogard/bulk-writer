@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq.Expressions;
 using System.Reflection;
 using BulkWriter.Properties;
+using static System.Linq.Expressions.Expression;
 
 namespace BulkWriter.Internal
 {
@@ -28,12 +28,12 @@ namespace BulkWriter.Internal
             {
                 if (!CachedGetters.TryGetValue(propertyInfo, out getter))
                 {
-                    var instance = Expression.Parameter(typeof(object), "instance");
-                    var convertedInstance = Expression.Convert(instance, propertyInfo.DeclaringType);
-                    var propertyCall = Expression.Property(convertedInstance, propertyInfo);
-                    var convertedPropertyValue = Expression.Convert(propertyCall, typeof(object));
+                    var instance = Parameter(typeof(object), "instance");
+                    var convertedInstance = Convert(instance, propertyInfo.DeclaringType);
+                    var propertyCall = Property(convertedInstance, propertyInfo);
+                    var convertedPropertyValue = Convert(propertyCall, typeof(object));
 
-                    var lambda = Expression.Lambda<GetPropertyValueHandler>(convertedPropertyValue, instance);
+                    var lambda = Lambda<GetPropertyValueHandler>(convertedPropertyValue, instance);
                     var compiled = lambda.Compile();
 
                     CachedGetters[propertyInfo] = getter = compiled;
