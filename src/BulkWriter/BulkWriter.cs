@@ -20,13 +20,24 @@ namespace BulkWriter
             _propertyMappings = typeof(TResult).BuildMappings();
 
             var hasAnyKeys = _propertyMappings.Any(x => x.Destination.IsKey);
-            var sqlBulkCopyOptions = hasAnyKeys ? SqlBulkCopyOptions.KeepIdentity : SqlBulkCopyOptions.Default;
+            var sqlBulkCopyOptions = (hasAnyKeys ? SqlBulkCopyOptions.KeepIdentity : SqlBulkCopyOptions.Default)
+                | SqlBulkCopyOptions.TableLock;
             var destinationTableName = typeof(TResult).GetTypeInfo().GetCustomAttribute<TableAttribute>()?.Name ?? typeof(TResult).Name;
 
             var sqlBulkCopy = new SqlBulkCopy(connectionString, sqlBulkCopyOptions)
             {
-                DestinationTableName = destinationTableName
+                DestinationTableName = destinationTableName,
+                EnableStreaming = true,
+                BulkCopyTimeout = 0
             };
+            if (BatchSize.HasValue)
+                sqlBulkCopy.BatchSize = BatchSize.Value;
+            if (BulkCopyTimeout.HasValue)
+                sqlBulkCopy.BulkCopyTimeout = BulkCopyTimeout.Value;
+
+            //sqlBulkCopy.BatchSize = BatchSize ?? sqlBulkCopy.BatchSize;
+            //sqlBulkCopy.BulkCopyTimeout = BulkCopyTimeout ?? sqlBulkCopy.BulkCopyTimeout;
+            BulkCopySetup(sqlBulkCopy);
 
             foreach (var propertyMapping in _propertyMappings.Where(propertyMapping => propertyMapping.ShouldMap))
             {
@@ -36,6 +47,10 @@ namespace BulkWriter
             _sqlBulkCopy = sqlBulkCopy;
         }
 
+        public int? BatchSize { get; set; }
+        public int? BulkCopyTimeout { get; set; }
+        public Action<SqlBulkCopy> BulkCopySetup { get; set; } = sbc => {};
+ 
         public void WriteToDatabase(IEnumerable<TResult> items)
         {
             using (var dataReader = new EnumerableDataReader<TResult>(items, _propertyMappings))
@@ -44,11 +59,11 @@ namespace BulkWriter
             }
         }
 
-        public Task WriteToDatabaseAsync(IEnumerable<TResult> items)
+        public async Task WriteToDatabaseAsync(IEnumerable<TResult> items)
         {
             using (var dataReader = new EnumerableDataReader<TResult>(items, _propertyMappings))
             {
-                return _sqlBulkCopy.WriteToServerAsync(dataReader);
+                await _sqlBulkCopy.WriteToServerAsync(dataReader);
             }
         }
 

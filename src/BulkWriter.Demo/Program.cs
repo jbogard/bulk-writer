@@ -1,24 +1,37 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace BulkWriter.Demo
 {
     internal class Program
     {
-        private static void Main(string[] args)
+        private static async Task Main(string[] args)
         {
             SetupDb();
 
-            using (var bulkWriter = new BulkWriter<MyDomainEntity>(@"Data Source=(localdb)\mssqllocaldb;Database=BulkWriter.Demo;Trusted_Connection=True;"))
+            var timer = new Stopwatch();
+            using (var bulkWriter = new BulkWriter<MyDomainEntity>(@"Data Source=.\sqlexpress;Database=BulkWriter.Demo;Trusted_Connection=True;Connection Timeout=300")
+            {
+                BulkCopyTimeout = 0,
+                BatchSize = 10000
+            })
             {
                 var items = GetDomainEntities();
-                bulkWriter.WriteToDatabase(items);
+                timer.Start();
+                await bulkWriter.WriteToDatabaseAsync(items);
+                timer.Stop();
             }
+
+            Console.WriteLine(timer.ElapsedMilliseconds);
+            Console.ReadKey();
         }
 
         private static void SetupDb()
         {
-            using (var sqlConnection = new SqlConnection(@"Data Source=(localdb)\mssqllocaldb;Trusted_Connection=True;"))
+            using (var sqlConnection = new SqlConnection(@"Data Source=.\sqlexpress;Trusted_Connection=True;"))
             {
                 sqlConnection.Open();
                 using (var command = new SqlCommand(
@@ -45,7 +58,7 @@ CREATE DATABASE [BulkWriter.Demo]", sqlConnection))
 
         private static IEnumerable<MyDomainEntity> GetDomainEntities()
         {
-            for (var i = 0; i < 1000; i++)
+            for (var i = 0; i < 10000000; i++)
             {
                 yield return new MyDomainEntity
                 {
@@ -55,5 +68,7 @@ CREATE DATABASE [BulkWriter.Demo]", sqlConnection))
                 };
             }
         }
+
+        
     }
 }

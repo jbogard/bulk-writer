@@ -1,4 +1,5 @@
 ﻿using System.Data.SqlClient;
+using System.Threading.Tasks;
 
 namespace BulkWriter.Tests
 {
@@ -22,6 +23,18 @@ CREATE DATABASE [BulkWriter.Tests]");
                 {
                     sqlConnection.Open();
                     command.ExecuteNonQuery();
+                }
+            }
+        }
+
+        public static async Task<object> ExecuteScalar(string connectionString, string commandText)
+        {
+            using (var sqlConnection = new SqlConnection(connectionString))
+            {
+                using (var command = new SqlCommand(commandText, sqlConnection))
+                {
+                    sqlConnection.Open();
+                    return await command.ExecuteScalarAsync();
                 }
             }
         }
