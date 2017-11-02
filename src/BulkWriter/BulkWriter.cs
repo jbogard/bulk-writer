@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using BulkWriter.Internal;
+using BulkWriter.Properties;
 
 namespace BulkWriter
 {
@@ -15,42 +15,45 @@ namespace BulkWriter
         private readonly SqlBulkCopy _sqlBulkCopy;
         private readonly IEnumerable<PropertyMapping> _propertyMappings;
 
-        public BulkWriter(string connectionString)
+        public BulkWriter(string connectionString, BulkWriterOptions options = null)
         {
+            options = options ?? new BulkWriterOptions();
             _propertyMappings = typeof(TResult).BuildMappings();
 
             var hasAnyKeys = _propertyMappings.Any(x => x.Destination.IsKey);
-            var sqlBulkCopyOptions = (hasAnyKeys ? SqlBulkCopyOptions.KeepIdentity : SqlBulkCopyOptions.Default)
-                | SqlBulkCopyOptions.TableLock;
+            var sqlBulkCopyOptions = (hasAnyKeys ? SqlBulkCopyOptions.KeepIdentity : SqlBulkCopyOptions.Default) | SqlBulkCopyOptions.TableLock;
             var destinationTableName = typeof(TResult).GetTypeInfo().GetCustomAttribute<TableAttribute>()?.Name ?? typeof(TResult).Name;
 
             var sqlBulkCopy = new SqlBulkCopy(connectionString, sqlBulkCopyOptions)
             {
                 DestinationTableName = destinationTableName,
                 EnableStreaming = true,
-                BulkCopyTimeout = 0
             };
-            if (BatchSize.HasValue)
-                sqlBulkCopy.BatchSize = BatchSize.Value;
-            if (BulkCopyTimeout.HasValue)
-                sqlBulkCopy.BulkCopyTimeout = BulkCopyTimeout.Value;
 
-            //sqlBulkCopy.BatchSize = BatchSize ?? sqlBulkCopy.BatchSize;
-            //sqlBulkCopy.BulkCopyTimeout = BulkCopyTimeout ?? sqlBulkCopy.BulkCopyTimeout;
-            BulkCopySetup(sqlBulkCopy);
+            ApplyOptions(options, sqlBulkCopy);
 
             foreach (var propertyMapping in _propertyMappings.Where(propertyMapping => propertyMapping.ShouldMap))
             {
-                sqlBulkCopy.ColumnMappings.Add(new SqlBulkCopyColumnMapping(propertyMapping.Source.Ordinal, propertyMapping.Destination.ColumnOrdinal));
+                sqlBulkCopy.ColumnMappings.Add(propertyMapping.ToColumnMapping());
+            }
+
+            options.BulkCopySetup(sqlBulkCopy);
+
+            if (sqlBulkCopy.ColumnMappings == null /* dispose of SqlBulkCopy will clear this */)
+            {
+                /* consumer called SqlBulkCopy.Close() in setup callback */
+                throw new InvalidOperationException(Resources.BulkWriter_Setup_SqlBulkCopyDisposed);
             }
 
             _sqlBulkCopy = sqlBulkCopy;
         }
 
-        public int? BatchSize { get; set; }
-        public int? BulkCopyTimeout { get; set; }
-        public Action<SqlBulkCopy> BulkCopySetup { get; set; } = sbc => {};
- 
+        private static void ApplyOptions(BulkWriterOptions options, SqlBulkCopy sqlBulkCopy)
+        {
+            sqlBulkCopy.BatchSize = options.BatchSize;
+            sqlBulkCopy.BulkCopyTimeout = options.BulkCopyTimeout;
+        }
+
         public void WriteToDatabase(IEnumerable<TResult> items)
         {
             using (var dataReader = new EnumerableDataReader<TResult>(items, _propertyMappings))
