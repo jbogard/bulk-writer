@@ -162,4 +162,7 @@
   <data name="BulkWriter_Setup_SqlBulkCopyDisposed" xml:space="preserve">
     <value>The setup callback disposed the SqlBulkCopy instance.</value>
   </data>
+  <data name="EnumerableDataReader_GetString_OrdinalDoesNotMapToProperty" xml:space="preserve">
+    <value>The ordinal does not map to property</value>
+  </data>
 </root>

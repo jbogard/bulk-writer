@@ -63,6 +63,35 @@ namespace BulkWriter.Tests
             Assert.Equal(1, count);
         }
 
+        public class MyTestClassForNvarCharMax
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+        }
+
+        [Fact]
+        public async Task Should_Handle_Column_Nvarchar_With_Length_Max()
+        {
+            string tableName = nameof(MyTestClassForNvarCharMax);
+            TestHelpers.ExecuteNonQuery(_connectionString, $"DROP TABLE IF EXISTS [dbo].[{tableName}]");
+            TestHelpers.ExecuteNonQuery(_connectionString,
+                "CREATE TABLE [dbo].[" + tableName + "](" +
+                "[Id] [int] IDENTITY(1,1) NOT NULL," +
+                "[Name] [nvarchar](MAX) NULL," +
+                "CONSTRAINT [PK_" + tableName + "] PRIMARY KEY CLUSTERED ([Id] ASC)" +
+                ")");
+
+            var writer = new BulkWriter<MyTestClassForNvarCharMax>(_connectionString);
+
+            var items = new[] { new MyTestClassForNvarCharMax { Id = 1, Name = "Bob" } };
+
+            writer.WriteToDatabase(items);
+
+            var count = (int)await TestHelpers.ExecuteScalar(_connectionString, $"SELECT COUNT(1) FROM {tableName}");
+
+            Assert.Equal(1, count);
+        }
+
         private string DropCreate(string tableName)
         {
             TestHelpers.ExecuteNonQuery(_connectionString, $"DROP TABLE IF EXISTS [dbo].[{tableName}]");

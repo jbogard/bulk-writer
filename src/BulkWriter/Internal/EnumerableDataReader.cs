@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Data;
 using System.Data.Common;
 using System.Linq;
 using BulkWriter.Properties;
@@ -83,6 +82,21 @@ namespace BulkWriter.Internal
             return value;
         }
 
+        public override string GetString(int i)
+        {
+            EnsureNotDisposed();
+
+            if (!_ordinalToPropertyMappings.TryGetValue(i, out PropertyMapping mapping))
+            {
+                throw new InvalidOperationException(Resources.EnumerableDataReader_GetString_OrdinalDoesNotMapToProperty);
+            }
+
+            var valueGetter = mapping.Source.Property.GetValueGetter();
+
+            var value = valueGetter(_enumerator.Current);
+            return value?.ToString();
+        }
+
         public override string GetName(int i)
         {
             EnsureNotDisposed();
@@ -104,8 +118,7 @@ namespace BulkWriter.Internal
                 return _propertyMappings.Length;
             }
         }
-
-
+        
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
@@ -161,8 +174,6 @@ namespace BulkWriter.Internal
         public override float GetFloat(int i) => throw new NotSupportedException();
 
         public override double GetDouble(int i) => throw new NotSupportedException();
-
-        public override string GetString(int i) => throw new NotSupportedException();
 
         public override decimal GetDecimal(int i) => throw new NotSupportedException();
 

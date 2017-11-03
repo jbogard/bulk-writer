@@ -198,5 +198,16 @@ namespace BulkWriter.Properties {
                 return ResourceManager.GetString("BulkWriter_Setup_SqlBulkCopyDisposed", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to The supplied property is not declared on a type..
+        /// </summary>
+        internal static string EnumerableDataReader_GetString_OrdinalDoesNotMapToProperty
+        {
+            get
+            {
+                return ResourceManager.GetString("EnumerableDataReader_GetString_OrdinalDoesNotMapToProperty", resourceCulture);
+            }
+        }        
     }
 }
