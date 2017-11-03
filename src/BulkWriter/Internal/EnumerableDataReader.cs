@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Data;
 using System.Data.Common;
 using System.Linq;
 using BulkWriter.Properties;
@@ -83,6 +82,44 @@ namespace BulkWriter.Internal
             return value;
         }
 
+        public override string GetString(int i)
+        {
+            EnsureNotDisposed();
+
+            if (!_ordinalToPropertyMappings.TryGetValue(i, out PropertyMapping mapping))
+            {
+                throw new InvalidOperationException(Resources.EnumerableDataReader_GetString_OrdinalDoesNotMapToProperty);
+            }
+
+            var valueGetter = mapping.Source.Property.GetValueGetter();
+
+            var value = valueGetter(_enumerator.Current);
+            return value?.ToString();
+        }
+
+        public override long GetBytes(int i, long fieldOffset, byte[] buffer, int bufferoffset, int length)
+        {
+            EnsureNotDisposed();
+
+            if (!_ordinalToPropertyMappings.TryGetValue(i, out PropertyMapping mapping))
+            {
+                throw new InvalidOperationException(Resources.EnumerableDataReader_GetBytes_OrdinalDoesNotMapToProperty);
+            }
+
+            var valueGetter = mapping.Source.Property.GetValueGetter();
+            var value = valueGetter(_enumerator.Current) as byte[];
+
+            if (value != null)
+            {
+                var pos = Math.Max(fieldOffset, fieldOffset / buffer.Length * buffer.Length);
+                var rest = value.Length - pos;
+                var count = Math.Min(rest, buffer.Length);
+                Array.Copy(value, (int)pos, buffer, 0, (int)count);
+                return count;
+            }
+            return 0;
+        }
+
         public override string GetName(int i)
         {
             EnsureNotDisposed();
@@ -104,7 +141,6 @@ namespace BulkWriter.Internal
                 return _propertyMappings.Length;
             }
         }
-
 
         protected override void Dispose(bool disposing)
         {
@@ -144,8 +180,6 @@ namespace BulkWriter.Internal
 
         public override byte GetByte(int i) => throw new NotSupportedException();
 
-        public override long GetBytes(int i, long fieldOffset, byte[] buffer, int bufferoffset, int length) => throw new NotSupportedException();
-
         public override char GetChar(int i) => throw new NotSupportedException();
 
         public override long GetChars(int i, long fieldoffset, char[] buffer, int bufferoffset, int length) => throw new NotSupportedException();
@@ -161,8 +195,6 @@ namespace BulkWriter.Internal
         public override float GetFloat(int i) => throw new NotSupportedException();
 
         public override double GetDouble(int i) => throw new NotSupportedException();
-
-        public override string GetString(int i) => throw new NotSupportedException();
 
         public override decimal GetDecimal(int i) => throw new NotSupportedException();
 
