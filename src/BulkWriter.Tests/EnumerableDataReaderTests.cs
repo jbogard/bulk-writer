@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using BulkWriter.Internal;
 using Xunit;
@@ -15,10 +16,14 @@ namespace BulkWriter.Tests
 
         private readonly IEnumerable<MyTestClass> _enumerable;
         private readonly EnumerableDataReader<MyTestClass> _dataReader;
+
+        private readonly IEnumerable<MyCustomOrdinalsTestClass> _customOrdinalsEnumerable;
+        private readonly EnumerableDataReader<MyCustomOrdinalsTestClass> _customOrdinalsDataReader;
         
         public EnumerableDataReaderTests()
         {
             _enumerable = new[] { new MyTestClass() };
+            _customOrdinalsEnumerable = new[] { new MyCustomOrdinalsTestClass() };
 
             TestHelpers.ExecuteNonQuery(_connectionString, $"DROP TABLE IF EXISTS [dbo].[{_tableName}]");
 
@@ -33,6 +38,11 @@ namespace BulkWriter.Tests
 
             _dataReader = new EnumerableDataReader<MyTestClass>(_enumerable, propertyMappings);
             _dataReader.Read();
+
+
+            var customOrdinalPropertyMappings = typeof(MyCustomOrdinalsTestClass).BuildMappings();
+            _customOrdinalsDataReader = new EnumerableDataReader<MyCustomOrdinalsTestClass>(_customOrdinalsEnumerable, customOrdinalPropertyMappings);
+            _customOrdinalsDataReader.Read();
         }
 
         public void Dispose()
@@ -50,6 +60,7 @@ namespace BulkWriter.Tests
         public void GetOrdinal_Returns_Correct_Value()
         {
             Assert.Equal(0, _dataReader.GetOrdinal("Id"));
+            Assert.Equal(1, _dataReader.GetOrdinal("Name"));
         }
 
         [Fact]
@@ -81,12 +92,37 @@ namespace BulkWriter.Tests
         {
             Assert.Equal(2, _dataReader.FieldCount);
         }
-        
+
+
+        [Fact]
+        public void CustomOrdrinals_GetOrdinal_Returns_Correct_Value()
+        {
+            Assert.Equal(0, _customOrdinalsDataReader.GetOrdinal("Id"));
+            Assert.Equal(1, _customOrdinalsDataReader.GetOrdinal("MiddleName"));
+            Assert.Equal(2, _customOrdinalsDataReader.GetOrdinal("LastName"));
+            Assert.Equal(3, _customOrdinalsDataReader.GetOrdinal("FirstName"));
+        }
+
         public class MyTestClass
         {
             public int Id { get; set; }
 
             public string Name { get; set; }
+        }
+
+        public class MyCustomOrdinalsTestClass
+        {
+            [Column(Order = 0)]
+            public int Id { get; set; }
+
+            [Column(Order = 3)]
+            public string FirstName { get; set; }
+
+            [Column(Order = 1)]
+            public string MiddleName { get; set; }
+
+            [Column(Order = 2)]
+            public string LastName { get; set; }
         }
     }
 }

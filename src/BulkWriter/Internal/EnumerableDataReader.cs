@@ -21,10 +21,10 @@ namespace BulkWriter.Internal
         public EnumerableDataReader(IEnumerable<TResult> items, IEnumerable<PropertyMapping> propertyMappings)
         {
             _items = items ?? throw new ArgumentNullException(nameof(items));
-            _propertyMappings = propertyMappings?.OrderBy(x => x.Source.Ordinal).ToArray() ?? throw new ArgumentNullException(nameof(propertyMappings));
+            _propertyMappings = propertyMappings?.OrderBy(x => x.Destination.ColumnOrdinal).ToArray() ?? throw new ArgumentNullException(nameof(propertyMappings));
 
-            _ordinalToPropertyMappings = _propertyMappings.ToDictionary(x => x.Source.Ordinal);
-            _nameToOrdinalMappings = _propertyMappings.ToDictionary(x => x.Source.Property.Name, x => x.Source.Ordinal);
+            _ordinalToPropertyMappings = _propertyMappings.ToDictionary(x => x.Destination.ColumnOrdinal);
+            _nameToOrdinalMappings = _propertyMappings.ToDictionary(x => x.Source.Property.Name, x => x.Destination.ColumnOrdinal);
         }
 
         public TResult Current
