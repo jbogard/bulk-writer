@@ -16,7 +16,7 @@ namespace BulkWriter.Internal
                     Property = pi,
                     Ordinal = i
                 },
-                ShouldMap = pi.GetCustomAttribute<NotMappedAttribute>() != null,
+                ShouldMap = pi.GetCustomAttribute<NotMappedAttribute>() == null,
                 Destination = new MappingDestination
                 {
                     ColumnName = pi.GetCustomAttribute<ColumnAttribute>()?.Name ?? pi.Name,
