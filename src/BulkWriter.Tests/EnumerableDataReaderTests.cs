@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using BulkWriter.Internal;
 using Xunit;
 
@@ -26,6 +27,7 @@ namespace BulkWriter.Tests
                 "CREATE TABLE [dbo].[" + _tableName + "](" +
                 "[Id] [int] IDENTITY(1,1) NOT NULL," +
                 "[Name] [nvarchar](50) NULL," +
+                "[Data] [varbinary](max) NULL," +
                 "CONSTRAINT [PK_" + _tableName + "] PRIMARY KEY CLUSTERED ([Id] ASC)" +
                 ")");
 
@@ -70,6 +72,24 @@ namespace BulkWriter.Tests
         }
 
         [Fact]
+        public void GetBytes_Returns_Correct_Value()
+        {
+            var inputBytes = Encoding.UTF8.GetBytes("Michael");
+
+            var element = _enumerable.ElementAt(0);
+            element.Id = 419;
+            element.Data = inputBytes;
+
+            var buffer = new byte[128];
+            const int fieldOffset = 0;
+            const int bufferOffset = 10;
+            var bytesRead = _dataReader.GetBytes(2, fieldOffset, buffer, bufferOffset, buffer.Length - bufferOffset);
+
+            Assert.Equal(bytesRead, inputBytes.Length);
+            Assert.Equal("Michael", Encoding.UTF8.GetString(buffer, bufferOffset, (int) bytesRead));
+        }
+
+        [Fact]
         public void GetName_Returns_Correct_Value()
         {
             Assert.Equal("Id", _dataReader.GetName(0));
@@ -79,14 +99,16 @@ namespace BulkWriter.Tests
         [Fact]
         public void FieldCount_Returns_Correct_Value()
         {
-            Assert.Equal(2, _dataReader.FieldCount);
+            Assert.Equal(3, _dataReader.FieldCount);
         }
-        
+
         public class MyTestClass
         {
             public int Id { get; set; }
 
             public string Name { get; set; }
+
+            public byte[] Data { get; set; }
         }
     }
 }
