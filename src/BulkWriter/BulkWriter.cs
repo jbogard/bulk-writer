@@ -22,7 +22,11 @@ namespace BulkWriter
             var hasAnyKeys = _propertyMappings.Any(x => x.Destination.IsKey);
             var sqlBulkCopyOptions = (hasAnyKeys ? SqlBulkCopyOptions.KeepIdentity : SqlBulkCopyOptions.Default)
                 | SqlBulkCopyOptions.TableLock;
-            var destinationTableName = typeof(TResult).GetTypeInfo().GetCustomAttribute<TableAttribute>()?.Name ?? typeof(TResult).Name;
+
+            var tableAttribute = typeof(TResult).GetTypeInfo().GetCustomAttribute<TableAttribute>();
+            var schemaName = tableAttribute?.Schema;
+            var tableName = tableAttribute?.Name ?? typeof(TResult).Name;
+            var destinationTableName = schemaName != null ? $"{schemaName}.{tableName}" : tableName;
 
             var sqlBulkCopy = new SqlBulkCopy(connectionString, sqlBulkCopyOptions)
             {
