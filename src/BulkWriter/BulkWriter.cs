@@ -37,12 +37,11 @@ namespace BulkWriter
             var tableName = tableAttribute?.Name ?? typeof(TResult).Name;
             var destinationTableName = schemaName != null ? $"{schemaName}.{tableName}" : tableName;
 
-            var sqlBulkCopy = new SqlBulkCopy(connectionString, sqlBulkCopyOptions)
-            {
-                DestinationTableName = destinationTableName,
-                EnableStreaming = true,
-                BulkCopyTimeout = 0
-            };
+            var sqlBulkCopy = createBulkCopy(sqlBulkCopyOptions);
+
+            sqlBulkCopy.DestinationTableName = destinationTableName;
+            sqlBulkCopy.EnableStreaming = true;
+            sqlBulkCopy.BulkCopyTimeout = 0;
 
             foreach (var propertyMapping in _propertyMappings.Where(propertyMapping => propertyMapping.ShouldMap))
             {
