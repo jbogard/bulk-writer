@@ -83,6 +83,25 @@ namespace BulkWriter.Internal
             return value;
         }
 
+        public override long GetBytes(int i, long fieldOffset, byte[] buffer, int bufferoffset, int length)
+        {
+            EnsureNotDisposed();
+
+            if (!_ordinalToPropertyMappings.TryGetValue(i, out PropertyMapping mapping))
+            {
+                throw new InvalidOperationException(Resources.EnumerableDataReader_GetValue_OrdinalDoesNotMapToProperty);
+            }
+
+            var valueGetter = mapping.Source.Property.GetValueGetter();
+
+            var value = (byte[])valueGetter(_enumerator.Current);
+            var count = Math.Min(length, value.Length - (int)fieldOffset);
+
+            Buffer.BlockCopy(value, (int)fieldOffset, buffer, bufferoffset, count);
+
+            return count;
+        }
+
         public override string GetName(int i)
         {
             EnsureNotDisposed();
@@ -143,8 +162,6 @@ namespace BulkWriter.Internal
         public override bool GetBoolean(int i) => throw new NotSupportedException();
 
         public override byte GetByte(int i) => throw new NotSupportedException();
-
-        public override long GetBytes(int i, long fieldOffset, byte[] buffer, int bufferoffset, int length) => throw new NotSupportedException();
 
         public override char GetChar(int i) => throw new NotSupportedException();
 
