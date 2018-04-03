@@ -31,11 +31,16 @@ CREATE DATABASE [BulkWriter.Tests]");
         {
             using (var sqlConnection = new SqlConnection(connectionString))
             {
-                using (var command = new SqlCommand(commandText, sqlConnection))
-                {
-                    sqlConnection.Open();
-                    return await command.ExecuteScalarAsync();
-                }
+                await sqlConnection.OpenAsync();
+                return await ExecuteScalar(sqlConnection, commandText);
+            }
+        }
+
+        public static async Task<object> ExecuteScalar(SqlConnection sqlConnection, string commandText, SqlTransaction transaction = null)
+        {
+            using (var command = new SqlCommand(commandText, sqlConnection, transaction))
+            {
+                return await command.ExecuteScalarAsync();
             }
         }
 

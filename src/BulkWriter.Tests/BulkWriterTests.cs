@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Data.SqlClient;
+using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -40,6 +41,56 @@ namespace BulkWriter.Tests
             var count = (int) await TestHelpers.ExecuteScalar(_connectionString, $"SELECT COUNT(1) FROM {_tableName}");
 
             Assert.Equal(1000, count);
+        }
+
+        [Fact]
+        public async Task CanWriteSyncWithExistingConnection()
+        {
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                await connection.OpenAsync();
+
+                var writer = new BulkWriter<BulkWriterTestsMyTestClass>(connection);
+
+                var items = Enumerable.Range(1, 1000)
+                    .Select(i => new BulkWriterTestsMyTestClass {Id = i, Name = "Bob"});
+
+                writer.WriteToDatabase(items);
+
+                var count = (int) await TestHelpers.ExecuteScalar(connection, $"SELECT COUNT(1) FROM {_tableName}");
+
+                Assert.Equal(1000, count);
+            }
+        }
+
+        [Fact]
+        public async Task CanWriteSyncWithExistingConnectionAndTransaction()
+        {
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                await connection.OpenAsync();
+
+                using (var transaction = connection.BeginTransaction())
+                {
+
+                    var writer = new BulkWriter<BulkWriterTestsMyTestClass>(connection, transaction);
+
+                    var items = Enumerable.Range(1, 1000)
+                        .Select(i => new BulkWriterTestsMyTestClass {Id = i, Name = "Bob"});
+
+                    writer.WriteToDatabase(items);
+
+                    var count = (int) await TestHelpers.ExecuteScalar(connection, $"SELECT COUNT(1) FROM {_tableName}", transaction);
+
+                    Assert.Equal(1000, count);
+
+                    transaction.Rollback();
+
+                    count = (int)await TestHelpers.ExecuteScalar(connection, $"SELECT COUNT(1) FROM {_tableName}");
+
+                    Assert.Equal(0, count);
+                }
+            }
         }
     }
 }
