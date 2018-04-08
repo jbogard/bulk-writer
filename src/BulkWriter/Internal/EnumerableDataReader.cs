@@ -97,29 +97,6 @@ namespace BulkWriter.Internal
             return value?.ToString();
         }
 
-        public override long GetBytes(int i, long fieldOffset, byte[] buffer, int bufferoffset, int length)
-        {
-            EnsureNotDisposed();
-
-            if (!_ordinalToPropertyMappings.TryGetValue(i, out PropertyMapping mapping))
-            {
-                throw new InvalidOperationException(Resources.EnumerableDataReader_GetBytes_OrdinalDoesNotMapToProperty);
-            }
-
-            var valueGetter = mapping.Source.Property.GetValueGetter();
-            var value = valueGetter(_enumerator.Current) as byte[];
-
-            if (value != null)
-            {
-                var pos = Math.Max(fieldOffset, fieldOffset / buffer.Length * buffer.Length);
-                var rest = value.Length - pos;
-                var count = Math.Min(rest, buffer.Length);
-                Array.Copy(value, (int)pos, buffer, 0, (int)count);
-                return count;
-            }
-            return 0;
-        }
-
         public override string GetName(int i)
         {
             EnsureNotDisposed();
@@ -141,7 +118,7 @@ namespace BulkWriter.Internal
                 return _propertyMappings.Length;
             }
         }
-
+        
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
@@ -179,6 +156,8 @@ namespace BulkWriter.Internal
         public override bool GetBoolean(int i) => throw new NotSupportedException();
 
         public override byte GetByte(int i) => throw new NotSupportedException();
+
+        public override long GetBytes(int i, long fieldOffset, byte[] buffer, int bufferoffset, int length) => throw new NotSupportedException();
 
         public override char GetChar(int i) => throw new NotSupportedException();
 
