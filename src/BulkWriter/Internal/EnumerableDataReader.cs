@@ -82,6 +82,21 @@ namespace BulkWriter.Internal
             return value;
         }
 
+        public override string GetString(int i)
+        {
+            EnsureNotDisposed();
+
+            if (!_ordinalToPropertyMappings.TryGetValue(i, out PropertyMapping mapping))
+            {
+                throw new InvalidOperationException(Resources.EnumerableDataReader_GetString_OrdinalDoesNotMapToProperty);
+            }
+
+            var valueGetter = mapping.Source.Property.GetValueGetter();
+
+            var value = valueGetter(_enumerator.Current);
+            return value?.ToString();
+        }
+
         public override long GetBytes(int i, long fieldOffset, byte[] buffer, int bufferoffset, int length)
         {
             EnsureNotDisposed();
@@ -180,8 +195,6 @@ namespace BulkWriter.Internal
         public override float GetFloat(int i) => throw new NotSupportedException();
 
         public override double GetDouble(int i) => throw new NotSupportedException();
-
-        public override string GetString(int i) => throw new NotSupportedException();
 
         public override decimal GetDecimal(int i) => throw new NotSupportedException();
 
