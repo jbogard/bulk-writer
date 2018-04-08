@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
@@ -89,6 +90,37 @@ namespace BulkWriter.Tests
 
             var count = (int)await TestHelpers.ExecuteScalar(_connectionString, $"SELECT COUNT(1) FROM {tableName}");
 
+            Assert.Equal(1, count);
+        }
+
+        public class MyTestClassForVarBinary
+        {
+            public int Id { get; set; }
+            public byte[] Data { get; set; }
+        }
+
+        [Fact]
+        public async Task Should_Handle_Column_VarBinary_Large()
+        {
+            string tableName = nameof(MyTestClassForVarBinary);
+
+            TestHelpers.ExecuteNonQuery(_connectionString, $"DROP TABLE IF EXISTS [dbo].[{tableName}]");
+            TestHelpers.ExecuteNonQuery(_connectionString,
+                "CREATE TABLE [dbo].[" + tableName + "](" +
+                "[Id] [int] IDENTITY(1,1) NOT NULL," +
+                "[Data] [varbinary](MAX) NULL," +
+                "CONSTRAINT [PK_" + tableName + "] PRIMARY KEY CLUSTERED ([Id] ASC)" +
+                ")");
+
+            var writer = new BulkWriter<MyTestClassForVarBinary>(_connectionString);
+            var items = new[] { new MyTestClassForVarBinary { Id = 1, Data = new byte[1024 * 1024 * 1] } };
+            new Random().NextBytes(items.First().Data);
+
+            writer.WriteToDatabase(items);
+
+            var count = (int)await TestHelpers.ExecuteScalar(_connectionString, $"SELECT COUNT(1) FROM {tableName}");
+            var data = (byte[])await TestHelpers.ExecuteScalar(_connectionString, $"SELECT TOP 1 Data FROM {tableName}");
+            Assert.Equal(items.First().Data, data);
             Assert.Equal(1, count);
         }
 
