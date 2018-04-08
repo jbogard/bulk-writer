@@ -7,7 +7,6 @@ using Xunit;
 
 namespace BulkWriter.Tests
 {
-    
     public class EnumerableDataReaderTests : IDisposable
     {
         private readonly string _connectionString = TestHelpers.ConnectionString;
@@ -16,7 +15,7 @@ namespace BulkWriter.Tests
 
         private readonly IEnumerable<MyTestClass> _enumerable;
         private readonly EnumerableDataReader<MyTestClass> _dataReader;
-        
+
         public EnumerableDataReaderTests()
         {
             _enumerable = new[] { new MyTestClass() };
@@ -86,7 +85,108 @@ namespace BulkWriter.Tests
             var bytesRead = _dataReader.GetBytes(2, fieldOffset, buffer, bufferOffset, buffer.Length - bufferOffset);
 
             Assert.Equal(bytesRead, inputBytes.Length);
-            Assert.Equal("Michael", Encoding.UTF8.GetString(buffer, bufferOffset, (int) bytesRead));
+            Assert.Equal("Michael", Encoding.UTF8.GetString(buffer, bufferOffset, (int)bytesRead));
+        }
+
+        [Fact]
+        public void GetBytes_Returns_Correct_Value_Equal_Buffer()
+        {
+            var element = _enumerable.ElementAt(0);
+            element.Data = new byte[16];
+            new Random().NextBytes(element.Data);
+
+            var buffer = new byte[16];
+            var count = _dataReader.GetBytes(2, 0, buffer, 0, 0);
+
+            Assert.Equal(16, count);
+            Assert.Equal(element.Data, buffer);
+        }
+
+        [Fact]
+        public void GetBytes_Returns_Correct_Value_Less_Than_Buffer()
+        {
+            var element = _enumerable.ElementAt(0);
+            element.Data = new byte[16];
+            new Random().NextBytes(element.Data);
+
+            var buffer = new byte[32];
+            var count = _dataReader.GetBytes(2, 0, buffer, 0, 0);
+
+            Assert.Equal(16, count);
+            Assert.Equal(element.Data, buffer.Take(16));
+            Assert.True(buffer.Skip(16).Take(16).All(b => b == 0));
+        }
+
+        [Fact]
+        public void GetBytes_Returns_Correct_Value_Greater_Than_Buffer_Partial_Page()
+        {
+            var element = _enumerable.ElementAt(0);
+            element.Data = new byte[24];
+            new Random().NextBytes(element.Data);
+
+            var buffer = new byte[16];
+            var result = new byte[24];
+            var count = ByteReadHelper(2, buffer, result);
+
+            Assert.Equal(24, count);
+            Assert.Equal(element.Data, result);
+        }
+
+        [Fact]
+        public void GetBytes_Returns_Correct_Value_Greater_Than_Buffer_Multiple_Full_Pages()
+        {
+            var element = _enumerable.ElementAt(0);
+            element.Data = new byte[16 * 3];
+            new Random().NextBytes(element.Data);
+
+            var buffer = new byte[16];
+            var result = new byte[16 * 3];
+            var count = ByteReadHelper(2, buffer, result);
+
+            Assert.Equal(16 * 3, count);
+            Assert.Equal(element.Data, result);
+        }
+
+        [Fact]
+        public void GetBytes_Returns_Correct_Value_Empty()
+        {
+            var element = _enumerable.ElementAt(0);
+            element.Data = new byte[0];
+            new Random().NextBytes(element.Data);
+
+            var buffer = new byte[16];
+            var result = new byte[0];
+            var count = ByteReadHelper(2, buffer, result);
+
+            Assert.Equal(0, count);
+            Assert.Equal(element.Data, result);
+        }
+
+        [Fact]
+        public void GetBytes_Returns_Correct_Value_Default_BulkCopy_Buffer()
+        {
+            var element = _enumerable.ElementAt(0);
+            element.Data = Guid.NewGuid().ToByteArray();
+
+            var buffer = new byte[4096];
+            var result = new byte[element.Data.Length];
+            var count = ByteReadHelper(2, buffer, result);
+
+            Assert.Equal(element.Data.Length, count);
+            Assert.Equal(element.Data, result);
+        }
+
+        private long ByteReadHelper(int ordinal, byte[] buffer, byte[] result)
+        {
+            long count;
+            long offset = 0;
+            do
+            {
+                count = _dataReader.GetBytes(ordinal, offset, buffer, 0, 0);
+                Array.Copy(buffer, 0, result, offset, count);
+                offset += count;
+            } while (count == buffer.Length);
+            return offset;
         }
 
         [Fact]

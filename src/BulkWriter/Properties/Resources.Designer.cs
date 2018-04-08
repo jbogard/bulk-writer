@@ -187,5 +187,16 @@ namespace BulkWriter.Properties {
                 return ResourceManager.GetString("PropertyInfoExtensions_PropertyNotDeclaredOnType", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to The supplied property is not declared on a type..
+        /// </summary>
+        internal static string EnumerableDataReader_GetBytes_OrdinalDoesNotMapToProperty
+        {
+            get
+            {
+                return ResourceManager.GetString("EnumerableDataReader_GetBytes_OrdinalDoesNotMapToProperty", resourceCulture);
+            }
+        }
     }
 }

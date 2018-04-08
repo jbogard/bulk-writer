@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Data;
 using System.Data.Common;
 using System.Linq;
 using BulkWriter.Properties;
@@ -89,17 +88,20 @@ namespace BulkWriter.Internal
 
             if (!_ordinalToPropertyMappings.TryGetValue(i, out PropertyMapping mapping))
             {
-                throw new InvalidOperationException(Resources.EnumerableDataReader_GetValue_OrdinalDoesNotMapToProperty);
+                throw new InvalidOperationException(Resources.EnumerableDataReader_GetBytes_OrdinalDoesNotMapToProperty);
             }
 
             var valueGetter = mapping.Source.Property.GetValueGetter();
+            if (valueGetter(_enumerator.Current) is byte[] value)
+            {
+                var pos = Math.Max(fieldOffset, fieldOffset / buffer.Length * buffer.Length);
+                var rest = value.Length - pos;
+                var count = Math.Min(rest, buffer.Length);
+                Buffer.BlockCopy(value, (int)fieldOffset, buffer, bufferoffset, (int)count);
+                return count;
+            }
 
-            var value = (byte[])valueGetter(_enumerator.Current);
-            var count = Math.Min(length, value.Length - (int)fieldOffset);
-
-            Buffer.BlockCopy(value, (int)fieldOffset, buffer, bufferoffset, count);
-
-            return count;
+            return 0;
         }
 
         public override string GetName(int i)
