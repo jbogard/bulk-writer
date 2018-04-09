@@ -183,7 +183,7 @@ namespace BulkWriter.Tests
             do
             {
                 count = _dataReader.GetBytes(ordinal, offset, buffer, 0, 0);
-                Array.Copy(buffer, 0, result, offset, count);
+                Buffer.BlockCopy(buffer, 0, result, (int)offset, (int)count);
                 offset += count;
             } while (count == buffer.Length);
             return offset;
