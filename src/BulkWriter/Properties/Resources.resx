@@ -160,9 +160,9 @@
     <value>The supplied property is not declared on a type.</value>
   </data>
   <data name="EnumerableDataReader_GetBytes_OrdinalDoesNotMapToProperty" xml:space="preserve">
-    <value>The ordinal does not map to property</value>
+    <value>The ordinal does not map to property.</value>
   </data>
   <data name="EnumerableDataReader_GetString_OrdinalDoesNotMapToProperty" xml:space="preserve">
-    <value>The ordinal does not map to property</value>
+    <value>The ordinal does not map to property.</value>
   </data>
 </root>
