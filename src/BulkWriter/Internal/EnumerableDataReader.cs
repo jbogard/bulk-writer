@@ -23,8 +23,12 @@ namespace BulkWriter.Internal
             _items = items ?? throw new ArgumentNullException(nameof(items));
             _propertyMappings = propertyMappings?.OrderBy(x => x.Source.Ordinal).ToArray() ?? throw new ArgumentNullException(nameof(propertyMappings));
 
+            // Map the source entity's positional ordinals to the source/destination property mapping.
             _ordinalToPropertyMappings = _propertyMappings.ToDictionary(x => x.Source.Ordinal);
-            _nameToOrdinalMappings = _propertyMappings.ToDictionary(x => x.Source.Property.Name, x => x.Source.Ordinal);
+
+            // Map the destination table's ordinals to the source/destination property mapping,
+            //   using the source property's name as the key.
+            _nameToOrdinalMappings = _propertyMappings.ToDictionary(x => x.Source.Property.Name, x => x.Destination.ColumnOrdinal);
         }
 
         public TResult Current
