@@ -52,11 +52,7 @@ namespace BulkWriter.Tests
             //   seems to create the columns by ordering the property names alphabetically).
             //
 
-            
-            
-            
-            
-            = new[] { new MyCustomOrderTestClass() };
+            _customOrderEnumerable = new[] { new MyCustomOrderTestClass() };
 
             TestHelpers.ExecuteNonQuery(_connectionString, $"DROP TABLE IF EXISTS [dbo].[{_customOrderTableName}]");
 
