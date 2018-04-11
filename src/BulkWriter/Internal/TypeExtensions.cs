@@ -8,24 +8,56 @@ namespace BulkWriter.Internal
 {
     public static class TypeExtensions
     {
-        public static PropertyMapping[] BuildMappings(this Type type) => type.GetRuntimeProperties()
-            .Select((pi, i) => new PropertyMapping
+        public static PropertyMapping[] BuildMappings(this Type type) =>
+           type.GetRuntimeProperties()
+             .Select((pi, i) =>
+             {
+                 var destinationParam = new DestinationParams(pi, i);
+
+                 return new PropertyMapping
+                 {
+                     Source = new MappingSource
+                     {
+                         Property = pi,
+                         Ordinal = i
+                     },
+                     ShouldMap = pi.GetCustomAttribute<NotMappedAttribute>() == null,
+                     Destination = new MappingDestination
+                     {
+                         ColumnName = destinationParam.ColumnName,
+                         ColumnOrdinal = destinationParam.ColumnOrdinal,
+                         ColumnSize = destinationParam.ColumnSize,
+                         DataTypeName = destinationParam.DataTypeName,
+                         IsKey = destinationParam.IsKey
+                     }
+                 };
+             })
+             .ToArray();
+
+        internal class DestinationParams
+        {
+            public DestinationParams(MemberInfo pi, int index)
             {
-                Source = new MappingSource
+                ColumnOrdinal = index;
+                ColumnName = pi.Name;
+                ColumnSize = pi.GetCustomAttribute<MaxLengthAttribute>()?.Length ?? 0;
+                IsKey = pi.GetCustomAttribute<KeyAttribute>() != null;
+
+                var columnAttribute = pi.GetCustomAttribute<ColumnAttribute>();
+
+                if (columnAttribute != null)
                 {
-                    Property = pi,
-                    Ordinal = i
-                },
-                ShouldMap = pi.GetCustomAttribute<NotMappedAttribute>() == null,
-                Destination = new MappingDestination
-                {
-                    ColumnName = pi.GetCustomAttribute<ColumnAttribute>()?.Name ?? pi.Name,
-                    ColumnOrdinal = pi.GetCustomAttribute<ColumnAttribute>()?.Order ?? i,
-                    ColumnSize = pi.GetCustomAttribute<MaxLengthAttribute>()?.Length ?? 0,
-                    DataTypeName = pi.GetCustomAttribute<ColumnAttribute>()?.TypeName,
-                    IsKey = pi.GetCustomAttribute<KeyAttribute>() != null
+                    ColumnOrdinal = columnAttribute.Order > -1 ? columnAttribute.Order : ColumnOrdinal;
+                    ColumnName = !string.IsNullOrWhiteSpace(columnAttribute.Name) ? columnAttribute.Name : ColumnName;
+                    DataTypeName = columnAttribute.TypeName;
                 }
-            })
-            .ToArray();
+            }
+
+            public string ColumnName { get; }
+            public int ColumnOrdinal { get; }
+            public int ColumnSize { get; }
+            public string DataTypeName { get; }
+            public bool IsKey { get; }
+        }
     }
 }

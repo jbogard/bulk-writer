@@ -45,7 +45,7 @@ namespace BulkWriter
 
             foreach (var propertyMapping in _propertyMappings.Where(propertyMapping => propertyMapping.ShouldMap))
             {
-                sqlBulkCopy.ColumnMappings.Add(new SqlBulkCopyColumnMapping(propertyMapping.Source.Ordinal, propertyMapping.Destination.ColumnOrdinal));
+                sqlBulkCopy.ColumnMappings.Add(propertyMapping.ToColumnMapping());
             }
 
             return sqlBulkCopy;
