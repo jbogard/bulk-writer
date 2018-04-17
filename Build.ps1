@@ -24,6 +24,8 @@ function Exec
 
 if(Test-Path .\artifacts) { Remove-Item .\artifacts -Force -Recurse }
 
+exec { & dotnet --info }
+
 exec { & dotnet restore }
 
 $tag = $(git tag -l --points-at HEAD)
