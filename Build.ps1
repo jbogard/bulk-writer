@@ -42,7 +42,7 @@ exec { & dotnet build BulkWriter.sln -c Release --version-suffix=$buildSuffix -v
 
 Push-Location -Path .\src\BulkWriter.Tests
 
-exec { & dotnet xunit -configuration Release }
+exec { & dotnet test --configuration Release }
 
 Pop-Location
 
