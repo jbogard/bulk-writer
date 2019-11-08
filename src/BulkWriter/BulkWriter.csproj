@@ -8,13 +8,17 @@
     <AssemblyName>BulkWriter</AssemblyName>
     <PackageId>BulkWriter</PackageId>
     <PackageProjectUrl>https://github.com/HeadspringLabs/bulk-writer</PackageProjectUrl>
-    <PackageLicenseUrl>https://github.com/HeadspringLabs/bulk-writer/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>git://github.com/HeadspringLabs/bulk-writer</RepositoryUrl>
-    <PackageIconUrl>https://github.com/HeadspringLabs/bulk-writer/raw/master/logo.png</PackageIconUrl>
+    <PackageIcon>logo.png</PackageIcon>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="System.ComponentModel.Annotations" Version="4.6.0" />
     <PackageReference Include="System.Data.SqlClient" Version="4.7.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\logo.png" Pack="true" PackagePath="\"/>
+    <None Include="..\..\LICENSE" Pack="true" PackagePath=""/>
   </ItemGroup>
 </Project>
