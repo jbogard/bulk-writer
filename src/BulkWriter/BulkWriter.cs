@@ -17,20 +17,41 @@ namespace BulkWriter
         public BulkWriter(string connectionString)
         {
             _propertyMappings = typeof(TResult).BuildMappings();
-            _sqlBulkCopy = Initialize(options => new SqlBulkCopy(connectionString, options));
+            _sqlBulkCopy = Initialize(options => new SqlBulkCopy(connectionString, options), null);
+        }
+
+        public BulkWriter(string connectionString, SqlBulkCopyOptions options)
+        {
+            _propertyMappings = typeof(TResult).BuildMappings();
+            _sqlBulkCopy = Initialize(sbcOpts => new SqlBulkCopy(connectionString, sbcOpts), options);
         }
 
         public BulkWriter(SqlConnection connection, SqlTransaction transaction = null)
         {
             _propertyMappings = typeof(TResult).BuildMappings();
-            _sqlBulkCopy = Initialize(options => new SqlBulkCopy(connection, options, transaction));
+            _sqlBulkCopy = Initialize(options => new SqlBulkCopy(connection, options, transaction), null);
         }
 
-        private SqlBulkCopy Initialize(Func<SqlBulkCopyOptions, SqlBulkCopy> createBulkCopy)
+        public BulkWriter(SqlConnection connection, SqlBulkCopyOptions options, SqlTransaction transaction = null)
         {
-            var hasAnyKeys = _propertyMappings.Any(x => x.Destination.IsKey);
-            var sqlBulkCopyOptions = (hasAnyKeys ? SqlBulkCopyOptions.KeepIdentity : SqlBulkCopyOptions.Default)
-                | SqlBulkCopyOptions.TableLock;
+            _propertyMappings = typeof(TResult).BuildMappings();
+            _sqlBulkCopy = Initialize(sbcOpts => new SqlBulkCopy(connection, sbcOpts, transaction), options);
+        }
+
+        private SqlBulkCopy Initialize(Func<SqlBulkCopyOptions, SqlBulkCopy> createBulkCopy, SqlBulkCopyOptions? options)
+        {
+            SqlBulkCopyOptions sqlBulkCopyOptions;
+
+            if (options == null)
+            {
+                var hasAnyKeys = _propertyMappings.Any(x => x.Destination.IsKey);
+                sqlBulkCopyOptions = (hasAnyKeys ? SqlBulkCopyOptions.KeepIdentity : SqlBulkCopyOptions.Default)
+                                     | SqlBulkCopyOptions.TableLock;
+            }
+            else
+            {
+                sqlBulkCopyOptions = options.Value;
+            }
 
             var tableAttribute = typeof(TResult).GetTypeInfo().GetCustomAttribute<TableAttribute>();
             var schemaName = tableAttribute?.Schema;
