@@ -109,3 +109,8 @@ UpgradeLog*.XML
 
 *.nupkg
 .vs
+
+# GitHub Pages
+docs/_site
+docs/Gemfile*
+docs/.jekyll-metadata
