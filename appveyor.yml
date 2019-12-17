@@ -12,13 +12,6 @@ artifacts:
   name: NuGet
 deploy:
 - provider: NuGet
-  server: https://www.myget.org/F/mediatr-ci/api/v2/package
-  api_key:
-    secure: zKeQZmIv9PaozHQRJmrlRHN+jMCI64Uvzmb/vwePdXFR5CUNEHalnZdOCg0vrh8t
-  skip_symbols: true
-  on:
-    branch: master
-- provider: NuGet
   name: production
   api_key:
     secure: t3blEIQiDIYjjWhOSTTtrcAnzJkmSi+0zYPxC1v4RDzm6oI/gIpD6ZtrOGsYu2jE
