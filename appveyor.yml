@@ -17,3 +17,6 @@ deploy:
     secure: t3blEIQiDIYjjWhOSTTtrcAnzJkmSi+0zYPxC1v4RDzm6oI/gIpD6ZtrOGsYu2jE
   on:
     appveyor_repo_tag: true
+skip_commits:
+  files:
+    - docs/*
