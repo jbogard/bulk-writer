@@ -14,7 +14,7 @@
 # You can create any custom variable you would like, and they will be accessible
 # in the templates via {{ site.myvariable }}.
 title: "Bulk Writer"
-description: "Testing documentation"
+description: "Bulk Writer is a small library which facilitates building fast, pull-based ETL processes in C#."
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "" # the base hostname & protocol for your site, e.g. http://example.com
 
