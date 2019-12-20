@@ -2,6 +2,9 @@
   <PropertyGroup>
     <TargetFramework>net461</TargetFramework>
     <LangVersion>latest</LangVersion>
+    <ApplicationIcon />
+    <OutputType>Exe</OutputType>
+    <StartupObject />
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\BulkWriter\BulkWriter.csproj" />
