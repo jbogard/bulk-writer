@@ -2,6 +2,6 @@
 {
     public interface IConnectionStringProvider
     {
-        string Get<T>(IPipelineContext<T> companyId);
+        string Get<T>(IPipelineContext<T> context);
     }
 }
