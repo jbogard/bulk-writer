@@ -6,9 +6,13 @@ using BulkWriter.Pipeline.Steps;
 
 namespace BulkWriter.Pipeline
 {
-    public class EtlPipeline : IEtlPipeline
+    public sealed class EtlPipeline : IEtlPipeline
     {
         private readonly Stack<IEtlPipelineStep> _pipelineSteps = new Stack<IEtlPipelineStep>();
+
+        private EtlPipeline()
+        {
+        }
 
         public Task ExecuteAsync()
         {
@@ -29,12 +33,13 @@ namespace BulkWriter.Pipeline
             return finalTask;
         }
 
-        public IEtlPipelineStep<T, T> StartWith<T>(IEnumerable<T> input)
+        public static IEtlPipelineStep<T, T> StartWith<T>(IEnumerable<T> input)
         {
-            var etlPipelineSetupContext = new EtlPipelineContext(this, (p, s) => _pipelineSteps.Push(s));
+            var pipeline = new EtlPipeline();
+            var etlPipelineSetupContext = new EtlPipelineContext(pipeline, (p, s) => pipeline._pipelineSteps.Push(s));
             var step = new StartEtlPipelineStep<T>(etlPipelineSetupContext, input);
 
-            _pipelineSteps.Push(step);
+            pipeline._pipelineSteps.Push(step);
 
             return step;
         }
