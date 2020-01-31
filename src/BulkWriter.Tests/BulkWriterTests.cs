@@ -30,7 +30,7 @@ namespace BulkWriter.Tests
         [Fact]
         public async Task CanWriteSync()
         {
-            string tableName = DropCreate(nameof(BulkWriterTestsMyTestClass));
+            string tableName = TestHelpers.DropCreate(nameof(BulkWriterTestsMyTestClass));
 
             var writer = new BulkWriter<BulkWriterTestsMyTestClass>(_connectionString);
 
@@ -46,8 +46,8 @@ namespace BulkWriter.Tests
         [Fact]
         public async Task CanWriteSyncWithOptions()
         {
-            var tableName = DropCreate(nameof(BulkWriterTestsMyTestClass));
-            var tableNameWithKey = DropCreate(nameof(BulkWriterTestsMyTestClassWithKey));
+            var tableName = TestHelpers.DropCreate(nameof(BulkWriterTestsMyTestClass));
+            var tableNameWithKey = TestHelpers.DropCreate(nameof(BulkWriterTestsMyTestClassWithKey));
 
             var writer = new BulkWriter<BulkWriterTestsMyTestClass>(_connectionString);
             var writerWithOptions = new BulkWriter<BulkWriterTestsMyTestClassWithKey>(_connectionString, SqlBulkCopyOptions.KeepIdentity);
@@ -68,7 +68,7 @@ namespace BulkWriter.Tests
         [Fact]
         public async Task CanWriteSyncWithExistingConnection()
         {
-            string tableName = DropCreate(nameof(BulkWriterTestsMyTestClass));
+            string tableName = TestHelpers.DropCreate(nameof(BulkWriterTestsMyTestClass));
 
             using (var connection = new SqlConnection(_connectionString))
             {
@@ -90,7 +90,7 @@ namespace BulkWriter.Tests
         [Fact]
         public async Task CanWriteSyncWithExistingConnectionAndTransaction()
         {
-            string tableName = DropCreate(nameof(BulkWriterTestsMyTestClass));
+            string tableName = TestHelpers.DropCreate(nameof(BulkWriterTestsMyTestClass));
 
             using (var connection = new SqlConnection(_connectionString))
             {
@@ -122,8 +122,8 @@ namespace BulkWriter.Tests
         [Fact]
         public async Task CanWriteSyncWithExistingConnectionAndTransactionAndOptions()
         {
-            var tableName = DropCreate(nameof(BulkWriterTestsMyTestClass));
-            var tableNameWithKey = DropCreate(nameof(BulkWriterTestsMyTestClassWithKey));
+            var tableName = TestHelpers.DropCreate(nameof(BulkWriterTestsMyTestClass));
+            var tableNameWithKey = TestHelpers.DropCreate(nameof(BulkWriterTestsMyTestClassWithKey));
 
             using (var connection = new SqlConnection(_connectionString))
             {
@@ -175,7 +175,7 @@ namespace BulkWriter.Tests
         [Fact]
         public async Task Should_Handle_Both_Ordinal_And_ColumnName_For_Destination_Mapping()
         {
-            string tableName = DropCreate(nameof(OrdinalAndColumnNameExampleType));
+            string tableName = TestHelpers.DropCreate(nameof(OrdinalAndColumnNameExampleType));
 
             var writer = new BulkWriter<OrdinalAndColumnNameExampleType>(_connectionString);
 
@@ -246,20 +246,6 @@ namespace BulkWriter.Tests
             var data = (byte[])await TestHelpers.ExecuteScalar(_connectionString, $"SELECT TOP 1 Data FROM {tableName}");
             Assert.Equal(items.First().Data, data);
             Assert.Equal(1, count);
-        }
-
-        private string DropCreate(string tableName)
-        {
-            TestHelpers.ExecuteNonQuery(_connectionString, $"DROP TABLE IF EXISTS [dbo].[{tableName}]");
-
-            TestHelpers.ExecuteNonQuery(_connectionString,
-                "CREATE TABLE [dbo].[" + tableName + "](" +
-                "[Id] [int] IDENTITY(1,1) NOT NULL," +
-                "[Name] [nvarchar](50) NULL," +
-                "CONSTRAINT [PK_" + tableName + "] PRIMARY KEY CLUSTERED ([Id] ASC)" +
-                ")");
-
-            return tableName;
         }
     }
 }
