@@ -4,17 +4,17 @@ using BulkWriter.Pipeline.Transforms;
 
 namespace BulkWriter.Pipeline.Steps
 {
-    public interface IEtlPipelineStep<out TIn, in TOut>
+    public interface IEtlPipelineStep<in TIn, TOut>
     {
-        IEtlPipelineStep<TIn, TOut> Aggregate(IAggregator<TIn, TOut> aggregator);
-        IEtlPipelineStep<TIn, TOut> Aggregate(Func<IEnumerable<TIn>, TOut> aggregationFunc);
+        IEtlPipelineStep<TOut, TNextOut> Aggregate<TNextOut>(IAggregator<TOut, TNextOut> aggregator);
+        IEtlPipelineStep<TOut, TNextOut> Aggregate<TNextOut>(Func<IEnumerable<TOut>, TNextOut> aggregationFunc);
 
-        IEtlPipelineStep<TIn, TOut> Pivot(IPivot<TIn, TOut> pivot);
-        IEtlPipelineStep<TIn, TOut> Pivot(Func<TIn, IEnumerable<TOut>> pivotFunc);
+        IEtlPipelineStep<TOut, TNextOut> Pivot<TNextOut>(IPivot<TOut, TNextOut> pivot);
+        IEtlPipelineStep<TOut, TNextOut> Pivot<TNextOut>(Func<TOut, IEnumerable<TNextOut>> pivotFunc);
 
-        IEtlPipelineStep<TIn, TOut> Project(IProjector<TIn, TOut> projector);
-        IEtlPipelineStep<TIn, TOut> Project(Func<TIn, TOut> projectionFunc);
+        IEtlPipelineStep<TOut, TNextOut> Project<TNextOut>(IProjector<TOut, TNextOut> projector);
+        IEtlPipelineStep<TOut, TNextOut> Project<TNextOut>(Func<TOut, TNextOut> projectionFunc);
 
-        IEtlPipeline WriteTo(IBulkWriter<TIn> bulkWriter);
+        IEtlPipeline WriteTo(IBulkWriter<TOut> bulkWriter);
     }
 }

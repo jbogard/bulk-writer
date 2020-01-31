@@ -19,57 +19,57 @@ namespace BulkWriter.Pipeline.Internal
             InputCollection = inputCollection;
         }
 
-        public IEtlPipelineStep<TIn, TOut> Aggregate(IAggregator<TIn, TOut> aggregator)
+        public IEtlPipelineStep<TOut, TNextOut> Aggregate<TNextOut>(IAggregator<TOut, TNextOut> aggregator)
         {
             if (aggregator == null) throw new ArgumentNullException(nameof(aggregator));
             return Aggregate(aggregator.Aggregate);
         }
 
-        public IEtlPipelineStep<TIn, TOut> Aggregate(Func<IEnumerable<TIn>, TOut> aggregationFunc)
+        public IEtlPipelineStep<TOut, TNextOut> Aggregate<TNextOut>(Func<IEnumerable<TOut>, TNextOut> aggregationFunc)
         {
             if (aggregationFunc == null) throw new ArgumentNullException(nameof(aggregationFunc));
 
-            var step = new AggregateEtlPipelineStep<TIn, TOut>(PipelineContext, InputCollection, aggregationFunc);
+            var step = new AggregateEtlPipelineStep<TOut, TNextOut>(PipelineContext, OutputCollection, aggregationFunc);
             PipelineContext.AddStep(step);
 
             return step;
         }
 
-        public IEtlPipelineStep<TIn, TOut> Pivot(IPivot<TIn, TOut> pivot)
+        public IEtlPipelineStep<TOut, TNextOut> Pivot<TNextOut>(IPivot<TOut, TNextOut> pivot)
         {
             if (pivot == null) throw new ArgumentNullException(nameof(pivot));
             return Pivot(pivot.Pivot);
         }
 
-        public IEtlPipelineStep<TIn, TOut> Pivot(Func<TIn, IEnumerable<TOut>> pivotFunc)
+        public IEtlPipelineStep<TOut, TNextOut> Pivot<TNextOut>(Func<TOut, IEnumerable<TNextOut>> pivotFunc)
         {
             if (pivotFunc == null) throw new ArgumentNullException(nameof(pivotFunc));
 
-            var step = new PivotEtlPipelineStep<TIn, TOut>(PipelineContext, InputCollection, pivotFunc);
+            var step = new PivotEtlPipelineStep<TOut, TNextOut>(PipelineContext, OutputCollection, pivotFunc);
             PipelineContext.AddStep(step);
 
             return step;
         }
 
-        public IEtlPipelineStep<TIn, TOut> Project(IProjector<TIn, TOut> projector)
+        public IEtlPipelineStep<TOut, TNextOut> Project<TNextOut>(IProjector<TOut, TNextOut> projector)
         {
             if (projector == null) throw new ArgumentNullException(nameof(projector));
             return Project(projector.ProjectTo);
         }
 
-        public IEtlPipelineStep<TIn, TOut> Project(Func<TIn, TOut> projectionFunc)
+        public IEtlPipelineStep<TOut, TNextOut> Project<TNextOut>(Func<TOut, TNextOut> projectionFunc)
         {
             if (projectionFunc == null) throw new ArgumentNullException(nameof(projectionFunc));
 
-            var step = new ProjectEtlPipelineStep<TIn, TOut>(PipelineContext, InputCollection, projectionFunc);
+            var step = new ProjectEtlPipelineStep<TOut, TNextOut>(PipelineContext, OutputCollection, projectionFunc);
             PipelineContext.AddStep(step);
 
             return step;
         }
 
-        public IEtlPipeline WriteTo(IBulkWriter<TIn> bulkWriter)
+        public IEtlPipeline WriteTo(IBulkWriter<TOut> bulkWriter)
         {
-            var step = new BulkWriterEtlPipelineStep<TIn>(PipelineContext, InputCollection, bulkWriter);
+            var step = new BulkWriterEtlPipelineStep<TOut>(PipelineContext, OutputCollection, bulkWriter);
             PipelineContext.AddStep(step);
 
             return PipelineContext.Pipeline;
