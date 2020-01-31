@@ -6,17 +6,18 @@ namespace BulkWriter.Pipeline.Internal
 {
     internal class StartEtlPipelineStep<TIn> : EtlPipelineStep<TIn, TIn>
     {
-        public StartEtlPipelineStep(EtlPipelineContext pipelineContext, IEnumerable<TIn> enumerable) : base(pipelineContext, new BlockingCollection<TIn>(new ConcurrentQueue<TIn>(enumerable)))
+        private readonly IEnumerable<TIn> _inputEnumerable;
+
+        public StartEtlPipelineStep(EtlPipelineContext pipelineContext, IEnumerable<TIn> inputEnumerable) : base(pipelineContext, new BlockingCollection<TIn>())
         {
+            _inputEnumerable = inputEnumerable;
         }
 
         public override void Run(CancellationToken cancellationToken)
         {
-            var enumerable = InputCollection.GetConsumingEnumerable(cancellationToken);
-
             RunSafely(() =>
             {
-                foreach (var item in enumerable)
+                foreach (var item in _inputEnumerable)
                 {
                     OutputCollection.Add(item, cancellationToken);
                 }
