@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using BulkWriter.Pipeline.Steps;
 using BulkWriter.Pipeline.Transforms;
@@ -62,6 +63,22 @@ namespace BulkWriter.Pipeline.Internal
             if (projectionFunc == null) throw new ArgumentNullException(nameof(projectionFunc));
 
             var step = new ProjectEtlPipelineStep<TOut, TNextOut>(PipelineContext, OutputCollection, projectionFunc);
+            PipelineContext.AddStep(step);
+
+            return step;
+        }
+
+        public IEtlPipelineStep<TOut, TOut> TransformInPlace(params ITransformer<TOut>[] transformers)
+        {
+            if (transformers == null || transformers.Any(t => t == null)) throw new ArgumentNullException(nameof(transformers), @"No transformer may be null");
+            return TransformInPlace(transformers.Select(t => (Action<TOut>)t.Transform).ToArray());
+        }
+
+        public IEtlPipelineStep<TOut, TOut> TransformInPlace(params Action<TOut>[] transformActions)
+        {
+            if (transformActions == null || transformActions.Any(t => t == null)) throw new ArgumentNullException(nameof(transformActions), @"No transformer may be null");
+
+            var step = new TransformEtlPipelineStep<TOut>(PipelineContext, OutputCollection, transformActions);
             PipelineContext.AddStep(step);
 
             return step;

@@ -15,6 +15,9 @@ namespace BulkWriter.Pipeline.Steps
         IEtlPipelineStep<TOut, TNextOut> Project<TNextOut>(IProjector<TOut, TNextOut> projector);
         IEtlPipelineStep<TOut, TNextOut> Project<TNextOut>(Func<TOut, TNextOut> projectionFunc);
 
+        IEtlPipelineStep<TOut, TOut> TransformInPlace(params ITransformer<TOut>[] transformers);
+        IEtlPipelineStep<TOut, TOut> TransformInPlace(params Action<TOut>[] transformActions);
+
         IEtlPipeline WriteTo(IBulkWriter<TOut> bulkWriter);
     }
 }
