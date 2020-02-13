@@ -4,7 +4,16 @@
 # https://docs.microsoft.com/azure/devops/pipelines/apps/aspnet/build-aspnet-4
 
 trigger:
-- master
+  batch: true
+  branches:
+    include:
+    - 'bulk-writer'
+  tags:
+    include:
+    - 'v*'
+    - '*-deploy'
+pr:
+- 'master'
 
 pool:
   vmImage: 'windows-latest'
