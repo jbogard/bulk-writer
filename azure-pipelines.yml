@@ -37,9 +37,9 @@ steps:
 # PIPELINE FOLLOW-UP
 # -------------------
 
-task: PublishTestResults@2
+- task: PublishTestResults@2
   inputs:
-    testResultsFormat: 'xUnit 2'
+    testResultsFormat: 'XUnit'
     testResultsFiles: '$(Build.SourcesDirectory)\build\results\**\*.xml'
   condition: succeededOrFailed()
   displayName: Publish Test Results to Pipeline
