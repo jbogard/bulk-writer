@@ -1,11 +1,17 @@
 include "./psake-build-helpers.ps1"
 
-#Add try catch to handle git not recognised exception
-$tag = $(git tag -l --points-at HEAD)
-$revision = @{ $true = "{0:00000}" -f [convert]::ToInt32("0" + $env:Build.BuildId, 10); $false = "local" }[$env:Build.BuildId -ne $NULL];
-$suffix = @{ $true = ""; $false = "ci-$revision"}[$tag -ne $NULL -and $revision -ne "local"]
-$commitHash = $(git rev-parse --short HEAD)
-$buildSuffix = @{ $true = "$($suffix)-$($commitHash)"; $false = "$($branch)-$($commitHash)" }[$suffix -ne ""]
+try {
+	#Add try catch to handle git not recognised exception
+	$tag = $(git tag -l --points-at HEAD)
+	$revision = @{ $true = "{0:00000}" -f [convert]::ToInt32("0" + $env:Build.BuildId, 10); $false = "local" }[$env:Build.BuildId -ne $NULL];
+	$suffix = @{ $true = ""; $false = "ci-$revision"}[$tag -ne $NULL -and $revision -ne "local"]
+	$commitHash = $(git rev-parse --short HEAD)
+	$buildSuffix = @{ $true = "$($suffix)-$($commitHash)"; $false = "$($branch)-$($commitHash)" }[$suffix -ne ""]
+}
+
+catch {
+	Write-Output "Install git for windows or run this script using git bash."
+}
 
 properties {
     $configuration = 'Release'
@@ -27,7 +33,7 @@ task Info -description "Display runtime information" {
 
 task Test -depends Restore, Build -description "Run unit tests" {
    Push-Location -Path .\src\BulkWriter.Tests
-   exec { dotnet xunit -configuration $configuration }
+   exec { & dotnet test --configuration $configuration }
 }
   
 task Build -depends Info -description "Build the solution" {
