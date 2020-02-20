@@ -3,17 +3,13 @@
 # Add steps that publish symbols, save build artifacts, deploy, and more:
 # https://docs.microsoft.com/azure/devops/pipelines/apps/aspnet/build-aspnet-4
 
+name: $(Build.SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
+
 trigger:
   batch: true
   branches:
     include:
     - '*'
-  tags:
-    include:
-    - 'v*'
-    - '*-deploy'
-pr:
-- 'master'
 
 pool:
   vmImage: 'windows-latest'
@@ -39,7 +35,7 @@ steps:
 
 - task: PublishTestResults@2
   inputs:
-    testResultsFormat: 'XUnit'
-    testResultsFiles: '$(Build.SourcesDirectory)\build\results\**\*.xml'
+    testResultsFormat: 'VSTest'
+    testResultsFiles: '$(Build.SourcesDirectory)\src\BulkWriter.Tests\TestResults\*.xml'
   condition: succeededOrFailed()
   displayName: Publish Test Results to Pipeline

@@ -1,12 +1,9 @@
 include "./psake-build-helpers.ps1"
 
 try {
-	#Add try catch to handle git not recognised exception
 	$tag = $(git tag -l --points-at HEAD)
 	$revision = @{ $true = "{0:00000}" -f [convert]::ToInt32("0" + $env:Build.BuildId, 10); $false = "local" }[$env:Build.BuildId -ne $NULL];
 	$suffix = @{ $true = ""; $false = "ci-$revision"}[$tag -ne $NULL -and $revision -ne "local"]
-	$commitHash = $(git rev-parse --short HEAD)
-	$buildSuffix = @{ $true = "$($suffix)-$($commitHash)"; $false = "$($branch)-$($commitHash)" }[$suffix -ne ""]
 }
 
 catch {
@@ -15,32 +12,40 @@ catch {
 
 properties {
     $configuration = 'Release'
-    $projectRootDirectory = "C:/MyDev/bulk-writer"
-    $testResults = "$projectRootDirectory/TestResults"
-	$src = "../../BukWriter"
+    $projectRoot = Resolve-Path "./"
+	$buildDir = "$projectRoot/Build"
+    $testResultsDir = "$projectRoot/src/BulkWriter.Tests/TestResults"
 }
- 
-task Restore -depends Info -description "Restore dependencies and tools"{
-exec { dotnet restore }
-}
-task default -depends Test
-#task CI -depends Clean, Test -description "Continuous Integration process"
-task Rebuild -depends Clean, Build -description "Rebuild the code and database, no testing"
 
-task Info -description "Display runtime information" {
+task default -depends Run-Tests
+task Run-CI -depends Clean-Solution, Run-Tests, Package-Local -description "Continuous Integration process"
+task ReBuild-Solution -depends Clean-Solution, Run-Tests -description "Rebuild the code, with testing"
+
+task Get-Info -description "Display runtime information" {
     exec { dotnet --info }
 }
 
-task Test -depends Restore, Build -description "Run unit tests" {
-   Push-Location -Path .\src\BulkWriter.Tests
-   exec { & dotnet test --configuration $configuration }
+task Run-Tests -depends Run-Restore, Build-Solution -description "Run unit tests" {
+    Push-Location -Path .\src\BulkWriter.Tests
+    exec { & dotnet test --configuration $configuration  --logger "trx;LogFileName=Testresults.xml" }
 }
   
-task Build -depends Info -description "Build the solution" {
-	exec { dotnet build BulkWriter.sln -c $configuration --version-suffix=$buildSuffix -v q /nologo }
+task Build-Solution -depends Get-Info -description "Build the solution" {
+	exec { dotnet build BulkWriter.sln -c $configuration -v q /nologo }
 }
   
-task Clean -description "Clean out all the binary folders" {
-    exec { dotnet clean --configuration $configuration /nologo } $src
-    remove-directory-silently $testResults
+task Clean-Solution -description "Clean out all the binary folders" {
+    exec { dotnet clean --configuration $configuration /nologo } $projectRoot
+    remove-directory-silently $testResultsDir
+}
+
+task Run-Restore -depends Get-Info -description "Restore dependencies and tools" {
+	exec { dotnet restore }
+}
+
+task Package-Local -description "Build local nuget file" {
+	Pop-Location
+	if ($suffix -ne "") {
+		exec { & dotnet pack .\src\BulkWriter\BulkWriter.csproj -c Release -o $buildDir --include-symbols --no-build }
+	} 
 }
