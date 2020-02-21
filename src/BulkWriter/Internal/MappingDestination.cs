@@ -1,4 +1,4 @@
-﻿namespace BulkWriter
+﻿namespace BulkWriter.Internal
 {
     internal class MappingDestination
     {

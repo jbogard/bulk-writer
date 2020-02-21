@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace BulkWriter
+namespace BulkWriter.Internal
 {
     internal class MappingSource
     {
