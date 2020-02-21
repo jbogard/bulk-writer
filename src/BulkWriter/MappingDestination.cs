@@ -1,6 +1,6 @@
 ﻿namespace BulkWriter
 {
-    public class MappingDestination
+    internal class MappingDestination
     {
         public string ColumnName { get; set; }
 

@@ -3,11 +3,13 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using BulkWriter.Properties;
 
+[assembly: InternalsVisibleTo("BulkWriter.Tests")]
 namespace BulkWriter.Internal
 {
-    public class EnumerableDataReader<TResult> : DbDataReader
+    internal class EnumerableDataReader<TResult> : DbDataReader
     {
         private readonly IEnumerable<TResult> _items;
         private readonly Dictionary<string, int> _nameToOrdinalMappings;

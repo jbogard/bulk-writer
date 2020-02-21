@@ -2,7 +2,7 @@
 
 namespace BulkWriter
 {
-    public class MappingSource
+    internal class MappingSource
     {
         public PropertyInfo Property { get; set; }
 
