@@ -46,9 +46,9 @@ CREATE DATABASE [BulkWriter.Tests]");
 
         public static string DropCreate(string tableName)
         {
-            TestHelpers.ExecuteNonQuery(ConnectionString, $"DROP TABLE IF EXISTS [dbo].[{tableName}]");
+            ExecuteNonQuery(ConnectionString, $"DROP TABLE IF EXISTS [dbo].[{tableName}]");
 
-            TestHelpers.ExecuteNonQuery(ConnectionString,
+            ExecuteNonQuery(ConnectionString,
                 "CREATE TABLE [dbo].[" + tableName + "](" +
                 "[Id] [int] IDENTITY(1,1) NOT NULL," +
                 "[Name] [nvarchar](50) NULL," +

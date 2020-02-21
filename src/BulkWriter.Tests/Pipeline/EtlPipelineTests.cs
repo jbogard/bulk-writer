@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using BulkWriter.Pipeline;
-using BulkWriter.Pipeline.Transforms;
 using Xunit;
 
 namespace BulkWriter.Tests.Pipeline
