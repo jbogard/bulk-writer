@@ -9,6 +9,11 @@ using BulkWriter.Internal;
 
 namespace BulkWriter
 {
+    /// <summary>
+    /// Implements an object that takes an enumerable of <typeparamref name="TResult"/> and writes them to a target database via <c>SqlBulkCopy</c>
+    /// </summary>
+    /// <typeparam name="TResult">Type of objects to be written to the database</typeparam>
+    /// <inheritdoc cref="IBulkWriter{TResult}"/>
     public class BulkWriter<TResult> : IBulkWriter<TResult>
     {
         private readonly SqlBulkCopy _sqlBulkCopy;
@@ -72,18 +77,27 @@ namespace BulkWriter
             return sqlBulkCopy;
         }
 
+        /// <summary>
+        /// Number of rows in each batch. At the end of each batch, the rows in the batch are sent to the server.
+        /// </summary>
         public int BatchSize
         {
             get => _sqlBulkCopy.BatchSize;
             set => _sqlBulkCopy.BatchSize = value;
         }
 
+        /// <summary>
+        /// Number of seconds for the BulkCopy operation to complete before it times out
+        /// </summary>
         public int BulkCopyTimeout
         {
             get => _sqlBulkCopy.BulkCopyTimeout;
             set => _sqlBulkCopy.BulkCopyTimeout = value;
         }
 
+        /// <summary>
+        /// Action to allow custom configuration of the <c>SqlBulkCopy</c> object prior to the start of the operation.
+        /// </summary>
         public Action<SqlBulkCopy> BulkCopySetup { get; set; } = sbc => { };
 
         public void WriteToDatabase(IEnumerable<TResult> items)
