@@ -11,7 +11,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{432DE5FB-310C-432E-8ADE-ED6FCBD45C18}"
 	ProjectSection(SolutionItems) = preProject
 		azure-pipelines.yml = azure-pipelines.yml
-		Build.ps1 = Build.ps1
 		psake-build-helpers.ps1 = psake-build-helpers.ps1
 		psake.cmd = psake.cmd
 		psakefile.ps1 = psakefile.ps1
