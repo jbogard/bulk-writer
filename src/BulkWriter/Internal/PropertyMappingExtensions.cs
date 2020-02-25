@@ -2,7 +2,7 @@
 
 namespace BulkWriter.Internal
 {
-    public static class PropertyMappingExtensions
+    internal static class PropertyMappingExtensions
     {
         public static SqlBulkCopyColumnMapping ToColumnMapping(this PropertyMapping self) =>
             !string.IsNullOrWhiteSpace(self.Destination.ColumnName)

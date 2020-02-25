@@ -1,6 +1,6 @@
-﻿namespace BulkWriter
+﻿namespace BulkWriter.Internal
 {
-    public class PropertyMapping
+    internal class PropertyMapping
     {
         public bool ShouldMap { get; set; }
 

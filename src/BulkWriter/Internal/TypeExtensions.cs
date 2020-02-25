@@ -6,7 +6,7 @@ using System.Reflection;
 
 namespace BulkWriter.Internal
 {
-    public static class TypeExtensions
+    internal static class TypeExtensions
     {
         public static PropertyMapping[] BuildMappings(this Type type) =>
            type.GetRuntimeProperties()
