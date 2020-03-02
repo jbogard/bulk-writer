@@ -10,16 +10,34 @@ trigger:
   branches:
     include:
     - '*'
+  tags:
+    include:
+    - 'v*'
+    - '*-deploy'
+
+pr:
+- 'master'
 
 pool:
   vmImage: 'windows-latest'
 
-variables:
-  solution: '**/*.sln'
-  buildPlatform: 'Any CPU'
-  buildConfiguration: 'Release'
-
 steps:
+# -------------------
+# Install Dependencies
+# -------------------
+- task: PowerShell@2
+  inputs:
+    targetType: inline
+    script: $(Build.SourcesDirectory)/setup.ps1
+  displayName: Install Dependencies for Feature Work
+
+- task: NuGetCommand@2
+  displayName: 'Authenticate with NuGet feed'
+  inputs:
+   command: custom
+   feedsToUse: config
+   arguments: sources update -Name "$(bulkwriterfeed)" -Username "bulkWriter" -Password "$(bulkwriterfeedpassword)" -StorePasswordInClearText -ConfigFile nuget.config
+
 # -------------------
 # RUN PSAKE SCRIPT
 # -------------------
@@ -36,6 +54,29 @@ steps:
 - task: PublishTestResults@2
   inputs:
     testResultsFormat: 'VSTest'
-    testResultsFiles: '$(Build.SourcesDirectory)\src\BulkWriter.Tests\TestResults\*.xml'
-  condition: succeededOrFailed()
+    testResultsFiles: '$(Build.SourcesDirectory)/src/BulkWriter.Tests/TestResults/*.xml'
   displayName: Publish Test Results to Pipeline
+
+- task: DotNetCoreCLI@2
+  inputs:
+    command: pack
+    packagesToPack: '$(Build.SourcesDirectory)/src/BulkWriter/BulkWriter.csproj'
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+  displayName: Create Nuget Package
+
+- task: DotNetCoreCLI@2
+  inputs:
+    command: push
+    searchPatternPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
+    feedPublish: '$(bulkwriterfeed)'
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+  displayName: Push Package to Private Feed
+
+- task: NuGetCommand@2
+  inputs:
+    command: push
+    nuGetFeedType: external
+    publishFeedCredentials: 'NuGetConnnection'
+    packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
+  condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
+  displayName: Push Package to Nuget

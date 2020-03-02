@@ -1,16 +1,10 @@
-function Set-Project-Properties($targetVersion) {
-    $copyright = $(get-copyright)
-
-    write-host "$product $targetVersion"
-    write-host $copyright
+function Set-Project-Properties($versionPrefix) {
+    write-host "$versionPrefix"
 
     set-regenerated-file "$pwd/Directory.Build.props" @"
 <Project>
     <PropertyGroup>
-        <Product>$product</Product>
-        <Version>$targetVersion</Version>
-        <Copyright>$copyright</Copyright>
-        <LangVersion>latest</LangVersion>
+        <VersionPrefix>$versionPrefix</VersionPrefix>
     </PropertyGroup>
 </Project>
 "@
