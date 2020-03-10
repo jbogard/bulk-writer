@@ -45,6 +45,7 @@ steps:
 - task: BatchScript@1
   inputs:
     filename: .\psake.cmd
+    arguments: 'Run-CI'
   displayName: Run Abbreviated PSAKE Build for Feature Work
 
 # -------------------
