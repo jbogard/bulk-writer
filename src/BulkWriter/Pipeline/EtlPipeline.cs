@@ -6,6 +6,10 @@ using BulkWriter.Pipeline.Steps;
 
 namespace BulkWriter.Pipeline
 {
+    /// <summary>
+    /// Implements an ETL pipeline that ultimately writes to a BulkWriter object
+    /// </summary>
+    /// <inheritdoc cref="IEtlPipeline"/>
     public sealed class EtlPipeline : IEtlPipeline
     {
         private readonly Stack<IEtlPipelineStep> _pipelineSteps = new Stack<IEtlPipelineStep>();
@@ -33,6 +37,12 @@ namespace BulkWriter.Pipeline
             return finalTask;
         }
 
+        /// <summary>
+        /// Begins configuration of a new EtlPipeline
+        /// </summary>
+        /// <typeparam name="T">Type of input objects to the pipeline</typeparam>
+        /// <param name="input">An enumerable with input objects for the pipeline</param>
+        /// <returns>Object for continuation of pipeline configuration</returns>
         public static IEtlPipelineStep<T, T> StartWith<T>(IEnumerable<T> input)
         {
             var pipeline = new EtlPipeline();
