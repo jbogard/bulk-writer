@@ -9,17 +9,83 @@ nav_order: 4
 With transformations we can manipulate data prior to writing to the data store.
 
 ## Aggregate
-
 With aggregates we can take multiple records and output a single record.
+
+```csharp
+using (var writer = new TestBulkWriter<int>())
+{
+    var items = Enumerable.Range(1, 1000).Select(i => new PipelineTestsMyTestClass { Id = i, Name = "Bob" });
+    var pipeline = EtlPipeline.StartWith(items)
+        .Aggregate(f => f.Sum(c => c.Id))
+        .WriteTo(writer);
+
+    await pipeline.ExecuteAsync();
+
+    Assert.Single(writer.ItemsWritten);
+    Assert.Equal(Enumerable.Range(1,1000).Sum(), writer.ItemsWritten[0]);
+}
+```
 
 ## Pivot
 
 With pivots you can turn one record into many.
 
+```csharp
+using (var writer = new Writer<PipelineTestsMyTestClass>())
+{
+    var idCounter = 0;
+    var items = Enumerable.Range(1, 10).ToList();
+    var pipeline = EtlPipeline.StartWith(items)
+        .Pivot(i =>
+        {
+            var result = new List<PipelineTestsMyTestClass>();
+            for (var j = 0; j < i; j++)
+            {
+                ++idCounter;
+                result.Add(new PipelineTestsMyTestClass { Id = idCounter, Name = $"Bob {idCounter}"});
+            }
+            return result;
+        })
+        .WriteTo(writer);
+
+    await pipeline.ExecuteAsync();
+}
+```
+
 ## Project
 
 With project you can translate your current type into a new type.
 
+```csharp
+using (var writer = new BulkWriter<PipelineTestsMyTestClass>())
+{
+    var items = Enumerable.Range(1, 1000).Select(i => new PipelineTestsOtherTestClass { Id = i, FirstName = "Bob", LastName = $"{i}"});
+    var pipeline = EtlPipeline
+        .StartWith(items)
+        .Project(i => new PipelineTestsMyTestClass { Id = i.Id, Name = $"{i.FirstName} {i.LastName}"})
+        .WriteTo(writer);
+
+    await pipeline.ExecuteAsync();
+}
+```
+
 ## Transform
 
 With transform you can apply changes in-place.
+
+```csharp
+using (var writer = new TestBulkWriter<PipelineTestsMyTestClass>())
+{
+    var items = Enumerable.Range(1, 1000).Select(i => new PipelineTestsMyTestClass { Id = i, Name = "Bob" });
+    var pipeline = EtlPipeline
+        .StartWith(items)
+        .TransformInPlace(i => 
+        { 
+            i.Id -= 1;
+            i.Name = $"Alice {i.Id}";
+        })
+        .WriteTo(writer);
+
+    await pipeline.ExecuteAsync();
+}
+```
