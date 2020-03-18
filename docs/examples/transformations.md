@@ -12,17 +12,14 @@ With transformations we can manipulate data prior to writing to the data store.
 With aggregates we can take multiple records and output a single record.
 
 ```csharp
-using (var writer = new TestBulkWriter<int>())
+using (var writer = new BulkWriter<int>(connectionString))
 {
-    var items = Enumerable.Range(1, 1000).Select(i => new PipelineTestsMyTestClass { Id = i, Name = "Bob" });
+    var items = Enumerable.Range(1, 1000).Select(i => new MyClass { Id = i, Name = "Bob" });
     var pipeline = EtlPipeline.StartWith(items)
         .Aggregate(f => f.Sum(c => c.Id))
         .WriteTo(writer);
 
     await pipeline.ExecuteAsync();
-
-    Assert.Single(writer.ItemsWritten);
-    Assert.Equal(Enumerable.Range(1,1000).Sum(), writer.ItemsWritten[0]);
 }
 ```
 
@@ -31,18 +28,18 @@ using (var writer = new TestBulkWriter<int>())
 With pivots you can turn one record into many.
 
 ```csharp
-using (var writer = new Writer<PipelineTestsMyTestClass>())
+using (var writer = new BulkWriter<MyClass>(connectionString))
 {
     var idCounter = 0;
     var items = Enumerable.Range(1, 10).ToList();
     var pipeline = EtlPipeline.StartWith(items)
         .Pivot(i =>
         {
-            var result = new List<PipelineTestsMyTestClass>();
+            var result = new List<MyClass>();
             for (var j = 0; j < i; j++)
             {
                 ++idCounter;
-                result.Add(new PipelineTestsMyTestClass { Id = idCounter, Name = $"Bob {idCounter}"});
+                result.Add(new MyClass { Id = idCounter, Name = $"Bob {idCounter}"});
             }
             return result;
         })
@@ -57,12 +54,12 @@ using (var writer = new Writer<PipelineTestsMyTestClass>())
 With project you can translate your current type into a new type.
 
 ```csharp
-using (var writer = new BulkWriter<PipelineTestsMyTestClass>())
+using (var writer = new BulkWriter<MyClass>(connectionString))
 {
     var items = Enumerable.Range(1, 1000).Select(i => new PipelineTestsOtherTestClass { Id = i, FirstName = "Bob", LastName = $"{i}"});
     var pipeline = EtlPipeline
         .StartWith(items)
-        .Project(i => new PipelineTestsMyTestClass { Id = i.Id, Name = $"{i.FirstName} {i.LastName}"})
+        .Project(i => new MyClass { Id = i.Id, Name = $"{i.FirstName} {i.LastName}"})
         .WriteTo(writer);
 
     await pipeline.ExecuteAsync();
@@ -74,9 +71,9 @@ using (var writer = new BulkWriter<PipelineTestsMyTestClass>())
 With transform you can apply changes in-place.
 
 ```csharp
-using (var writer = new TestBulkWriter<PipelineTestsMyTestClass>())
+using (var writer = new BulkWriter<MyClass>(connectionString))
 {
-    var items = Enumerable.Range(1, 1000).Select(i => new PipelineTestsMyTestClass { Id = i, Name = "Bob" });
+    var items = Enumerable.Range(1, 1000).Select(i => new MyClass { Id = i, Name = "Bob" });
     var pipeline = EtlPipeline
         .StartWith(items)
         .TransformInPlace(i => 
