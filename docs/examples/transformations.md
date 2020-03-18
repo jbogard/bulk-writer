@@ -56,7 +56,7 @@ With project you can translate your current type into a new type.
 ```csharp
 using (var writer = new BulkWriter<MyClass>(connectionString))
 {
-    var items = Enumerable.Range(1, 1000).Select(i => new PipelineTestsOtherTestClass { Id = i, FirstName = "Bob", LastName = $"{i}"});
+    var items = Enumerable.Range(1, 1000).Select(i => new MyOtherClass { Id = i, FirstName = "Bob", LastName = $"{i}"});
     var pipeline = EtlPipeline
         .StartWith(items)
         .Project(i => new MyClass { Id = i.Id, Name = $"{i.FirstName} {i.LastName}"})
