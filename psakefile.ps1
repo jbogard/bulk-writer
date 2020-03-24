@@ -1,14 +1,8 @@
 include "./psake-build-helpers.ps1"
 
-try {
-	$tag = $(git tag -l --points-at HEAD)
-	$revision = @{ $true = "{0:00000}" -f [convert]::ToInt32("0" + $env:BUILD_BUILDID, 10); $false = "local" }[$env:Build.BuildId -ne $NULL];
-	$suffix = @{ $true = ""; $false = "ci-$revision"}[$tag -ne $NULL -and $revision -ne "local"]
-}
-
-catch {
-	Write-Output "Install git for windows or run this script using git bash."
-}
+$tag = $(git tag -l --points-at HEAD)
+$revision = @{ $true = ""; $false = "local" }[$env:BUILD_BUILDNUMBER -ne $NULL]
+$suffix = @{ $true = ""; $false = "ci-$revision" }[$tag -ne $NULL -and $revision -ne "local"]
 
 properties {
 	$configuration = 'Release'
@@ -16,6 +10,7 @@ properties {
 	$buildDir = "$projectRoot/Build"
 	$testResultsDir = "$projectRoot/src/BulkWriter.Tests/TestResults"
 	$versionPrefix = "3.0.0"
+	$version = "ci-local"
 }
 
 task default -depends Run-Tests
@@ -28,20 +23,25 @@ task Get-Info -description "Display runtime information" {
 }
 
 task Run-Tests -depends Run-Restore, Build-Solution -description "Run unit tests" {
-	Push-Location -Path .\src\BulkWriter.Tests
-	exec { & dotnet test --configuration $configuration  --logger "trx;LogFileName=Testresults.xml" }
+	exec { dotnet test --configuration $configuration  --logger "trx;LogFileName=Testresults.xml" } -workingDirectory src/BulkWriter.Tests
 }
 
 task Build-Solution -depends Get-Info -description "Build the solution" {
-	if($env:BUILD_BUILDID -ne $NULL) {
+	if($suffix -eq "") {
 		set-project-properties $versionPrefix
 	}
-	exec { dotnet build BulkWriter.sln -c $configuration -v q /nologo }
+	else
+	{
+	    set-project-properties $version
+	}
+
+	exec { dotnet build --configuration $configuration --nologo --no-restore} -workingDirectory .
 }
 
 task Clean-Solution -description "Clean out all the binary folders" {
-	exec { dotnet clean --configuration $configuration /nologo } $projectRoot
+	exec { dotnet clean --configuration $configuration /nologo } -workingDirectory $projectRoot
 	remove-directory-silently $testResultsDir
+	remove-directory-silently $buildDir
 }
 
 task Run-Restore -depends Get-Info -description "Restore dependencies and tools" {
@@ -49,8 +49,7 @@ task Run-Restore -depends Get-Info -description "Restore dependencies and tools"
 }
 
 task Package-Local -description "Build local nuget file" {
-	Pop-Location
 	if ($suffix -ne "") {
-		exec { & dotnet pack .\src\BulkWriter\BulkWriter.csproj -c Release -o $buildDir --include-symbols --no-build }
+		exec { dotnet pack -c Release -o $buildDir --include-symbols --no-build } -workingDirectory $projectRoot/src/BulkWriter
 	}
 }

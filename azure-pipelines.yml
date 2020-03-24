@@ -3,8 +3,6 @@
 # Add steps that publish symbols, save build artifacts, deploy, and more:
 # https://docs.microsoft.com/azure/devops/pipelines/apps/aspnet/build-aspnet-4
 
-name: $(Build.SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
-
 trigger:
   batch: true
   branches:
@@ -26,23 +24,17 @@ steps:
 # -------------------
 # Install Dependencies
 # -------------------
-- task: PowerShell@2
-  inputs:
-    targetType: inline
-    script: $(Build.SourcesDirectory)/setup.ps1
-  displayName: Install Dependencies for Feature Work
-
 - task: UseDotNet@2
-  displayName: Require .NET 2.0
+  displayName: Require .NET 2.1
   inputs:
     packageType: 'runtime'
-    version: '2.0.x'
+    version: '2.1.x'
 
 - task: UseDotNet@2
-  displayName: Require .NET 3.0 SDK for Build Process
+  displayName: Require .NET 3.1 SDK for Build Process
   inputs:
     packageType: 'sdk'
-    version: '3.0.x'
+    version: '3.1.x'
 
 - task: NuGetCommand@2
   displayName: 'Authenticate with NuGet feed'
@@ -51,15 +43,29 @@ steps:
    feedsToUse: config
    arguments: sources update -Name "$(bulkwriterfeed)" -Username "bulkWriter" -Password "$(bulkwriterfeedpassword)" -StorePasswordInClearText -ConfigFile nuget.config
 
+- task: PowerShell@2
+  inputs:
+    targetType: inline
+    script: $(Build.SourcesDirectory)/setup.ps1
+  displayName: Install Dependencies for Feature Work
+
+- task: PowerShell@2
+  displayName: Generate Version using GitVersion
+  inputs:
+    targetType: 'inline'
+    script: dotnet gitversion /output buildserver
+
 # -------------------
 # RUN PSAKE SCRIPT
 # -------------------
 
-- task: BatchScript@1
+- task: PowerShell@2
+  displayName: Build and Test
+  continueOnError: true
   inputs:
-    filename: .\psake.cmd
-    arguments: 'Run-CI'
-  displayName: Run Abbreviated PSAKE Build for Feature Work
+    targetType: 'inline'
+    script: |
+      invoke-psake run-ci -properties @{'version'='$(Build.BuildNumber)'}
 
 # -------------------
 # PIPELINE FOLLOW-UP
