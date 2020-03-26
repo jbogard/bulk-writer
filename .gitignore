@@ -114,3 +114,5 @@ UpgradeLog*.XML
 docs/_site
 docs/Gemfile*
 docs/.jekyll-metadata
+
+Directory.Build.props

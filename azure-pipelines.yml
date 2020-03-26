@@ -11,7 +11,6 @@ trigger:
   tags:
     include:
     - 'v*'
-    - '*-deploy'
 
 pr:
 - 'development'
@@ -44,10 +43,9 @@ steps:
    arguments: sources update -Name "$(bulkwriterfeed)" -Username "bulkWriter" -Password "$(bulkwriterfeedpassword)" -StorePasswordInClearText -ConfigFile nuget.config
 
 - task: PowerShell@2
+  displayName: Setup Required Dependencies
   inputs:
-    targetType: inline
-    script: $(Build.SourcesDirectory)/setup.ps1
-  displayName: Install Dependencies for Feature Work
+    filePath: 'setup.ps1'
 
 - task: PowerShell@2
   displayName: Generate Version using GitVersion
@@ -81,7 +79,7 @@ steps:
   inputs:
     command: pack
     packagesToPack: '$(Build.SourcesDirectory)/src/BulkWriter/BulkWriter.csproj'
-  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+  condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), startsWith(variables['Build.SourceBranch'], 'refs/tags/')))
   displayName: Create Nuget Package
 
 - task: DotNetCoreCLI@2

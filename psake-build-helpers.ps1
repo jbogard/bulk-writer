@@ -1,10 +1,10 @@
-function Set-Project-Properties($versionPrefix) {
-    write-host "$versionPrefix"
+function Set-Project-Properties($version) {
+    write-host "$version"
 
     set-regenerated-file "$pwd/Directory.Build.props" @"
 <Project>
     <PropertyGroup>
-        <VersionPrefix>$versionPrefix</VersionPrefix>
+        <Version>$version</Version>
     </PropertyGroup>
 </Project>
 "@
@@ -15,12 +15,6 @@ function Get-Copyright {
     $year = $date.Year
     $copyrightSpan = if ($year -eq $yearInitiated) { $year } else { "$yearInitiated-$year" }
     return "© $copyrightSpan $owner"
-}
-
-function Publish-Project {
-    $project = Split-Path $pwd -Leaf
-    Write-Host "Publishing $project"
-    dotnet publish --configuration $configuration --no-restore --output $publish/$project /nologo
 }
 
 function Set-Regenerated-File($path, $newContent) {
