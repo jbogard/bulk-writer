@@ -10,7 +10,7 @@ trigger:
     - '*'
   tags:
     include:
-    - 'v*'
+    - '*'
 
 pr:
 - 'development'
@@ -79,22 +79,20 @@ steps:
   inputs:
     command: pack
     packagesToPack: '$(Build.SourcesDirectory)/src/BulkWriter/BulkWriter.csproj'
-  condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), startsWith(variables['Build.SourceBranch'], 'refs/tags/')))
+  #condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), startsWith(variables['Build.SourceBranch'], 'refs/tags/')))
   displayName: Create Nuget Package
+
+
+- task: PublishPipelineArtifact@1
+  inputs:
+    targetPath: $(Build.ArtifactStagingDirectory)
+    artifact: 'package'
+    publishLocation: 'pipeline'
 
 - task: DotNetCoreCLI@2
   inputs:
     command: push
     searchPatternPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
     feedPublish: '$(bulkwriterfeed)'
-  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+  #condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
   displayName: Push Package to Private Feed
-
-- task: NuGetCommand@2
-  inputs:
-    command: push
-    nuGetFeedType: external
-    publishFeedCredentials: 'NuGetConnnection'
-    packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
-  condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
-  displayName: Push Package to Nuget
