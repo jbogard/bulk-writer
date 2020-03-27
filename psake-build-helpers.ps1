@@ -5,6 +5,7 @@ function Set-Project-Properties($version) {
 <Project>
     <PropertyGroup>
         <Version>$version</Version>
+		<Copyright>$(get-copyright)</Copyright>
     </PropertyGroup>
 </Project>
 "@

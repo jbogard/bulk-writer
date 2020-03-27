@@ -5,8 +5,9 @@ properties {
 	$projectRoot = Resolve-Path "./"
 	$buildDir = "$projectRoot/Build"
 	$testResultsDir = "$projectRoot/src/BulkWriter.Tests/TestResults"
-	$nugetVersion = "3.0.0"
 	$version = "3.0.0-ci-local"
+	$owner = 'Headspring'
+	$yearInitiated = '2014'
 }
 
 task default -depends Run-Tests
@@ -23,13 +24,7 @@ task Run-Tests -depends Run-Restore, Build-Solution -description "Run unit tests
 }
 
 task Build-Solution -depends Get-Info -description "Build the solution" {
-	if($version -like '*tags-v*') {
-		set-project-properties $nugetVersion
-	}
-	else {
-	    set-project-properties $version
-	}
-
+	set-project-properties $version
 	exec { dotnet build --configuration $configuration --nologo --no-restore} -workingDirectory .
 }
 

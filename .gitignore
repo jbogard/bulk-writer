@@ -116,3 +116,4 @@ docs/Gemfile*
 docs/.jekyll-metadata
 
 Directory.Build.props
+Nuget.Config

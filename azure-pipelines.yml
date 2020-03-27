@@ -10,7 +10,7 @@ trigger:
     - '*'
   tags:
     include:
-    - '*'
+    - 'v*'
 
 pr:
 - 'development'
@@ -34,13 +34,6 @@ steps:
   inputs:
     packageType: 'sdk'
     version: '3.1.x'
-
-- task: NuGetCommand@2
-  displayName: 'Authenticate with NuGet feed'
-  inputs:
-   command: custom
-   feedsToUse: config
-   arguments: sources update -Name "$(bulkwriterfeed)" -Username "bulkWriter" -Password "$(bulkwriterfeedpassword)" -StorePasswordInClearText -ConfigFile nuget.config
 
 - task: PowerShell@2
   displayName: Setup Required Dependencies
@@ -79,7 +72,7 @@ steps:
   inputs:
     command: pack
     packagesToPack: '$(Build.SourcesDirectory)/src/BulkWriter/BulkWriter.csproj'
-  #condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), startsWith(variables['Build.SourceBranch'], 'refs/tags/')))
+  condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), startsWith(variables['Build.SourceBranch'], 'refs/tags/')))
   displayName: Create Nuget Package
 
 
@@ -88,11 +81,5 @@ steps:
     targetPath: $(Build.ArtifactStagingDirectory)
     artifact: 'package'
     publishLocation: 'pipeline'
-
-- task: DotNetCoreCLI@2
-  inputs:
-    command: push
-    searchPatternPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
-    feedPublish: '$(bulkwriterfeed)'
-  #condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
-  displayName: Push Package to Private Feed
+  condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), startsWith(variables['Build.SourceBranch'], 'refs/tags/')))
+  displayName: Publish Deployment Artifact
