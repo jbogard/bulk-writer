@@ -14,9 +14,9 @@ With aggregates we can take multiple records and output a single record.
 ```csharp
 using (var writer = new BulkWriter<int>(connectionString))
 {
-    var items = Enumerable.Range(1, 1000).Select(i => new MyClass { Id = i, Name = "Bob" });
+    var items = Enumerable.Range(1, 1000).Select(i => new MyClass { Id = i, Name = "Bob", WeightInKg = 82 });
     var pipeline = EtlPipeline.StartWith(items)
-        .Aggregate(f => f.Sum(c => c.Id))
+        .Aggregate(f => f.Sum(c => c.WeightInKg))
         .WriteTo(writer);
 
     await pipeline.ExecuteAsync();
