@@ -22,6 +22,10 @@ using (var writer = new BulkWriter<int>(connectionString))
     await pipeline.ExecuteAsync();
 }
 ```
+### Output
+```
+82,000
+```
 
 ## Pivot
 
@@ -31,7 +35,7 @@ using (var writer = new BulkWriter<int>(connectionString))
 using (var writer = new BulkWriter<MyClass>(connectionString))
 {
     var idCounter = 0;
-    var items = Enumerable.Range(1, 10).ToList();
+    var items = Enumerable.Range(1, 3).ToList();
     var pipeline = EtlPipeline.StartWith(items)
         .Pivot(i =>
         {
@@ -39,7 +43,7 @@ using (var writer = new BulkWriter<MyClass>(connectionString))
             for (var j = 0; j < i; j++)
             {
                 ++idCounter;
-                result.Add(new MyClass { Id = idCounter, Name = $"Bob {idCounter}"});
+                result.Add(new MyClass { Id = idCounter, Name = $"Bob {idCounter}" });
             }
             return result;
         })
@@ -47,6 +51,17 @@ using (var writer = new BulkWriter<MyClass>(connectionString))
 
     await pipeline.ExecuteAsync();
 }
+```
+### Output
+```
+Id       Name
+--------------
+1        Bob 1
+2        Bob 2
+3        Bob 3
+4        Bob 4
+5        Bob 5
+6        Bob 6
 ```
 
 ## Project
@@ -56,14 +71,26 @@ using (var writer = new BulkWriter<MyClass>(connectionString))
 ```csharp
 using (var writer = new BulkWriter<MyClass>(connectionString))
 {
-    var items = Enumerable.Range(1, 1000).Select(i => new MyOtherClass { Id = i, FirstName = "Bob", LastName = $"{i}"});
+    var items = Enumerable.Range(1, 1000).Select(i => new MyOtherClass { Id = i, FirstName = "Bob", LastName = $"{i}" );
     var pipeline = EtlPipeline
         .StartWith(items)
-        .Project(i => new MyClass { Id = i.Id, Name = $"{i.FirstName} {i.LastName}"})
+        .Project(i => new MyClass { Id = i.Id, Name = $"{i.FirstName} {i.LastName}" })
         .WriteTo(writer);
 
     await pipeline.ExecuteAsync();
 }
+```
+### Output
+```
+Id       Name
+-----------------
+1        Bob 1
+2        Bob 2
+3        Bob 3
+...
+998      Bob 998
+999      Bob 999
+1000     Bob 1000
 ```
 
 ## Transform
@@ -73,7 +100,7 @@ using (var writer = new BulkWriter<MyClass>(connectionString))
 ```csharp
 using (var writer = new BulkWriter<MyClass>(connectionString))
 {
-    var items = Enumerable.Range(1, 1000).Select(i => new MyClass { Id = i, Name = "Bob" });
+    var items = Enumerable.Range(1, 1000).Select(i => new MyClass { Id = i, Name = "Bob", WeightInKg =  80 });
     var pipeline = EtlPipeline
         .StartWith(items)
         .TransformInPlace(i => 
@@ -84,4 +111,16 @@ using (var writer = new BulkWriter<MyClass>(connectionString))
 
     await pipeline.ExecuteAsync();
 }
+```
+### Output
+```
+Id       Name    WeightInKg    WeightInLbs
+------------------------------------------
+1        Bob     80            176.4
+2        Bob     80            176.4
+3        Bob     80            176.4
+...
+998      Bob     80            176.4
+999      Bob     80            176.4
+1000     Bob     80            176.4
 ```
