@@ -78,8 +78,7 @@ using (var writer = new BulkWriter<MyClass>(connectionString))
         .StartWith(items)
         .TransformInPlace(i => 
         { 
-            i.Id -= 1;
-            i.Name = $"Alice {i.Id}";
+            i.WeightInLbs = i.WeightInKg * 2.205;
         })
         .WriteTo(writer);
 
