@@ -9,7 +9,7 @@ nav_order: 4
 With transformations we can manipulate data prior to writing to the data store.
 
 ## Aggregate
-With aggregates we can take multiple records and output a single record.
+```Aggregate``` can take multiple records and output a single record.
 
 ```csharp
 using (var writer = new BulkWriter<int>(connectionString))
@@ -25,7 +25,7 @@ using (var writer = new BulkWriter<int>(connectionString))
 
 ## Pivot
 
-With pivots you can turn one record into many.
+```Pivot``` can turn one record into many.
 
 ```csharp
 using (var writer = new BulkWriter<MyClass>(connectionString))
@@ -51,7 +51,7 @@ using (var writer = new BulkWriter<MyClass>(connectionString))
 
 ## Project
 
-With project you can translate your current type into a new type.
+```Project``` can translate your current type into a new type.
 
 ```csharp
 using (var writer = new BulkWriter<MyClass>(connectionString))
@@ -68,7 +68,7 @@ using (var writer = new BulkWriter<MyClass>(connectionString))
 
 ## Transform
 
-With transform you can apply changes in-place.
+```Transform``` can apply changes in-place.
 
 ```csharp
 using (var writer = new BulkWriter<MyClass>(connectionString))
