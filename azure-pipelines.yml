@@ -52,9 +52,9 @@ steps:
 
 - task: PowerShell@2
   displayName: Build and Test
-  continueOnError: true
   inputs:
     targetType: 'inline'
+    pwsh: true
     script: |
       invoke-psake run-ci -properties @{'version'='$(Build.BuildNumber)'}
 
@@ -66,6 +66,7 @@ steps:
   inputs:
     testResultsFormat: 'VSTest'
     testResultsFiles: '$(Build.SourcesDirectory)/src/BulkWriter.Tests/TestResults/*.xml'
+  condition: succeededOrFailed()
   displayName: Publish Test Results to Pipeline
 
 - task: DotNetCoreCLI@2
