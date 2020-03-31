@@ -1,6 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <VersionPrefix>3.0.0</VersionPrefix>
     <Authors>Headspring</Authors>
     <TargetFrameworks>net461;netstandard2.0</TargetFrameworks>
     <Summary>LINQ to SQL bulk copy</Summary>
