@@ -73,7 +73,6 @@ steps:
   inputs:
     command: pack
     packagesToPack: '$(Build.SourcesDirectory)/src/BulkWriter/BulkWriter.csproj'
-  condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), startsWith(variables['Build.SourceBranch'], 'refs/tags/')))
   displayName: Create Nuget Package
 
 
@@ -82,5 +81,4 @@ steps:
     targetPath: $(Build.ArtifactStagingDirectory)
     artifact: 'package'
     publishLocation: 'pipeline'
-  condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), startsWith(variables['Build.SourceBranch'], 'refs/tags/')))
   displayName: Publish Deployment Artifact
