@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using BulkWriter.Pipeline.Steps;
 using BulkWriter.Pipeline.Transforms;
+using Microsoft.Extensions.Logging;
 
 namespace BulkWriter.Pipeline.Internal
 {
@@ -14,10 +15,14 @@ namespace BulkWriter.Pipeline.Internal
         protected readonly BlockingCollection<TIn> InputCollection;
         protected readonly BlockingCollection<TOut> OutputCollection = new BlockingCollection<TOut>();
 
+        public ILogger Logger { get; set; }
+        protected int StepNumber { get; }
+
         protected EtlPipelineStep(EtlPipelineContext pipelineContext, BlockingCollection<TIn> inputCollection)
         {
             PipelineContext = pipelineContext;
             InputCollection = inputCollection;
+            StepNumber = pipelineContext.Pipeline.StepCount;
         }
 
         public IEtlPipelineStep<TOut, TNextOut> Aggregate<TNextOut>(IAggregator<TOut, TNextOut> aggregator)
@@ -96,10 +101,19 @@ namespace BulkWriter.Pipeline.Internal
         {
             try
             {
+                Logger?.LogInformation($"Starting pipeline step {StepNumber} of {PipelineContext.Pipeline.StepCount}");
                 action();
             }
+
+            catch (Exception e)
+            {
+                Logger?.LogError(e, $"Error during pipeline processing in step {StepNumber} of {PipelineContext.Pipeline.StepCount}");
+            }
+
             finally
             {
+                Logger?.LogInformation($"Completing pipeline step {StepNumber} of {PipelineContext.Pipeline.StepCount}");
+
                 //This statement is in place to ensure that no matter what, the output collection
                 //will be marked "complete".  Without this, an exception in the action above can
                 //lead to a stalled (i.e. non-terminating) pipeline because this thread's consumer
