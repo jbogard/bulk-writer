@@ -3,7 +3,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using BulkWriter.Pipeline.Internal;
 using BulkWriter.Pipeline.Steps;
-using Microsoft.Extensions.Logging;
 
 namespace BulkWriter.Pipeline
 {
@@ -14,9 +13,6 @@ namespace BulkWriter.Pipeline
     public sealed class EtlPipeline : IEtlPipeline
     {
         private readonly Stack<IEtlPipelineStep> _pipelineSteps = new Stack<IEtlPipelineStep>();
-        private ILogger _logger = null;
-
-        public int StepCount => _pipelineSteps.Count;
 
         private EtlPipeline()
         {
@@ -30,25 +26,15 @@ namespace BulkWriter.Pipeline
         public Task ExecuteAsync(CancellationToken cancellationToken)
         {
             var finalStep = _pipelineSteps.Pop();
-            finalStep.Logger = _logger;
-
             var finalTask = Task.Run(() => finalStep.Run(cancellationToken), cancellationToken);
 
             while (_pipelineSteps.Count != 0)
             {
                 var taskAction = _pipelineSteps.Pop();
-                taskAction.Logger = _logger;
-
                 Task.Run(() => taskAction.Run(cancellationToken), cancellationToken);
             }
 
             return finalTask;
-        }
-
-        public IEtlPipeline LogTo(ILogger logger)
-        {
-            _logger = logger;
-            return this;
         }
 
         /// <summary>

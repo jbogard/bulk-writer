@@ -15,14 +15,13 @@ namespace BulkWriter.Pipeline.Internal
         protected readonly BlockingCollection<TIn> InputCollection;
         protected readonly BlockingCollection<TOut> OutputCollection = new BlockingCollection<TOut>();
 
-        public ILogger Logger { get; set; }
         protected int StepNumber { get; }
 
         protected EtlPipelineStep(EtlPipelineContext pipelineContext, BlockingCollection<TIn> inputCollection)
         {
             PipelineContext = pipelineContext;
             InputCollection = inputCollection;
-            StepNumber = pipelineContext.Pipeline.StepCount;
+            StepNumber = pipelineContext.StepCount;
         }
 
         public IEtlPipelineStep<TOut, TNextOut> Aggregate<TNextOut>(IAggregator<TOut, TNextOut> aggregator)
@@ -89,6 +88,12 @@ namespace BulkWriter.Pipeline.Internal
             return step;
         }
 
+        public IEtlPipelineStep<TIn, TOut> LogTo(ILogger logger)
+        {
+            PipelineContext.Logger = logger;
+            return this;
+        }
+
         public IEtlPipeline WriteTo(IBulkWriter<TOut> bulkWriter)
         {
             var step = new BulkWriterEtlPipelineStep<TOut>(PipelineContext, OutputCollection, bulkWriter);
@@ -101,18 +106,18 @@ namespace BulkWriter.Pipeline.Internal
         {
             try
             {
-                Logger?.LogInformation($"Starting pipeline step {StepNumber} of {PipelineContext.Pipeline.StepCount}");
+                PipelineContext.Logger?.LogInformation($"Starting pipeline step {StepNumber} of {PipelineContext.StepCount}");
                 action();
             }
 
             catch (Exception e)
             {
-                Logger?.LogError(e, $"Error during pipeline processing in step {StepNumber} of {PipelineContext.Pipeline.StepCount}");
+                PipelineContext.Logger?.LogError(e, $"Error during pipeline processing in step {StepNumber} of {PipelineContext.StepCount}");
             }
 
             finally
             {
-                Logger?.LogInformation($"Completing pipeline step {StepNumber} of {PipelineContext.Pipeline.StepCount}");
+                PipelineContext.Logger?.LogInformation($"Completing pipeline step {StepNumber} of {PipelineContext.StepCount}");
 
                 //This statement is in place to ensure that no matter what, the output collection
                 //will be marked "complete".  Without this, an exception in the action above can

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using BulkWriter.Pipeline.Transforms;
+using Microsoft.Extensions.Logging;
 
 namespace BulkWriter.Pipeline.Steps
 {
@@ -72,6 +73,13 @@ namespace BulkWriter.Pipeline.Steps
         /// <param name="transformActions">One or more actions that will transform input objects in place</param>
         /// <returns>Next step in the pipeline to be configured</returns>
         IEtlPipelineStep<TOut, TOut> TransformInPlace(params Action<TOut>[] transformActions);
+
+        /// <summary>
+        /// Enable logging for all steps in this pipeline
+        /// </summary>
+        /// <param name="logger"></param>
+        /// <returns></returns>
+        IEtlPipelineStep<TIn, TOut> LogTo(ILogger logger);
 
         /// <summary>
         /// Configures the pipeline to write its output to a BulkWriter object; finalizes the pipeline.
