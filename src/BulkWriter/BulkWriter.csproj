@@ -13,7 +13,7 @@
     <PackageIcon>logo.png</PackageIcon>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="System.ComponentModel.Annotations" Version="4.6.0" />
+    <PackageReference Include="System.ComponentModel.Annotations" Version="4.7.0" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="1.1.1" />
   </ItemGroup>
   <ItemGroup>
