@@ -14,7 +14,7 @@ namespace BulkWriter
     /// </summary>
     /// <typeparam name="TResult">Type of objects to be written to the database</typeparam>
     /// <inheritdoc cref="IBulkWriter{TResult}"/>
-    public class BulkWriter<TResult> : IBulkWriter<TResult>
+    public sealed class BulkWriter<TResult> : IBulkWriter<TResult>
     {
         private readonly SqlBulkCopy _sqlBulkCopy;
         private readonly IEnumerable<PropertyMapping> _propertyMappings;
