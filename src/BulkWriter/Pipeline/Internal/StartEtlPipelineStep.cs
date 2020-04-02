@@ -13,15 +13,12 @@ namespace BulkWriter.Pipeline.Internal
             _inputEnumerable = inputEnumerable;
         }
 
-        public override void Run(CancellationToken cancellationToken)
+        protected override void RunCore(CancellationToken cancellationToken)
         {
-            RunSafely(() =>
+            foreach (var item in _inputEnumerable)
             {
-                foreach (var item in _inputEnumerable)
-                {
-                    OutputCollection.Add(item, cancellationToken);
-                }
-            });
+                OutputCollection.Add(item, cancellationToken);
+            }
         }
     }
 }

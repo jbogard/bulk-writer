@@ -14,21 +14,18 @@ namespace BulkWriter.Pipeline.Internal
             _pivotFunc = pivotFunc ?? throw new ArgumentNullException(nameof(pivotFunc));
         }
 
-        public override void Run(CancellationToken cancellationToken)
+        protected override void RunCore(CancellationToken cancellationToken)
         {
             var enumerable = InputCollection.GetConsumingEnumerable(cancellationToken);
 
-            RunSafely(() =>
+            foreach (var item in enumerable)
             {
-                foreach (var item in enumerable)
+                var outputs = _pivotFunc(item);
+                foreach (var output in outputs)
                 {
-                    var outputs = _pivotFunc(item);
-                    foreach (var output in outputs)
-                    {
-                        OutputCollection.Add(output, cancellationToken);
-                    }
+                    OutputCollection.Add(output, cancellationToken);
                 }
-            });
+            }
         }
     }
 }

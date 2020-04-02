@@ -13,18 +13,15 @@ namespace BulkWriter.Pipeline.Internal
             _projectionFunc = projectionFunc ?? throw new ArgumentNullException(nameof(projectionFunc));
         }
 
-        public override void Run(CancellationToken cancellationToken)
+        protected override void RunCore(CancellationToken cancellationToken)
         {
             var enumerable = InputCollection.GetConsumingEnumerable(cancellationToken);
 
-            RunSafely(() =>
+            foreach (var item in enumerable)
             {
-                foreach (var item in enumerable)
-                {
-                    var result = _projectionFunc(item);
-                    OutputCollection.Add(result, cancellationToken);
-                }
-            });
+                var result = _projectionFunc(item);
+                OutputCollection.Add(result, cancellationToken);
+            }
         }
     }
 }

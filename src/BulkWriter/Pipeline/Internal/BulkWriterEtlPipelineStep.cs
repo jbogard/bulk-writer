@@ -12,7 +12,7 @@ namespace BulkWriter.Pipeline.Internal
             _bulkWriter = bulkWriter;
         }
 
-        public override void Run(CancellationToken cancellationToken)
+        protected override void RunCore(CancellationToken cancellationToken)
         {
             var enumerable = InputCollection.GetConsumingEnumerable(cancellationToken);
             _bulkWriter.WriteToDatabase(enumerable);

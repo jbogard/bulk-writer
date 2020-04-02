@@ -14,15 +14,12 @@ namespace BulkWriter.Pipeline.Internal
             _aggregationFunc = aggregationFunc ?? throw new ArgumentNullException(nameof(aggregationFunc));
         }
 
-        public override void Run(CancellationToken cancellationToken)
+        protected override void RunCore(CancellationToken cancellationToken)
         {
             var enumerable = InputCollection.GetConsumingEnumerable(cancellationToken);
 
-            RunSafely(() =>
-            {
-                var result = _aggregationFunc(enumerable);
-                OutputCollection.Add(result, cancellationToken);
-            });
+            var result = _aggregationFunc(enumerable);
+            OutputCollection.Add(result, cancellationToken);
         }
     }
 }

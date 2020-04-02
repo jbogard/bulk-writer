@@ -92,23 +92,24 @@ namespace BulkWriter.Pipeline.Internal
             return PipelineContext.Pipeline;
         }
 
-        protected void RunSafely(Action action)
+        protected abstract void RunCore(CancellationToken cancellationToken);
+
+        public void Run(CancellationToken cancellationToken)
         {
             try
             {
-                action();
+                RunCore(cancellationToken);
             }
             finally
             {
                 //This statement is in place to ensure that no matter what, the output collection
-                //will be marked "complete".  Without this, an exception in the action above can
+                //will be marked "complete". Without this, an exception in the try block above can
                 //lead to a stalled (i.e. non-terminating) pipeline because this thread's consumer
                 //is waiting for more output from this thread, which will never happen because the
-                //thread is now dead.
+                //thread is now dead. This should also ensure we get at least partial output in case
+                //of an exception.
                 OutputCollection.CompleteAdding();
             }
         }
-
-        public abstract void Run(CancellationToken cancellationToken);
     }
 }

@@ -13,22 +13,19 @@ namespace BulkWriter.Pipeline.Internal
             _transformActions = transformActions;
         }
 
-        public override void Run(CancellationToken cancellationToken)
+        protected override void RunCore(CancellationToken cancellationToken)
         {
             var enumerable = InputCollection.GetConsumingEnumerable(cancellationToken);
 
-            RunSafely(() =>
+            foreach (var item in enumerable)
             {
-                foreach (var item in enumerable)
+                foreach (var transformAction in _transformActions)
                 {
-                    foreach (var transformAction in _transformActions)
-                    {
-                        transformAction(item);
-                    }
-
-                    OutputCollection.Add(item, cancellationToken);
+                    transformAction(item);
                 }
-            });
+
+                OutputCollection.Add(item, cancellationToken);
+            }
         }
     }
 }
