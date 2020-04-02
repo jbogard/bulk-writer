@@ -45,7 +45,7 @@ namespace BulkWriter.Tests.Pipeline
         }
 
         [Fact]
-        public async Task RunsToCompletionWhenAStepThrows()
+        public async Task ThrowsWhenAStepThrows()
         {
             var tableName = TestHelpers.DropCreate(nameof(PipelineTestsMyTestClass));
 
@@ -54,14 +54,40 @@ namespace BulkWriter.Tests.Pipeline
                 var items = Enumerable.Range(1, 1000).Select(i => new PipelineTestsMyTestClass { Id = i, Name = "Bob" });
                 var pipeline = EtlPipeline
                     .StartWith(items)
-                    .Project<PipelineTestsMyTestClass>(i => throw new Exception())
+                    .Project<PipelineTestsMyTestClass>(i => throw new Exception("Projection exception"))
                     .WriteTo(writer);
 
-                await pipeline.ExecuteAsync();
+                var pipelineTask = pipeline.ExecuteAsync();
+                await Assert.ThrowsAsync<Exception>(() => pipelineTask);
 
                 var count = (int)await TestHelpers.ExecuteScalar(_connectionString, $"SELECT COUNT(1) FROM {tableName}");
-
                 Assert.Equal(0, count);
+            }
+        }
+
+        [Fact]
+        public async Task PartiallyCompletesWhenAStepThrows()
+        {
+            var tableName = TestHelpers.DropCreate(nameof(PipelineTestsMyTestClass));
+
+            using (var writer = new BulkWriter<PipelineTestsMyTestClass>(_connectionString))
+            {
+                var items = Enumerable.Range(1, 1000).Select(i => new PipelineTestsMyTestClass { Id = i, Name = "Bob" });
+                var pipeline = EtlPipeline
+                    .StartWith(items)
+                    .TransformInPlace(i =>
+                    {
+                        if (i.Id > 500) throw new Exception("Transform exception");
+                        i.Id -= 1;
+                        i.Name = $"Alice {i.Id}";
+                    })
+                    .WriteTo(writer);
+
+                var pipelineTask = pipeline.ExecuteAsync();
+                await Assert.ThrowsAsync<Exception>(() => pipelineTask);
+
+                var count = (int)await TestHelpers.ExecuteScalar(_connectionString, $"SELECT COUNT(1) FROM {tableName}");
+                Assert.Equal(500, count);
             }
         }
 

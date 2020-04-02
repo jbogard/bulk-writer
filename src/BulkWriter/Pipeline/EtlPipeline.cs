@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using BulkWriter.Pipeline.Internal;
@@ -12,7 +13,7 @@ namespace BulkWriter.Pipeline
     /// <inheritdoc cref="IEtlPipeline"/>
     public sealed class EtlPipeline : IEtlPipeline
     {
-        private readonly Stack<IEtlPipelineStep> _pipelineSteps = new Stack<IEtlPipelineStep>();
+        private readonly List<IEtlPipelineStep> _pipelineSteps = new List<IEtlPipelineStep>();
 
         private EtlPipeline()
         {
@@ -25,16 +26,13 @@ namespace BulkWriter.Pipeline
 
         public Task ExecuteAsync(CancellationToken cancellationToken)
         {
-            var finalStep = _pipelineSteps.Pop();
-            var finalTask = Task.Run(() => finalStep.Run(cancellationToken), cancellationToken);
+            var pipelineTasks = _pipelineSteps.Select(s => Task.Run(() => s.Run(cancellationToken), cancellationToken));
+            return Task.WhenAll(pipelineTasks);
+        }
 
-            while (_pipelineSteps.Count != 0)
-            {
-                var taskAction = _pipelineSteps.Pop();
-                Task.Run(() => taskAction.Run(cancellationToken), cancellationToken);
-            }
-
-            return finalTask;
+        private void AddStep(IEtlPipelineStep etlPipelineStep)
+        {
+            _pipelineSteps.Add(etlPipelineStep);
         }
 
         /// <summary>
@@ -46,10 +44,10 @@ namespace BulkWriter.Pipeline
         public static IEtlPipelineStep<T, T> StartWith<T>(IEnumerable<T> input)
         {
             var pipeline = new EtlPipeline();
-            var etlPipelineSetupContext = new EtlPipelineContext(pipeline, (p, s) => pipeline._pipelineSteps.Push(s));
+            var etlPipelineSetupContext = new EtlPipelineContext(pipeline, (p, s) => pipeline.AddStep(s));
             var step = new StartEtlPipelineStep<T>(etlPipelineSetupContext, input);
 
-            pipeline._pipelineSteps.Push(step);
+            etlPipelineSetupContext.AddStep(step);
 
             return step;
         }
