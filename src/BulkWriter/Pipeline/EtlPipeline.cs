@@ -44,7 +44,7 @@ namespace BulkWriter.Pipeline
         public static IEtlPipelineStep<T, T> StartWith<T>(IEnumerable<T> input)
         {
             var pipeline = new EtlPipeline();
-            var etlPipelineSetupContext = new EtlPipelineContext(pipeline, (p, s) => pipeline.AddStep(s));
+            var etlPipelineSetupContext = new EtlPipelineContext(pipeline, s => pipeline.AddStep(s));
             var step = new StartEtlPipelineStep<T>(etlPipelineSetupContext, input);
 
             etlPipelineSetupContext.AddStep(step);
