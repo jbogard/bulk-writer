@@ -8,16 +8,30 @@ using BulkWriter.Pipeline.Transforms;
 
 namespace BulkWriter.Pipeline.Internal
 {
-    internal abstract class EtlPipelineStep<TIn, TOut> : IEtlPipelineStep<TIn, TOut>, IEtlPipelineStep
+    internal abstract class EtlPipelineStepBase<TOut>
     {
-        protected readonly EtlPipelineContext PipelineContext;
-        protected readonly BlockingCollection<TIn> InputCollection;
-        protected readonly BlockingCollection<TOut> OutputCollection = new BlockingCollection<TOut>();
-
-        protected EtlPipelineStep(EtlPipelineContext pipelineContext, BlockingCollection<TIn> inputCollection)
+        protected EtlPipelineStepBase(EtlPipelineContext pipelineContext)
         {
             PipelineContext = pipelineContext;
-            InputCollection = inputCollection;
+            OutputCollection = new BlockingCollection<TOut>();
+        }
+
+        internal readonly EtlPipelineContext PipelineContext;
+        internal readonly BlockingCollection<TOut> OutputCollection;
+    }
+
+    internal abstract class EtlPipelineStep<TIn, TOut> : EtlPipelineStepBase<TOut>, IEtlPipelineStep<TIn, TOut>, IEtlPipelineStep
+    {
+        internal readonly BlockingCollection<TIn> InputCollection;
+
+        protected EtlPipelineStep(EtlPipelineContext pipelineContext) : base(pipelineContext)
+        {
+            InputCollection = new BlockingCollection<TIn>();
+        }
+
+        protected EtlPipelineStep(EtlPipelineStepBase<TIn> previousStep) : base(previousStep.PipelineContext)
+        {
+            InputCollection = previousStep.OutputCollection;
         }
 
         public IEtlPipelineStep<TOut, TNextOut> Aggregate<TNextOut>(IAggregator<TOut, TNextOut> aggregator)
@@ -30,7 +44,7 @@ namespace BulkWriter.Pipeline.Internal
         {
             if (aggregationFunc == null) throw new ArgumentNullException(nameof(aggregationFunc));
 
-            var step = new AggregateEtlPipelineStep<TOut, TNextOut>(PipelineContext, OutputCollection, aggregationFunc);
+            var step = new AggregateEtlPipelineStep<TOut, TNextOut>(this, aggregationFunc);
             PipelineContext.AddStep(step);
 
             return step;
@@ -46,7 +60,7 @@ namespace BulkWriter.Pipeline.Internal
         {
             if (pivotFunc == null) throw new ArgumentNullException(nameof(pivotFunc));
 
-            var step = new PivotEtlPipelineStep<TOut, TNextOut>(PipelineContext, OutputCollection, pivotFunc);
+            var step = new PivotEtlPipelineStep<TOut, TNextOut>(this, pivotFunc);
             PipelineContext.AddStep(step);
 
             return step;
@@ -62,7 +76,7 @@ namespace BulkWriter.Pipeline.Internal
         {
             if (projectionFunc == null) throw new ArgumentNullException(nameof(projectionFunc));
 
-            var step = new ProjectEtlPipelineStep<TOut, TNextOut>(PipelineContext, OutputCollection, projectionFunc);
+            var step = new ProjectEtlPipelineStep<TOut, TNextOut>(this, projectionFunc);
             PipelineContext.AddStep(step);
 
             return step;
@@ -78,7 +92,7 @@ namespace BulkWriter.Pipeline.Internal
         {
             if (transformActions == null || transformActions.Any(t => t == null)) throw new ArgumentNullException(nameof(transformActions), @"No transformer may be null");
 
-            var step = new TransformEtlPipelineStep<TOut>(PipelineContext, OutputCollection, transformActions);
+            var step = new TransformEtlPipelineStep<TOut>(this, transformActions);
             PipelineContext.AddStep(step);
 
             return step;
@@ -86,29 +100,30 @@ namespace BulkWriter.Pipeline.Internal
 
         public IEtlPipeline WriteTo(IBulkWriter<TOut> bulkWriter)
         {
-            var step = new BulkWriterEtlPipelineStep<TOut>(PipelineContext, OutputCollection, bulkWriter);
+            var step = new BulkWriterEtlPipelineStep<TOut>(this, bulkWriter);
             PipelineContext.AddStep(step);
 
             return PipelineContext.Pipeline;
         }
 
-        protected void RunSafely(Action action)
+        protected abstract void RunCore(CancellationToken cancellationToken);
+
+        public void Run(CancellationToken cancellationToken)
         {
             try
             {
-                action();
+                RunCore(cancellationToken);
             }
             finally
             {
                 //This statement is in place to ensure that no matter what, the output collection
-                //will be marked "complete".  Without this, an exception in the action above can
+                //will be marked "complete". Without this, an exception in the try block above can
                 //lead to a stalled (i.e. non-terminating) pipeline because this thread's consumer
                 //is waiting for more output from this thread, which will never happen because the
-                //thread is now dead.
+                //thread is now dead. This should also ensure we get at least partial output in case
+                //of an exception.
                 OutputCollection.CompleteAdding();
             }
         }
-
-        public abstract void Run(CancellationToken cancellationToken);
     }
 }

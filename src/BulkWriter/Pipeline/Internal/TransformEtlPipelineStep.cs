@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Threading;
 
 namespace BulkWriter.Pipeline.Internal
@@ -8,27 +7,24 @@ namespace BulkWriter.Pipeline.Internal
     {
         private readonly Action<TOut>[] _transformActions;
 
-        public TransformEtlPipelineStep(EtlPipelineContext pipelineContext, BlockingCollection<TOut> inputCollection, params Action<TOut>[] transformActions) : base(pipelineContext, inputCollection)
+        public TransformEtlPipelineStep(EtlPipelineStepBase<TOut> previousStep, params Action<TOut>[] transformActions) : base(previousStep)
         {
             _transformActions = transformActions;
         }
 
-        public override void Run(CancellationToken cancellationToken)
+        protected override void RunCore(CancellationToken cancellationToken)
         {
             var enumerable = InputCollection.GetConsumingEnumerable(cancellationToken);
 
-            RunSafely(() =>
+            foreach (var item in enumerable)
             {
-                foreach (var item in enumerable)
+                foreach (var transformAction in _transformActions)
                 {
-                    foreach (var transformAction in _transformActions)
-                    {
-                        transformAction(item);
-                    }
-
-                    OutputCollection.Add(item, cancellationToken);
+                    transformAction(item);
                 }
-            });
+
+                OutputCollection.Add(item, cancellationToken);
+            }
         }
     }
 }

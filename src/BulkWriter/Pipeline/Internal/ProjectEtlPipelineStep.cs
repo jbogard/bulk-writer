@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Threading;
 
 namespace BulkWriter.Pipeline.Internal
@@ -8,23 +7,20 @@ namespace BulkWriter.Pipeline.Internal
     {
         private readonly Func<TIn, TOut> _projectionFunc;
 
-        public ProjectEtlPipelineStep(EtlPipelineContext pipelineContext, BlockingCollection<TIn> inputCollection, Func<TIn, TOut> projectionFunc) : base(pipelineContext, inputCollection)
+        public ProjectEtlPipelineStep(EtlPipelineStepBase<TIn> previousStep, Func<TIn, TOut> projectionFunc) : base(previousStep)
         {
             _projectionFunc = projectionFunc ?? throw new ArgumentNullException(nameof(projectionFunc));
         }
 
-        public override void Run(CancellationToken cancellationToken)
+        protected override void RunCore(CancellationToken cancellationToken)
         {
             var enumerable = InputCollection.GetConsumingEnumerable(cancellationToken);
 
-            RunSafely(() =>
+            foreach (var item in enumerable)
             {
-                foreach (var item in enumerable)
-                {
-                    var result = _projectionFunc(item);
-                    OutputCollection.Add(result, cancellationToken);
-                }
-            });
+                var result = _projectionFunc(item);
+                OutputCollection.Add(result, cancellationToken);
+            }
         }
     }
 }

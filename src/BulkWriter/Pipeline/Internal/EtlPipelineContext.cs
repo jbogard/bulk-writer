@@ -4,9 +4,9 @@ namespace BulkWriter.Pipeline.Internal
 {
     internal class EtlPipelineContext
     {
-        private readonly Action<IEtlPipeline, IEtlPipelineStep> _addStepAction;
+        private readonly Action<IEtlPipelineStep> _addStepAction;
 
-        public EtlPipelineContext(IEtlPipeline etlPipeline, Action<IEtlPipeline, IEtlPipelineStep> addStepAction)
+        public EtlPipelineContext(IEtlPipeline etlPipeline, Action<IEtlPipelineStep> addStepAction)
         {
             Pipeline = etlPipeline;
             _addStepAction = addStepAction;
@@ -16,7 +16,7 @@ namespace BulkWriter.Pipeline.Internal
 
         public void AddStep(IEtlPipelineStep step)
         {
-            _addStepAction(Pipeline, step);
+            _addStepAction(step);
         }
     }
 }
