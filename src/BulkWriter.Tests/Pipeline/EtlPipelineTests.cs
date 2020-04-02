@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using BulkWriter.Pipeline;
+using Microsoft.Extensions.Logging;
 using Xunit;
 
 namespace BulkWriter.Tests.Pipeline
@@ -263,6 +265,105 @@ namespace BulkWriter.Tests.Pipeline
             }
         }
 
+        [Fact]
+        public async Task IgnoresNullLogger()
+        {
+            using (var writer = new TestBulkWriter<PipelineTestsMyTestClass>())
+            {
+                var items = Enumerable.Range(1, 1000).Select(i => new PipelineTestsMyTestClass { Id = i, Name = "Bob" });
+                var pipeline = EtlPipeline
+                    .StartWith(items)
+                    .TransformInPlace(i =>
+                    {
+                        i.Id -= 1;
+                        i.Name = $"Alice {i.Id}";
+                    })
+                    .LogWith(null)
+                    .WriteTo(writer);
+
+                await pipeline.ExecuteAsync();
+
+                Assert.Equal(1000, writer.ItemsWritten.Count);
+            }
+        }
+
+        [Fact]
+        public async Task LogsStartAndFinishOfPipelineSteps()
+        {
+            using (var writer = new TestBulkWriter<PipelineTestsOtherTestClass>())
+            {
+                var items = Enumerable.Range(1, 1000).Select(i => new PipelineTestsMyTestClass { Id = i, Name = "Bob" });
+                var logger = new FakeLoggerFactory();
+                var pipeline = EtlPipeline
+                    .StartWith(items)
+                    .LogWith(logger)
+                    .Aggregate(f =>
+                    {
+                        Thread.Sleep(1);
+                        return f.Max(c => c.Id);
+                    })
+                    .Pivot(i =>
+                    {
+                        var result = new List<PipelineTestsMyTestClass>();
+                        for (var j = 1; j <= i; j++)
+                        {
+                            result.Add(new PipelineTestsMyTestClass { Id = j, Name = $"Bob {j}" });
+                        }
+                        return result;
+                    })
+                    .Project(i =>
+                    {
+                        var nameParts = i.Name.Split(' ');
+                        return new PipelineTestsOtherTestClass { Id = i.Id, FirstName = nameParts[0], LastName = nameParts[1] };
+                    })
+                    .TransformInPlace(i =>
+                    {
+                        i.Id -= 1;
+                        i.FirstName = "Alice";
+                        i.LastName = $"{i.Id}";
+                    })
+                    .WriteTo(writer);
+
+                await pipeline.ExecuteAsync();
+
+                var totalStepsExpected = 6;
+                Assert.True(2 * totalStepsExpected == logger.LoggedMessages.Count, string.Join("\r\n", logger.LoggedMessages.Select(m => m.Message))); //2 log messages for each step in the pipeline
+
+                for (var i = 1; i <= totalStepsExpected; i++)
+                {
+                    var messagesForStep = logger.LoggedMessages.Where(m => m.Message.Contains($"step {i} of {totalStepsExpected}")).ToList();
+                    Assert.True(messagesForStep.Count == 2, $"Found {messagesForStep.Count} messages for step {i}");
+
+                    Assert.Equal(1, messagesForStep.Count(m => m.Message.Contains("Starting")));
+                    Assert.Equal(1, messagesForStep.Count(m => m.Message.Contains("Completing")));
+                }
+            }
+        }
+
+        [Fact]
+        public async Task LogsExceptionInPipelineStep()
+        {
+            using (var writer = new TestBulkWriter<PipelineTestsMyTestClass>())
+            {
+                var items = Enumerable.Range(1, 1000).Select(i => new PipelineTestsMyTestClass { Id = i, Name = "Bob" });
+                var logger = new FakeLoggerFactory();
+                var pipeline = EtlPipeline
+                    .StartWith(items)
+                    .Project<PipelineTestsMyTestClass>(i => throw new Exception("This is my exception"))
+                    .LogWith(logger)
+                    .WriteTo(writer);
+
+                var pipelineTask = pipeline.ExecuteAsync();
+                await Assert.ThrowsAsync<Exception>(() => pipelineTask);
+
+                var errorMessages = logger.LoggedMessages.Where(m => m.LogLevel == LogLevel.Error).ToList();
+                Assert.Single(errorMessages);
+
+                Assert.Contains("Error", errorMessages[0].Message);
+                Assert.Equal("This is my exception", errorMessages[0].Exception.Message);
+            }
+        }
+
         private class TestBulkWriter<T> : IBulkWriter<T>
         {
             public List<T> ItemsWritten { get; } = new List<T>();
@@ -280,6 +381,73 @@ namespace BulkWriter.Tests.Pipeline
             {
                 ItemsWritten.AddRange(items);
                 return Task.CompletedTask;
+            }
+        }
+
+        private class FakeLoggerFactory : ILoggerFactory
+        {
+            public List<FakeLogger> LoggerInstances { get; } = new List<FakeLogger>();
+            public List<FakeLogger.LogEntry> LoggedMessages => LoggerInstances.SelectMany(i => i.LoggedMessages).ToList();
+            private readonly object _lock = new object();
+
+            public void Dispose()
+            {
+            }
+
+            public ILogger CreateLogger(string categoryName)
+            {
+                lock (_lock)
+                {
+                    var logger = new FakeLogger();
+                    LoggerInstances.Add(logger);
+
+                    return logger;
+                }
+            }
+
+            public void AddProvider(ILoggerProvider provider)
+            {
+            }
+        }
+
+
+        private class FakeLogger : ILogger
+        {
+            public List<LogEntry> LoggedMessages { get; } = new List<LogEntry>();
+
+            public class LogEntry
+            {
+                public string Message { get; set; }
+                public LogLevel LogLevel { get; set; }
+                public Exception Exception { get; set; }
+            }
+
+            public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception,
+                Func<TState, Exception, string> formatter)
+            {
+                LoggedMessages.Add(new LogEntry
+                {
+                    Exception = exception,
+                    LogLevel = logLevel,
+                    Message = formatter(state, exception)
+                });
+            }
+
+            public bool IsEnabled(LogLevel logLevel)
+            {
+                return true;
+            }
+
+            public IDisposable BeginScope<TState>(TState state)
+            {
+                return new FakeLogScope();
+            }
+
+            private sealed class FakeLogScope : IDisposable
+            {
+                public void Dispose()
+                {
+                }
             }
         }
     }
