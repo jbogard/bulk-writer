@@ -73,6 +73,7 @@ steps:
   inputs:
     command: pack
     packagesToPack: '$(Build.SourcesDirectory)/src/BulkWriter/BulkWriter.csproj'
+    configurationToPack: Release
   displayName: Create Nuget Package
 
 
