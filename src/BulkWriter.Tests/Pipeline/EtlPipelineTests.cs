@@ -58,10 +58,45 @@ namespace BulkWriter.Tests.Pipeline
                     .WriteTo(writer);
 
                 var pipelineTask = pipeline.ExecuteAsync();
+                var exception = await Assert.ThrowsAsync<Exception>(() => pipelineTask);
+                Assert.Equal("Projection exception", exception.Message);
+            }
+        }
+
+        [Fact]
+        public async Task RaisesExceptionsForAllStepsThatThrow()
+        {
+            var tableName = TestHelpers.DropCreate(nameof(PipelineTestsMyTestClass));
+
+            using (var writer = new BulkWriter<PipelineTestsMyTestClass>(_connectionString))
+            {
+                var items = Enumerable.Range(1, 1000).Select(i => new PipelineTestsMyTestClass { Id = i, Name = "Bob" });
+                var pipeline = EtlPipeline
+                    .StartWith(items)
+                    .Project(i =>
+                    {
+                        //pump a few values through to ensure the next pipeline step actually
+                        //gets run
+                        if (i.Id >= 400)
+                            throw new Exception("Projection exception 1");
+
+                        return i;
+                    })
+                    .Project(i =>
+                    {
+                        if (i.Id >= 200)
+                            throw new Exception("Projection exception 2");
+
+                        return i;
+                    })
+                    .WriteTo(writer);
+
+                var pipelineTask = pipeline.ExecuteAsync();
                 await Assert.ThrowsAsync<Exception>(() => pipelineTask);
 
-                var count = (int)await TestHelpers.ExecuteScalar(_connectionString, $"SELECT COUNT(1) FROM {tableName}");
-                Assert.Equal(0, count);
+                Assert.Equal(2, pipelineTask.Exception.InnerExceptions.Count);
+                Assert.Equal(1, pipelineTask.Exception.InnerExceptions.Count(e => e.Message == "Projection exception 1"));
+                Assert.Equal(1, pipelineTask.Exception.InnerExceptions.Count(e => e.Message == "Projection exception 2"));
             }
         }
 
