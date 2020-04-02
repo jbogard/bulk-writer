@@ -11,26 +11,29 @@ namespace BulkWriter.Pipeline.Internal
 {
     internal abstract class EtlPipelineStepBase<TOut>
     {
-        protected EtlPipelineStepBase(EtlPipelineContext pipelineContext)
+        protected EtlPipelineStepBase(EtlPipelineContext pipelineContext, int stepNumber)
         {
             PipelineContext = pipelineContext;
             OutputCollection = new BlockingCollection<TOut>();
+            StepNumber = stepNumber;
         }
 
         internal readonly EtlPipelineContext PipelineContext;
         internal readonly BlockingCollection<TOut> OutputCollection;
+
+        public int StepNumber { get; protected set; }
     }
 
     internal abstract class EtlPipelineStep<TIn, TOut> : EtlPipelineStepBase<TOut>, IEtlPipelineStep<TIn, TOut>, IEtlPipelineStep
     {
         internal readonly BlockingCollection<TIn> InputCollection;
 
-        protected EtlPipelineStep(EtlPipelineContext pipelineContext) : base(pipelineContext)
+        protected EtlPipelineStep(EtlPipelineContext pipelineContext) : base(pipelineContext, 1)
         {
             InputCollection = new BlockingCollection<TIn>();
         }
 
-        protected EtlPipelineStep(EtlPipelineStepBase<TIn> previousStep) : base(previousStep.PipelineContext)
+        protected EtlPipelineStep(EtlPipelineStepBase<TIn> previousStep) : base(previousStep.PipelineContext, previousStep.StepNumber + 1)
         {
             InputCollection = previousStep.OutputCollection;
         }
@@ -123,16 +126,16 @@ namespace BulkWriter.Pipeline.Internal
 
                 try
                 {
-                    logger?.LogInformation("Starting pipeline step");
+                    logger?.LogInformation($"Starting pipeline step {StepNumber} of {PipelineContext.TotalSteps}");
 
                     RunCore(cancellationToken);
 
-                    logger?.LogInformation("Completing pipeline step");
+                    logger?.LogInformation($"Completing pipeline step {StepNumber} of {PipelineContext.TotalSteps}");
                 }
 
                 catch (Exception e)
                 {
-                    logger?.LogError(e, "Error while running pipeline step");
+                    logger?.LogError(e, $"Error while running pipeline step {StepNumber} of {PipelineContext.TotalSteps}");
                     throw;
                 }
             }

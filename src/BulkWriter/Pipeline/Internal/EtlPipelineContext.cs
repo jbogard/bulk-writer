@@ -15,9 +15,11 @@ namespace BulkWriter.Pipeline.Internal
 
         public IEtlPipeline Pipeline { get; }
         public ILoggerFactory LoggerFactory { get; set; }
+        public int TotalSteps { get; private set; }
 
         public void AddStep(IEtlPipelineStep step)
         {
+            ++TotalSteps;
             _addStepToPipelineAction(step);
         }
     }
