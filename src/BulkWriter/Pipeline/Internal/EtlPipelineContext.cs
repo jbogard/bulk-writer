@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.Extensions.Logging;
 
 namespace BulkWriter.Pipeline.Internal
 {
@@ -13,6 +14,7 @@ namespace BulkWriter.Pipeline.Internal
         }
 
         public IEtlPipeline Pipeline { get; }
+        public ILoggerFactory LoggerFactory { get; set; }
 
         public void AddStep(IEtlPipelineStep step)
         {

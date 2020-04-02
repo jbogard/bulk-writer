@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using BulkWriter.Pipeline.Steps;
 using BulkWriter.Pipeline.Transforms;
+using Microsoft.Extensions.Logging;
 
 namespace BulkWriter.Pipeline.Internal
 {
@@ -98,6 +99,12 @@ namespace BulkWriter.Pipeline.Internal
             return step;
         }
 
+        public IEtlPipelineStep<TIn, TOut> LogWith(ILoggerFactory loggerFactory)
+        {
+            PipelineContext.LoggerFactory = loggerFactory;
+            return this;
+        }
+
         public IEtlPipeline WriteTo(IBulkWriter<TOut> bulkWriter)
         {
             var step = new BulkWriterEtlPipelineStep<TOut>(this, bulkWriter);
@@ -112,8 +119,24 @@ namespace BulkWriter.Pipeline.Internal
         {
             try
             {
-                RunCore(cancellationToken);
+                var logger = PipelineContext.LoggerFactory?.CreateLogger(GetType());
+
+                try
+                {
+                    logger?.LogInformation("Starting pipeline step");
+
+                    RunCore(cancellationToken);
+
+                    logger?.LogInformation("Completing pipeline step");
+                }
+
+                catch (Exception e)
+                {
+                    logger?.LogError(e, "Error while running pipeline step");
+                    throw;
+                }
             }
+
             finally
             {
                 //This statement is in place to ensure that no matter what, the output collection
