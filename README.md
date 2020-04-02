@@ -46,10 +46,14 @@ using (var bulkWriter = new BulkWriter<EntityToZipCodeDistance>(connectionString
 
 ## Building Locally
 
-Run the commands below to build and test the project.
-
+Run the following command once to setup your environment.
 ```
 PS> .\setup.ps1
+```
+
+Run the command below to build and test the project.
+
+```
 PS> .\psake.cmd
 ```
 
