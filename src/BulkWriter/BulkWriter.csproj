@@ -9,7 +9,7 @@
     <PackageProjectUrl>https://github.com/HeadspringLabs/bulk-writer</PackageProjectUrl>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>git://github.com/HeadspringLabs/bulk-writer</RepositoryUrl>
+    <RepositoryUrl>https://github.com/HeadspringLabs/bulk-writer</RepositoryUrl>
     <PackageIcon>logo.png</PackageIcon>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <IncludeSymbols>true</IncludeSymbols>
