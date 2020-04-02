@@ -1,5 +1,4 @@
-﻿using System.Collections.Concurrent;
-using System.Threading;
+﻿using System.Threading;
 
 namespace BulkWriter.Pipeline.Internal
 {
@@ -7,7 +6,7 @@ namespace BulkWriter.Pipeline.Internal
     {
         private readonly IBulkWriter<TEntity> _bulkWriter;
 
-        public BulkWriterEtlPipelineStep(EtlPipelineContext pipelineContext, BlockingCollection<TEntity> inputCollection, IBulkWriter<TEntity> bulkWriter) : base(pipelineContext, inputCollection)
+        public BulkWriterEtlPipelineStep(EtlPipelineStepBase<TEntity> previousStep, IBulkWriter<TEntity> bulkWriter) : base(previousStep)
         {
             _bulkWriter = bulkWriter;
         }

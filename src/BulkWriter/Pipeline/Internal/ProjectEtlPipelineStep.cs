@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Threading;
 
 namespace BulkWriter.Pipeline.Internal
@@ -8,7 +7,7 @@ namespace BulkWriter.Pipeline.Internal
     {
         private readonly Func<TIn, TOut> _projectionFunc;
 
-        public ProjectEtlPipelineStep(EtlPipelineContext pipelineContext, BlockingCollection<TIn> inputCollection, Func<TIn, TOut> projectionFunc) : base(pipelineContext, inputCollection)
+        public ProjectEtlPipelineStep(EtlPipelineStepBase<TIn> previousStep, Func<TIn, TOut> projectionFunc) : base(previousStep)
         {
             _projectionFunc = projectionFunc ?? throw new ArgumentNullException(nameof(projectionFunc));
         }

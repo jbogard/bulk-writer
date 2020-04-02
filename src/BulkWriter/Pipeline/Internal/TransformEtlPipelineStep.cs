@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Threading;
 
 namespace BulkWriter.Pipeline.Internal
@@ -8,7 +7,7 @@ namespace BulkWriter.Pipeline.Internal
     {
         private readonly Action<TOut>[] _transformActions;
 
-        public TransformEtlPipelineStep(EtlPipelineContext pipelineContext, BlockingCollection<TOut> inputCollection, params Action<TOut>[] transformActions) : base(pipelineContext, inputCollection)
+        public TransformEtlPipelineStep(EtlPipelineStepBase<TOut> previousStep, params Action<TOut>[] transformActions) : base(previousStep)
         {
             _transformActions = transformActions;
         }

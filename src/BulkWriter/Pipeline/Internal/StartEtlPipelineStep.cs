@@ -1,5 +1,4 @@
-﻿using System.Collections.Concurrent;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading;
 
 namespace BulkWriter.Pipeline.Internal
@@ -8,7 +7,7 @@ namespace BulkWriter.Pipeline.Internal
     {
         private readonly IEnumerable<TIn> _inputEnumerable;
 
-        public StartEtlPipelineStep(EtlPipelineContext pipelineContext, IEnumerable<TIn> inputEnumerable) : base(pipelineContext, new BlockingCollection<TIn>())
+        public StartEtlPipelineStep(EtlPipelineContext pipelineContext, IEnumerable<TIn> inputEnumerable) : base(pipelineContext)
         {
             _inputEnumerable = inputEnumerable;
         }
