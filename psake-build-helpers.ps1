@@ -15,7 +15,7 @@ function Get-Copyright {
     $date = Get-Date
     $year = $date.Year
     $copyrightSpan = if ($year -eq $yearInitiated) { $year } else { "$yearInitiated-$year" }
-    return "(c) $copyrightSpan $owner"
+    return "© $copyrightSpan $owner"
 }
 
 function Set-Regenerated-File($path, $newContent) {
