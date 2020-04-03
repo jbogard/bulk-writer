@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using BulkWriter.Pipeline.Transforms;
+using Microsoft.Extensions.Logging;
 
 namespace BulkWriter.Pipeline.Steps
 {
@@ -72,6 +73,13 @@ namespace BulkWriter.Pipeline.Steps
         /// <param name="transformActions">One or more actions that will transform input objects in place</param>
         /// <returns>Next step in the pipeline to be configured</returns>
         IEtlPipelineStep<TOut, TOut> TransformInPlace(params Action<TOut>[] transformActions);
+
+        /// <summary>
+        /// Enables logging of the ETL pipeline internals
+        /// </summary>
+        /// <param name="loggerFactory">Factory used to create a new ILogger</param>
+        /// <returns>Current step in the pipeline</returns>
+        IEtlPipelineStep<TIn, TOut> LogWith(ILoggerFactory loggerFactory);
 
         /// <summary>
         /// Configures the pipeline to write its output to a BulkWriter object; finalizes the pipeline.
