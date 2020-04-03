@@ -12,7 +12,6 @@ Please start a discussion on the [issue tracker](https://github.com/HeadspringLa
 BulkWriter is built using the RTM tooling that ships with Visual Studio 2019. This is the only configuration accepted.
 
 ## Building
-
 Run `.\setup.ps1` from the command line for the initial setup.
 
 Run `.\psake.cmd` to build and test the project.
