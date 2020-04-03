@@ -5,7 +5,7 @@ function Set-Project-Properties($version) {
 <Project>
     <PropertyGroup>
         <Version>$version</Version>
-		<Copyright>$(get-copyright)</Copyright>
+        <Copyright>$(get-copyright)</Copyright>
     </PropertyGroup>
 </Project>
 "@
@@ -15,7 +15,7 @@ function Get-Copyright {
     $date = Get-Date
     $year = $date.Year
     $copyrightSpan = if ($year -eq $yearInitiated) { $year } else { "$yearInitiated-$year" }
-    return "(c) $copyrightSpan $owner"
+    return  [char]0x00A9 + " $copyrightSpan $owner"
 }
 
 function Set-Regenerated-File($path, $newContent) {
