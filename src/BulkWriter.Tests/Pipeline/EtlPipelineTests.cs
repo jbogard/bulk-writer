@@ -293,10 +293,10 @@ namespace BulkWriter.Tests.Pipeline
             using (var writer = new TestBulkWriter<PipelineTestsOtherTestClass>())
             {
                 var items = Enumerable.Range(1, 1000).Select(i => new PipelineTestsMyTestClass { Id = i, Name = "Bob" });
-                var logger = new FakeLoggerFactory();
+                var loggerFactory = new FakeLoggerFactory();
                 var pipeline = EtlPipeline
                     .StartWith(items)
-                    .LogWith(logger)
+                    .LogWith(loggerFactory)
                     .Aggregate(f =>
                     {
                         Thread.Sleep(1);
@@ -327,11 +327,11 @@ namespace BulkWriter.Tests.Pipeline
                 await pipeline.ExecuteAsync();
 
                 var totalStepsExpected = 6;
-                Assert.True(2 * totalStepsExpected == logger.LoggedMessages.Count, string.Join("\r\n", logger.LoggedMessages.Select(m => m.Message))); //2 log messages for each step in the pipeline
+                Assert.True(2 * totalStepsExpected == loggerFactory.LoggedMessages.Count, string.Join("\r\n", loggerFactory.LoggedMessages.Select(m => m.Message))); //2 log messages for each step in the pipeline
 
                 for (var i = 1; i <= totalStepsExpected; i++)
                 {
-                    var messagesForStep = logger.LoggedMessages.Where(m => m.Message.Contains($"step {i} of {totalStepsExpected}")).ToList();
+                    var messagesForStep = loggerFactory.LoggedMessages.Where(m => m.Message.Contains($"step {i} of {totalStepsExpected}")).ToList();
                     Assert.True(messagesForStep.Count == 2, $"Found {messagesForStep.Count} messages for step {i}");
 
                     Assert.Equal(1, messagesForStep.Count(m => m.Message.Contains("Starting")));
@@ -346,17 +346,17 @@ namespace BulkWriter.Tests.Pipeline
             using (var writer = new TestBulkWriter<PipelineTestsMyTestClass>())
             {
                 var items = Enumerable.Range(1, 1000).Select(i => new PipelineTestsMyTestClass { Id = i, Name = "Bob" });
-                var logger = new FakeLoggerFactory();
+                var loggerFactory = new FakeLoggerFactory();
                 var pipeline = EtlPipeline
                     .StartWith(items)
                     .Project<PipelineTestsMyTestClass>(i => throw new Exception("This is my exception"))
-                    .LogWith(logger)
+                    .LogWith(loggerFactory)
                     .WriteTo(writer);
 
                 var pipelineTask = pipeline.ExecuteAsync();
                 await Assert.ThrowsAsync<Exception>(() => pipelineTask);
 
-                var errorMessages = logger.LoggedMessages.Where(m => m.LogLevel == LogLevel.Error).ToList();
+                var errorMessages = loggerFactory.LoggedMessages.Where(m => m.LogLevel == LogLevel.Error).ToList();
                 Assert.Single(errorMessages);
 
                 Assert.Contains("Error", errorMessages[0].Message);
@@ -409,7 +409,6 @@ namespace BulkWriter.Tests.Pipeline
             {
             }
         }
-
 
         private class FakeLogger : ILogger
         {
