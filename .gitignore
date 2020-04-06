@@ -108,6 +108,7 @@ Backup*/
 UpgradeLog*.XML
 
 *.nupkg
+*.snupkg
 .vs
 
 # GitHub Pages
