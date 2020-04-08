@@ -4,10 +4,11 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using BulkWriter.Internal;
 using BulkWriter.Properties;
 
 [assembly: InternalsVisibleTo("BulkWriter.Tests")]
-namespace BulkWriter.Internal
+namespace BulkWriter
 {
     internal class EnumerableDataReader<TResult> : DbDataReader
     {
