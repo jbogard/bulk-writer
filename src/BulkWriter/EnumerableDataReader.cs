@@ -3,12 +3,16 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
-using BulkWriter.Internal;
+using BulkWriter.Mapping;
 using BulkWriter.Properties;
 
 namespace BulkWriter
 {
-    internal class EnumerableDataReader<TResult> : DbDataReader
+    /// <summary>
+    /// Converts an input <c>IEnumerable{TResult}</c> to be readable as an <c>IDataReader</c>. This class is meant to be used as an input to an instance of <c>SqlBulkCopy</c> object.
+    /// </summary>
+    /// <typeparam name="TResult">Type of the record that should be presented via this DbDataReader</typeparam>
+    public class EnumerableDataReader<TResult> : DbDataReader
     {
         private readonly IEnumerable<TResult> _items;
         private readonly Dictionary<string, int> _nameToOrdinalMappings;
