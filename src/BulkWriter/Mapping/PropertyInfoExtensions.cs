@@ -4,7 +4,7 @@ using System.Reflection;
 using BulkWriter.Properties;
 using static System.Linq.Expressions.Expression;
 
-namespace BulkWriter.Internal
+namespace BulkWriter.Mapping
 {
     internal static class PropertyInfoExtensions
     {

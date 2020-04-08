@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Reflection;
 
-namespace BulkWriter.Internal
+namespace BulkWriter.Mapping
 {
     internal static class TypeExtensions
     {

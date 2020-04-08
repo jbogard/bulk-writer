@@ -5,7 +5,7 @@ using Microsoft.Data.SqlClient;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using BulkWriter.Internal;
+using BulkWriter.Mapping;
 
 namespace BulkWriter
 {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
-using BulkWriter.Internal;
+using BulkWriter.Mapping;
 using Xunit;
 
 namespace BulkWriter.Tests

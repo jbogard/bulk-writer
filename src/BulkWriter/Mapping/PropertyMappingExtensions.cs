@@ -1,6 +1,6 @@
 ﻿using Microsoft.Data.SqlClient;
 
-namespace BulkWriter.Internal
+namespace BulkWriter.Mapping
 {
     internal static class PropertyMappingExtensions
     {
