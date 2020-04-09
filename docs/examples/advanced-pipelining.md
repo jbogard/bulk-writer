@@ -40,7 +40,7 @@ var finalStageInput = new BlockingCollection<FinalStageInput>();
 
 var stage1 = taskFactory.StartNew(() => {
    var enumerable = stage1Input.GetConsumingEnumerable();
-   
+
    try {
       foreach(var item in enumerable) {
          var outputs = GetOutputsFromIO(item);
@@ -56,7 +56,7 @@ var stage1 = taskFactory.StartNew(() => {
 
 var stage2 = taskFactory.StartNew(() => {
    var enumerable = stage2Input.GetConsumingEnumerable();
-   
+
    try {
       foreach(var item in enumerable) {
          var outputs = DoLotsOfCalculations(item);

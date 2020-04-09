@@ -9,7 +9,8 @@ nav_order: 4
 With transformations we can manipulate data prior to writing to the data store.
 
 ## Aggregate
-```Aggregate``` can take multiple records and output a single record.
+
+`Aggregate` can take multiple records and output a single record.
 
 ```csharp
 using (var writer = new BulkWriter<int>(connectionString))
@@ -22,14 +23,14 @@ using (var writer = new BulkWriter<int>(connectionString))
     await pipeline.ExecuteAsync();
 }
 ```
+
 ### Output
-```
-82,000
-```
+
+`82,000`
 
 ## Pivot
 
-```Pivot``` can turn one record into many.
+`Pivot` can turn one record into many.
 
 ```csharp
 using (var writer = new BulkWriter<MyClass>(connectionString))
@@ -52,21 +53,21 @@ using (var writer = new BulkWriter<MyClass>(connectionString))
     await pipeline.ExecuteAsync();
 }
 ```
+
 ### Output
-```
-Id       Name
---------------
-1        Bob 1
-2        Bob 2
-3        Bob 3
-4        Bob 4
-5        Bob 5
-6        Bob 6
-```
+
+| Id  | Name  |
+|:----|:------|
+| 1   | Bob 1 |
+| 2   | Bob 2 |
+| 3   | Bob 3 |
+| 4   | Bob 4 |
+| 5   | Bob 5 |
+| 6   | Bob 6 |
 
 ## Project
 
-```Project``` can translate your current type into a new type.
+`Project` can translate your current type into a new type.
 
 ```csharp
 using (var writer = new BulkWriter<MyClass>(connectionString))
@@ -80,22 +81,22 @@ using (var writer = new BulkWriter<MyClass>(connectionString))
     await pipeline.ExecuteAsync();
 }
 ```
+
 ### Output
-```
-Id       Name
------------------
-1        Bob 1
-2        Bob 2
-3        Bob 3
-...
-998      Bob 998
-999      Bob 999
-1000     Bob 1000
-```
+
+| Id   | Name     |
+|:-----|:---------|
+| 1    | Bob 1    |
+| 2    | Bob 2    |
+| 3    | Bob 3    |
+| ...  | ...      |
+| 998  | Bob 998  |
+| 999  | Bob 999  |
+| 1000 | Bob 1000 |
 
 ## Transform
 
-```Transform``` can apply changes in-place.
+`Transform` can apply changes in-place.
 
 ```csharp
 using (var writer = new BulkWriter<MyClass>(connectionString))
@@ -112,15 +113,15 @@ using (var writer = new BulkWriter<MyClass>(connectionString))
     await pipeline.ExecuteAsync();
 }
 ```
+
 ### Output
-```
-Id       Name    WeightInKg    WeightInLbs
-------------------------------------------
-1        Bob     80            176.4
-2        Bob     80            176.4
-3        Bob     80            176.4
-...
-998      Bob     80            176.4
-999      Bob     80            176.4
-1000     Bob     80            176.4
-```
+
+|Id    | Name | WeightInKg | WeightInLbs |
+|:-----|:-----|:-------------------------|
+| 1    | Bob  | 80         | 176.4       |
+| 2    | Bob  | 80         | 176.4       |
+| 3    | Bob  | 80         | 176.4       |
+| ...  | ...  | ...        | ...         |
+| 998  | Bob  | 80         | 176.4       |
+| 999  | Bob  | 80         | 176.4       |
+| 1000 | Bob  | 80         | 176.4       |

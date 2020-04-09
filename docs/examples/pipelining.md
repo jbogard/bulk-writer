@@ -32,7 +32,7 @@ var step1 = DoStep1(begin);
 var step2 = DoStep2(step1);
 var step3 = DoStep3(step2);
 DoStepEnd(step3);
-      
+
 // Or a one-liner!!
 // DoStepEnd(DoStep3(DoStep2(DoStep1(DoStepBegin()))));
 
