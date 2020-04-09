@@ -113,7 +113,7 @@ UpgradeLog*.XML
 
 # GitHub Pages
 docs/_site
-docs/Gemfile*
+docs/Gemfile.lock
 docs/.jekyll-metadata
 
 Directory.Build.props
