@@ -6,4 +6,4 @@ has_children: true
 ---
 # Examples
 
-By itself, Bulk Writer is a pretty simple concept and the code itself isn't really all that complicated. However, even simple implementations can enable very complex scenarios. The rest of this document shows examples of what you can do with Bulk Writer.
+*Bulk Writer* is built on the concept of pull-based data streaming, and the code to implement this concept isn't really all that complicated. However, even simple implementations can enable very complex scenarios. Here are some code samples to demonstrate implementing ETL pipelines of various complexity using the *Bulk Writer* library.
