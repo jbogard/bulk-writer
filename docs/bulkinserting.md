@@ -20,11 +20,11 @@ There are other non-caching forward-only readers in .NET, which are used every d
 
 ## Streaming data to SqlBulkCopy
 
-The Bulk Writer core assembly has an `IDataReader` implementation that wraps an `IEnumerator` called `EnumerableDataReader`. You can give an instance of `EnumerableDataReader` to an instance of `SqlBulkCopy`, so that when `SqlBulkCopy` calls for the next record from the `EnumerableDataReader` instance, it is retrieving the next record from the underlying `IEnumerator`.
+The Bulk Writer core assembly has an `IDataReader` implementation that wraps an `IEnumerator` called `EnumerableDataReader`. An instance of `EnumerableDataReader` is passed to an instance of `SqlBulkCopy`, so that when `SqlBulkCopy` calls for the next record from the `EnumerableDataReader` instance, it is retrieving the next record from the underlying `IEnumerator`.
 
 It is conceivable that `IEnumerator.MoveNext()` and `IEnumerator.Current` are proffering records from any type of data source, but you are typically enumerating over an enumerable by retrieving an instance of `IEnumerator` by calling `IEnumerable.GetEnumerator()`. So, you can think of `EnumerableDataReader` in this way:
 
-> **You can give `EnumerableDataReader` to `SqlBulkCopy`, and in turn, `SqlBulkCopy` will stream the data from the `IEnumerable` into your target data store.**
+> **`EnumerableDataReader` is given to `SqlBulkCopy`, and in turn, `SqlBulkCopy` will stream the data from the `IEnumerable` into your target data store.**
 
 Most of the other code in the core assembly is for mapping properties on source data (objects yielded from an `IEnumerable`) to columns in the target data store. 
 
