@@ -1,10 +1,10 @@
 ---
 layout: default
-title: Relative Distances
+title: LINQ to SqlBulkCopy
 parent: Examples
 nav_order: 1
 ---
-# Relative Distances
+# LINQ to SqlBulkCopy
 
 Suppose that for performance reasons you wanted to cache the distances between some entities (such as a store, house or distribution center) and the centroid of every zip code in the U.S. Depending on the number of entities, you could easily produce a very large data set from these calculations. But sure, entity locations and zip code centroids aren't likely to change often enough to warrant computing this result set on every ETL job run, but the real point of this example is to show
 
@@ -22,7 +22,8 @@ var q =
    let distance = GetDistance(entity, zipCode)
    let arbitraryData = CreateSomeArbitraryData(entity, zipCode)
    where distance > 0
-   select new EntityToZipCodeDistance {
+   select new EntityToZipCodeDistance
+   {
       EntityId = entity.Id,
       ZipCode = zipCode.Zip,
       Distance = distance,

@@ -6,66 +6,75 @@ nav_order: 2
 ---
 # Pipelining
 
-The example above shows a transform that's pretty simple. But some ETL jobs require transforms that are so complex (and the code is so complicated), it's easier to reason about and implement the transforms in steps. You can create these steps using a single LINQ query (which are actually pipelines themselves), or you can implement a Pipeline with Stages.
+This example manually implements a basic pipeline as described in the [Pipelining Overview](../pipelining.md#pipelining). You can see the `IEnumerable` objects being chained together through each method call. Since we never trigger evaluation of the `IEnumerable` objects until the call to `BulkWriter.WriteToDatabase()`, we don't end up waiting on or using up memory for all 1,000,000 objects before we write to the database via `SqlBulkCopy`.
 
-Typical pipelines push data from one stage to the next.
-
-            =========         =========         =========         ==========
-            |       |         |       |         |       |         |        |
-    Push -> | Stage | Push -> | Stage | Push -> | Stage | Push -> |  Sink  |
-            |       |         |       |         |       |         |        |
-            =========         =========         =========         ==========
-
-Using Bulk Writer, data is *pulled* through the Pipeline.
-
-    =========         =========         =========         ==========
-    |       |         |       |         |       |         |        |
-    | Stage | <- Pull | Stage | <- Pull | Stage | <- Pull |  Sink  |
-    |       |         |       |         |       |         |        |
-    =========         =========         =========         ==========
-
-Take the following example:
+This code effectively implements the same pipeline as the [Advanced Pipelining](./advanced-pipelining.md) example, except we don't have buffers between each step, as show in the [Pipelining Overview](../pipelining.md)
 
 ```csharp
-var begin = DoStepBegin();
-var step1 = DoStep1(begin);
-var step2 = DoStep2(step1);
-var step3 = DoStep3(step2);
-DoStepEnd(step3);
-      
+public class MyEntity
+{
+   public int Id { get; set; }
+   public string Name { get; set; }
+}
+
+public class MyOtherEntity
+{
+   public int Id { get; set; }
+   public string FirstName { get; set; }
+   public string LastName { get; set; }
+}
+
+var entities = GetEntities();
+var maxId = GetMaxId(entities);
+var bobObjects = CreateBobObjects(maxId);
+var otherBobObjects = ProjectBobObjects(bobObjects);
+var aliceObjects = TransformToAliceObjects(otherBobObjects);
+WriteToDatabase(aliceObjects);
+
 // Or a one-liner!!
-// DoStepEnd(DoStep3(DoStep2(DoStep1(DoStepBegin()))));
+// WriteToDatabase(TransformToAliceObjects(ProjectBobObjects(CreateBobObjects(GetMaxId(GetEntities())))));
 
-private static IEnumerable<BeginStepResult> DoStepBegin() {
-   foreach (var item in Enumerable.Range(0, 1000000)) {
-      yield return new BeginStepResult();
+private static IEnumerable<MyEntity> GetEntities()
+{
+   foreach (var item in Enumerable.Range(0, 1000000))
+   {
+      yield return new MyEntity { Id = item, Name = "Carol" };
    }
 }
 
-private static IEnumerable<Step1Result> DoStep1(IEnumerable<BeginStepResult> input) {
-    // Or using LINQ, which does the same thing as below
-    return input.Where(x => SomePredicate(x)).Select(x => new Step1Result(x));
+private static int GetMaxId(IEnumerable<MyEntity> input)
+{
+    return input.Max(i => i.Id);
 }
 
-private static IEnumerable<Step2Result> DoStep2(IEnumerable<Step1Result> input) {
-   foreach (var item in input) {
-      if (SomePredicate(item)) {
-         yield return new Step2Result(item);
-      }
+private static IEnumerable<MyEntity> CreateBobObjects(int numberOfBobs)
+{
+   for (var j = 1; j <= numberOfBobs; j++)
+   {
+      yield return new MyEntity { Id = j, Name = $"Bob {j}" };
    }
 }
 
-private static IEnumerable<Step3Result> DoStep3(IEnumerable<Step2Result> input) {
-   foreach (var item in input) {
-      foreach(var many in GetManyItems(item)) {
-         yield return Step3Result(many);
-      }
+private static IEnumerable<MyOtherEntity> ProjectBobObjects(IEnumerable<MyEntity> input)
+{
+   foreach (var item in input)
+   {
+      var nameParts = item.Name.Split(' ');
+      yield return new MyOtherEntity {Id = item.Id, FirstName = nameParts[0], LastName = nameParts[1] };
    }
 }
 
-private static void DoStepEnd(IEnumerable<Step3Result> input) {
-   var mapping = MapBuilder.BuildAllProperties<Step3Result>();
-   using (var bulkWriter = mapping.CreateBulkWriter(connectionString))
+private static IEnumerable<MyOtherEntity> TransformToAliceObjects(IEnumerable<MyOtherEntity> input)
+{
+   foreach (var item in input)
+   {
+      yield return new MyOtherEntity {Id = item.Id, FirstName = "Alice", LastName = item.LastName };
+   }
+}
+
+private static void WriteToDatabase(IEnumerable<MyOtherEntity> input)
+{
+   using (var bulkWriter = new BulkWriter<MyOtherEntity>(connectionString))
    {
       bulkWriter.WriteToDatabase(input);
    }

@@ -14,7 +14,7 @@
 # You can create any custom variable you would like, and they will be accessible
 # in the templates via {{ site.myvariable }}.
 title: "Bulk Writer"
-description: "Bulk Writer is a small library which facilitates building fast, pull-based ETL processes in C#."
+description: "Bulk Writer is a small library which facilitates building fast, memory-efficient, pull-based ETL processes in C#."
 baseurl: "/bulk-writer" # the subpath of your site, e.g. /blog
 url: "https://headspringlabs.github.io" # the base hostname & protocol for your site, e.g. http://example.com
 
@@ -24,6 +24,14 @@ remote_theme: pmarsceill/just-the-docs
 
 # Just the Docs Settings
 search_enabled: true
+footer_content: "Copyright &copy; 2020 Headspring."
+logo: "assets/images/logo.png"
+
+defaults:
+  - scope:
+      path: "assets/images"
+    values:
+      image: true
 
 # Exclude from processing.
 # The following items will not be processed, by default. Create a custom list
