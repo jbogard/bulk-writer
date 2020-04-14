@@ -6,7 +6,7 @@ using static System.Linq.Expressions.Expression;
 
 namespace BulkWriter.Internal
 {
-    public static class PropertyInfoExtensions
+    internal static class PropertyInfoExtensions
     {
         private static readonly Dictionary<PropertyInfo, GetPropertyValueHandler> CachedGetters = new Dictionary<PropertyInfo, GetPropertyValueHandler>();
 

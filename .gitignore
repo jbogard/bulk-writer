@@ -108,4 +108,13 @@ Backup*/
 UpgradeLog*.XML
 
 *.nupkg
+*.snupkg
 .vs
+
+# GitHub Pages
+docs/_site
+docs/Gemfile.lock
+docs/.jekyll-metadata
+
+Directory.Build.props
+Nuget.Config

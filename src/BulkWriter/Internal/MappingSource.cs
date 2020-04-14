@@ -1,8 +1,8 @@
 ﻿using System.Reflection;
 
-namespace BulkWriter
+namespace BulkWriter.Internal
 {
-    public class MappingSource
+    internal class MappingSource
     {
         public PropertyInfo Property { get; set; }
 

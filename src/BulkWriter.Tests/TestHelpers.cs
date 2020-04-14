@@ -1,4 +1,4 @@
-﻿using System.Data.SqlClient;
+﻿using Microsoft.Data.SqlClient;
 using System.Threading.Tasks;
 
 namespace BulkWriter.Tests
@@ -42,6 +42,20 @@ CREATE DATABASE [BulkWriter.Tests]");
             {
                 return await command.ExecuteScalarAsync();
             }
+        }
+
+        public static string DropCreate(string tableName)
+        {
+            ExecuteNonQuery(ConnectionString, $"DROP TABLE IF EXISTS [dbo].[{tableName}]");
+
+            ExecuteNonQuery(ConnectionString,
+                "CREATE TABLE [dbo].[" + tableName + "](" +
+                "[Id] [int] IDENTITY(1,1) NOT NULL," +
+                "[Name] [nvarchar](50) NULL," +
+                "CONSTRAINT [PK_" + tableName + "] PRIMARY KEY CLUSTERED ([Id] ASC)" +
+                ")");
+
+            return tableName;
         }
 
         public static string ConnectionString { get; }
