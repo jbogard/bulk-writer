@@ -18,4 +18,4 @@ Such a technique would allow writing to target data stores as fast as our transf
 
 ## Solution
 
-This library and the guidance that follows show how to use `SqlBulkCopy`, `IEnumerable` and `IDataReader` to enable this kind of streaming technique, that is, to stream from a data source and to stream into a data store, with our C# ETLs.  We'll also cover how to change your "push"-based transforms that use `INSERT` statements to "pull"-based transforms that use `IEnumerable` and `EnumerableDataReader`, the `SqlBulkCopy` implementation contained in this library.
+This library and the guidance that follows show how to use `SqlBulkCopy`, `IEnumerable` and `IDataReader` to enable this kind of streaming technique, that is, to stream from a data source and to stream into a data store, with our C# ETLs.  We'll also cover how to change your "push"-based transforms that use `INSERT` statements to "pull"-based transforms that use `IEnumerable`.
