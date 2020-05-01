@@ -33,7 +33,7 @@ public class BobFromIdPivot : IPivot<int, MyEntity>
    }
 }
 
-using (var writer = new TestBulkWriter<PipelineTestsOtherTestClass>())
+using (var writer = new BulkWriter<PipelineTestsOtherTestClass>())
 {
     var items = Enumerable.Range(1, 1000000).Select(i => new MyEntity { Id = i, Name = "Carol" });
     var pipeline = EtlPipeline
