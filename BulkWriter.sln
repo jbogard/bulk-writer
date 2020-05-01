@@ -19,7 +19,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{432DE5FB
 		setup.ps1 = setup.ps1
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BulkWriter.Benchmark", "src\BulkWriter.Benchmark\BulkWriter.Benchmark.csproj", "{C39F623C-7958-427E-B5E3-2CE704A69B85}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BulkWriter.Benchmark", "src\BulkWriter.Benchmark\BulkWriter.Benchmark.csproj", "{C39F623C-7958-427E-B5E3-2CE704A69B85}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{95C9E859-9C1F-44C1-B38A-7383439785A0}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
