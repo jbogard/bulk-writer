@@ -170,8 +170,8 @@ using (var writer = new BulkWriter<MyClass>(connectionString))
 
 **Output:**
 
-|Id    | Name | WeightInKg | WeightInLbs |
-|:-----|:-----|:-------------------------|
+| Id   | Name | WeightInKg | WeightInLbs |
+|:-----|:-----|:-----------|-------------|
 | 1    | Bob  | 80         | 176.4       |
 | 2    | Bob  | 80         | 176.4       |
 | 3    | Bob  | 80         | 176.4       |
