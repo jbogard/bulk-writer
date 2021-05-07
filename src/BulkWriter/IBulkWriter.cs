@@ -18,5 +18,15 @@ namespace BulkWriter
         /// <param name="items">Items to load to the database</param>
         /// <returns>Awaitable task for writing to the database</returns>
         Task WriteToDatabaseAsync(IEnumerable<TResult> items);
+
+#if NETSTANDARD2_1
+
+        /// <summary>
+        /// Bulk loads an input async enumerable of type <typeparamref name="TResult"/>
+        /// </summary>
+        /// <param name="items">Items to async load to the database</param>
+        /// <returns>Awaitable task for writing to the database</returns>
+        Task WriteToDatabaseAsync(IAsyncEnumerable<TResult> items);
+#endif
     }
 }
