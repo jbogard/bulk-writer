@@ -382,6 +382,13 @@ namespace BulkWriter.Tests.Pipeline
                 ItemsWritten.AddRange(items);
                 return Task.CompletedTask;
             }
+
+#if NETCOREAPP3_1
+            public async Task WriteToDatabaseAsync(IAsyncEnumerable<T> items)
+            {
+                ItemsWritten.AddRange(await items.ToListAsync());
+            }
+#endif
         }
 
         private class FakeLoggerFactory : ILoggerFactory

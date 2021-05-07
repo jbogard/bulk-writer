@@ -120,6 +120,17 @@ namespace BulkWriter
             }
         }
 
+#if NETSTANDARD2_1
+        public async Task WriteToDatabaseAsync(IAsyncEnumerable<TResult> items)
+        {
+            BulkCopySetup(_sqlBulkCopy);
+
+            await using var dataReader = new AsyncEnumerableDataReader<TResult>(items, _propertyMappings);
+
+            await _sqlBulkCopy.WriteToServerAsync(dataReader);
+        }
+#endif
+
         public void Dispose() => ((IDisposable)_sqlBulkCopy).Dispose();
     }
 }

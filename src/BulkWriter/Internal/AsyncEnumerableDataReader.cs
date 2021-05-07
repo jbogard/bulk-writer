@@ -25,6 +25,7 @@ namespace BulkWriter.Internal
         public AsyncEnumerableDataReader(IAsyncEnumerable<TResult> items, IEnumerable<PropertyMapping> propertyMappings)
         {
             _items = items ?? throw new ArgumentNullException(nameof(items));
+
             _propertyMappings = propertyMappings?.OrderBy(x => x.Source.Ordinal).ToArray() ?? throw new ArgumentNullException(nameof(propertyMappings));
 
             // Map the source entity's positional ordinals to the source/destination property mapping.
@@ -56,15 +57,11 @@ namespace BulkWriter.Internal
             return ordinal;
         }
 
-        public override async Task<bool> ReadAsync(CancellationToken cancellationToken)
+        public override Task<bool> ReadAsync(CancellationToken cancellationToken)
         {
-            if (_enumerator == null)
-            {
-                _enumerator = _items.GetAsyncEnumerator(cancellationToken);
-            }
+            _enumerator ??= _items.GetAsyncEnumerator(cancellationToken);
 
-            var result = await _enumerator.MoveNextAsync();
-            return base.ReadAsync(cancellationToken);
+            return _enumerator.MoveNextAsync().AsTask();
         }
 
         public override bool IsDBNull(int i)
@@ -149,28 +146,22 @@ namespace BulkWriter.Internal
             }
         }
 
-
-        protected override void Dispose(bool disposing)
+        public override async ValueTask DisposeAsync()
         {
-            base.Dispose(disposing);
-
-            if (disposing)
+            if (_enumerator != null)
             {
-                if (null != _enumerator)
-                {
-                    _enumerator.Dispose();
-                    _enumerator = null;
-                }
-
-                _disposed = true;
+                await _enumerator.DisposeAsync();
+                _enumerator = null;
             }
+            _disposed = true;
+            await base.DisposeAsync();
         }
 
         private void EnsureNotDisposed()
         {
             if (_disposed)
             {
-                throw new ObjectDisposedException("EnumerableDataReader");
+                throw new ObjectDisposedException("AsyncEnumerableDataReader");
             }
         }
 
@@ -213,6 +204,8 @@ namespace BulkWriter.Internal
         public override object this[string name] => throw new NotSupportedException();
 
         public override bool NextResult() => throw new NotSupportedException();
+      
+        public override bool Read() => throw new NotSupportedException();
 
         public override bool HasRows => throw new NotSupportedException();
 

@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
 using Microsoft.Data.SqlClient;
+using System.Linq;
 
 namespace BulkWriter.Benchmark.Benchmarks
 {
@@ -18,6 +19,20 @@ namespace BulkWriter.Benchmark.Benchmarks
             };
 
             var items = GetTestRecords();
+            await bulkWriter.WriteToDatabaseAsync(items);
+        }
+
+        [Benchmark]
+        public async Task BulkWriterAsyncEnumerable()
+        {
+            await using var sqlConnection = DbHelpers.OpenSqlConnection();
+            using var bulkWriter = new BulkWriter<DomainEntity>(sqlConnection)
+            {
+                BulkCopyTimeout = 0,
+                BatchSize = 10000
+            };
+
+            var items = GetTestRecords().ToAsyncEnumerable();
             await bulkWriter.WriteToDatabaseAsync(items);
         }
 
