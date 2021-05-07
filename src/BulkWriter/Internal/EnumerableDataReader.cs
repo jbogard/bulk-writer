@@ -9,19 +9,14 @@ using BulkWriter.Properties;
 [assembly: InternalsVisibleTo("BulkWriter.Tests")]
 namespace BulkWriter.Internal
 {
-    internal class EnumerableDataReader<TResult> : DbDataReader
+    internal abstract class EnumerableDataReaderBase<TResult> : DbDataReader
     {
-        private readonly IEnumerable<TResult> _items;
+        private readonly PropertyMapping[] _propertyMappings;
         private readonly Dictionary<string, int> _nameToOrdinalMappings;
         private readonly Dictionary<int, PropertyMapping> _ordinalToPropertyMappings;
-        private readonly PropertyMapping[] _propertyMappings;
 
-        private bool _disposed;
-        private IEnumerator<TResult> _enumerator;
-
-        public EnumerableDataReader(IEnumerable<TResult> items, IEnumerable<PropertyMapping> propertyMappings)
+        protected EnumerableDataReaderBase(IEnumerable<PropertyMapping> propertyMappings)
         {
-            _items = items ?? throw new ArgumentNullException(nameof(items));
             _propertyMappings = propertyMappings?.OrderBy(x => x.Source.Ordinal).ToArray() ?? throw new ArgumentNullException(nameof(propertyMappings));
 
             // Map the source entity's positional ordinals to the source/destination property mapping.
@@ -30,16 +25,26 @@ namespace BulkWriter.Internal
             // Map the destination table's ordinals to the source/destination property mapping,
             //   using the source property's name as the key.
             _nameToOrdinalMappings = _propertyMappings.ToDictionary(x => x.Source.Property.Name, x => x.Destination.ColumnOrdinal);
+
         }
 
-        public TResult Current
+        public abstract TResult Current { get; }
+
+        protected abstract void EnsureNotDisposed();
+
+        public override int FieldCount
         {
             get
             {
                 EnsureNotDisposed();
-                return null != _enumerator ? _enumerator.Current : default(TResult);
+                return _propertyMappings.Length;
             }
         }
+
+        public override bool HasRows => throw new NotSupportedException();
+        public override int Depth => throw new NotSupportedException();
+        public override bool IsClosed => throw new NotSupportedException();
+        public override int RecordsAffected => throw new NotSupportedException();
 
         public override int GetOrdinal(string name)
         {
@@ -51,18 +56,6 @@ namespace BulkWriter.Internal
             }
 
             return ordinal;
-        }
-
-        public override bool Read()
-        {
-            EnsureNotDisposed();
-
-            if (null == _enumerator)
-            {
-                _enumerator = _items.GetEnumerator();
-            }
-
-            return _enumerator.MoveNext();
         }
 
         public override bool IsDBNull(int i)
@@ -84,7 +77,7 @@ namespace BulkWriter.Internal
 
             var valueGetter = mapping.Source.Property.GetValueGetter();
 
-            var value = valueGetter(_enumerator.Current);
+            var value = valueGetter(Current);
             return value;
         }
 
@@ -99,7 +92,7 @@ namespace BulkWriter.Internal
 
             var valueGetter = mapping.Source.Property.GetValueGetter();
 
-            var value = valueGetter(_enumerator.Current);
+            var value = valueGetter(Current);
             return value?.ToString();
         }
 
@@ -113,7 +106,7 @@ namespace BulkWriter.Internal
             }
 
             var valueGetter = mapping.Source.Property.GetValueGetter();
-            if (valueGetter(_enumerator.Current) is byte[] value)
+            if (valueGetter(Current) is byte[] value)
             {
                 var pos = Math.Max(fieldOffset, fieldOffset / buffer.Length * buffer.Length);
                 var rest = value.Length - pos;
@@ -138,13 +131,60 @@ namespace BulkWriter.Internal
             return name;
         }
 
-        public override int FieldCount
+        public override string GetDataTypeName(int i) => throw new NotSupportedException();
+        public override IEnumerator GetEnumerator() => throw new NotImplementedException();
+        public override Type GetFieldType(int i) => throw new NotSupportedException();
+        public override int GetValues(object[] values) => throw new NotSupportedException();
+        public override bool GetBoolean(int i) => throw new NotSupportedException();
+        public override byte GetByte(int i) => throw new NotSupportedException();
+        public override char GetChar(int i) => throw new NotSupportedException();
+        public override long GetChars(int i, long fieldoffset, char[] buffer, int bufferoffset, int length) => throw new NotSupportedException();
+        public override Guid GetGuid(int i) => throw new NotSupportedException();
+        public override short GetInt16(int i) => throw new NotSupportedException();
+        public override int GetInt32(int i) => throw new NotSupportedException();
+        public override long GetInt64(int i) => throw new NotSupportedException();
+        public override float GetFloat(int i) => throw new NotSupportedException();
+        public override double GetDouble(int i) => throw new NotSupportedException();
+        public override decimal GetDecimal(int i) => throw new NotSupportedException();
+        public override DateTime GetDateTime(int i) => throw new NotSupportedException();
+        public override object this[int i] => throw new NotSupportedException();
+        public override object this[string name] => throw new NotSupportedException();
+        public override bool NextResult() => throw new NotSupportedException();
+    }
+
+    internal class EnumerableDataReader<TResult> : EnumerableDataReaderBase<TResult>
+    {
+        private readonly IEnumerable<TResult> _items;
+
+        private bool _disposed;
+        private IEnumerator<TResult> _enumerator;
+
+        public EnumerableDataReader(IEnumerable<TResult> items, IEnumerable<PropertyMapping> propertyMappings)
+            : base(propertyMappings)
+        {
+            _items = items ?? throw new ArgumentNullException(nameof(items));
+        }
+
+        public override TResult Current
         {
             get
             {
                 EnsureNotDisposed();
-                return _propertyMappings.Length;
+
+                return null != _enumerator ? _enumerator.Current : default(TResult);
             }
+        }
+
+        public override bool Read()
+        {
+            EnsureNotDisposed();
+
+            if (null == _enumerator)
+            {
+                _enumerator = _items.GetEnumerator();
+            }
+
+            return _enumerator.MoveNext();
         }
 
 
@@ -164,62 +204,12 @@ namespace BulkWriter.Internal
             }
         }
 
-        private void EnsureNotDisposed()
+        protected override void EnsureNotDisposed()
         {
             if (_disposed)
             {
                 throw new ObjectDisposedException("EnumerableDataReader");
             }
         }
-
-        #region Not used by SqlBulkCopy
-
-        public override string GetDataTypeName(int i) => throw new NotSupportedException();
-
-        public override IEnumerator GetEnumerator() => throw new NotImplementedException();
-
-        public override Type GetFieldType(int i) => throw new NotSupportedException();
-
-        public override int GetValues(object[] values) => throw new NotSupportedException();
-
-        public override bool GetBoolean(int i) => throw new NotSupportedException();
-
-        public override byte GetByte(int i) => throw new NotSupportedException();
-
-        public override char GetChar(int i) => throw new NotSupportedException();
-
-        public override long GetChars(int i, long fieldoffset, char[] buffer, int bufferoffset, int length) => throw new NotSupportedException();
-
-        public override Guid GetGuid(int i) => throw new NotSupportedException();
-
-        public override short GetInt16(int i) => throw new NotSupportedException();
-
-        public override int GetInt32(int i) => throw new NotSupportedException();
-
-        public override long GetInt64(int i) => throw new NotSupportedException();
-
-        public override float GetFloat(int i) => throw new NotSupportedException();
-
-        public override double GetDouble(int i) => throw new NotSupportedException();
-
-        public override decimal GetDecimal(int i) => throw new NotSupportedException();
-
-        public override DateTime GetDateTime(int i) => throw new NotSupportedException();
-
-        public override object this[int i] => throw new NotSupportedException();
-
-        public override object this[string name] => throw new NotSupportedException();
-
-        public override bool NextResult() => throw new NotSupportedException();
-
-        public override bool HasRows => throw new NotSupportedException();
-
-        public override int Depth => throw new NotSupportedException();
-
-        public override bool IsClosed => throw new NotSupportedException();
-
-        public override int RecordsAffected => throw new NotSupportedException();
-
-        #endregion
     }
 }
