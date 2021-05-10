@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace BulkWriter.Pipeline.Internal
 {
@@ -13,12 +14,14 @@ namespace BulkWriter.Pipeline.Internal
             _aggregationFunc = aggregationFunc ?? throw new ArgumentNullException(nameof(aggregationFunc));
         }
 
-        protected override void RunCore(CancellationToken cancellationToken)
+        protected override Task RunCore(CancellationToken cancellationToken)
         {
             var enumerable = InputCollection.GetConsumingEnumerable(cancellationToken);
 
             var result = _aggregationFunc(enumerable);
             OutputCollection.Add(result, cancellationToken);
+
+            return Task.CompletedTask;
         }
     }
 }

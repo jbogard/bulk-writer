@@ -1,4 +1,5 @@
 ﻿using System.Threading;
+using System.Threading.Tasks;
 
 namespace BulkWriter.Pipeline.Internal
 {
@@ -11,10 +12,10 @@ namespace BulkWriter.Pipeline.Internal
             _bulkWriter = bulkWriter;
         }
 
-        protected override void RunCore(CancellationToken cancellationToken)
+        protected override async Task RunCore(CancellationToken cancellationToken)
         {
             var enumerable = InputCollection.GetConsumingEnumerable(cancellationToken);
-            _bulkWriter.WriteToDatabase(enumerable);
+            await _bulkWriter.WriteToDatabaseAsync(enumerable);
         }
     }
 }

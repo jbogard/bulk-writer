@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace BulkWriter.Pipeline.Internal
 {
@@ -12,7 +13,7 @@ namespace BulkWriter.Pipeline.Internal
             _transformActions = transformActions;
         }
 
-        protected override void RunCore(CancellationToken cancellationToken)
+        protected override Task RunCore(CancellationToken cancellationToken)
         {
             var enumerable = InputCollection.GetConsumingEnumerable(cancellationToken);
 
@@ -25,6 +26,8 @@ namespace BulkWriter.Pipeline.Internal
 
                 OutputCollection.Add(item, cancellationToken);
             }
+
+            return Task.CompletedTask;
         }
     }
 }

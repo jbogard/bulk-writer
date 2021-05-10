@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace BulkWriter.Pipeline.Internal
 {
@@ -13,7 +14,7 @@ namespace BulkWriter.Pipeline.Internal
             _pivotFunc = pivotFunc ?? throw new ArgumentNullException(nameof(pivotFunc));
         }
 
-        protected override void RunCore(CancellationToken cancellationToken)
+        protected override Task RunCore(CancellationToken cancellationToken)
         {
             var enumerable = InputCollection.GetConsumingEnumerable(cancellationToken);
 
@@ -25,6 +26,8 @@ namespace BulkWriter.Pipeline.Internal
                     OutputCollection.Add(output, cancellationToken);
                 }
             }
+
+            return Task.CompletedTask;
         }
     }
 }

@@ -1,9 +1,10 @@
 ﻿using System.Threading;
+using System.Threading.Tasks;
 
 namespace BulkWriter.Pipeline.Internal
 {
     internal interface IEtlPipelineStep
     {
-        void Run(CancellationToken cancellationToken);
+        Task Run(CancellationToken cancellationToken);
     }
 }
