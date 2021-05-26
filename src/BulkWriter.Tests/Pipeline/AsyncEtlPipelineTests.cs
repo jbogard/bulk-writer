@@ -428,15 +428,16 @@ namespace BulkWriter.Tests.Pipeline
                 ItemsWritten.AddRange(items);
             }
 
-            public Task WriteToDatabaseAsync(IEnumerable<T> items)
+            public Task WriteToDatabaseAsync(IEnumerable<T> items, CancellationToken cancellationToken = default)
             {
                 ItemsWritten.AddRange(items);
+
                 return Task.CompletedTask;
             }
 
-            public async Task WriteToDatabaseAsync(IAsyncEnumerable<T> items)
+            public async Task WriteToDatabaseAsync(IAsyncEnumerable<T> items, CancellationToken cancellationToken = default)
             {
-                ItemsWritten.AddRange(await items.ToListAsync());
+                ItemsWritten.AddRange(await items.ToListAsync(cancellationToken));
             }
         }
 
