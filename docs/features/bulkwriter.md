@@ -6,7 +6,7 @@ nav_order: 1
 ---
 # BulkWriter
 
-The `BulkWriter<TResult>` class is (naturally) the main attraction of this library. It implements the streaming from `IEnumerable` to `SqlBulkCopy`, as described in [Motivation](../motivation.md). The class will automatically handle mapping of your DTOs, so the only configuration you need to provide is a database connection (or connection string) and an input `IEnumerable`.
+The `BulkWriter<TResult>` class is (naturally) the main attraction of this library. It implements the streaming from `IEnumerable` or `IAsyncEnumerable` to `SqlBulkCopy`, as described in [Motivation](../motivation.md). The class will automatically handle mapping of your DTOs, so the only configuration you need to provide is a database connection (or connection string) and an input `IEnumerable` or `IAsyncEnumerable`.
 
 The following constructors are provided:
 

@@ -42,6 +42,14 @@ using (var bulkWriter = new BulkWriter<EntityToZipCodeDistance>(connectionString
 {
     await bulkWriter.WriteToDatabaseAsync(q);
 }
+
+// or async enumerables with .NET Standard 2.1 or later
+var u = q.ToAsyncEnumerable(); // 
+
+using (var bulkWriter = new BulkWriter<EntityToZipCodeDistance>(connectionString))
+{
+    await bulkWriter.WriteToDatabaseAsync(u);
+}
 ```
 
 ## Building Locally
