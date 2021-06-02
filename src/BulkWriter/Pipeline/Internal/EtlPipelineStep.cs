@@ -6,6 +6,7 @@ using System.Threading;
 using BulkWriter.Pipeline.Steps;
 using BulkWriter.Pipeline.Transforms;
 using Microsoft.Extensions.Logging;
+using System.Threading.Tasks;
 
 namespace BulkWriter.Pipeline.Internal
 {
@@ -116,9 +117,9 @@ namespace BulkWriter.Pipeline.Internal
             return PipelineContext.Pipeline;
         }
 
-        protected abstract void RunCore(CancellationToken cancellationToken);
+        protected abstract Task RunCore(CancellationToken cancellationToken);
 
-        public void Run(CancellationToken cancellationToken)
+        public async Task Run(CancellationToken cancellationToken)
         {
             try
             {
@@ -128,7 +129,7 @@ namespace BulkWriter.Pipeline.Internal
                 {
                     logger?.LogInformation($"Starting pipeline step {StepNumber} of {PipelineContext.TotalSteps}");
 
-                    RunCore(cancellationToken);
+                    await RunCore(cancellationToken);
 
                     logger?.LogInformation($"Completing pipeline step {StepNumber} of {PipelineContext.TotalSteps}");
                 }

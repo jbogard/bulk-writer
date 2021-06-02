@@ -26,7 +26,7 @@ namespace BulkWriter.Pipeline
 
         public Task ExecuteAsync(CancellationToken cancellationToken)
         {
-            var pipelineTasks = _pipelineSteps.Select(s => Task.Run(() => s.Run(cancellationToken), cancellationToken));
+            var pipelineTasks = _pipelineSteps.Select(s => s.Run(cancellationToken));
             return Task.WhenAll(pipelineTasks);
         }
 
@@ -51,5 +51,25 @@ namespace BulkWriter.Pipeline
 
             return step;
         }
+
+#if NETSTANDARD2_1
+        /// <summary>
+        /// Begins configuration of a new EtlPipeline
+        /// </summary>
+        /// <typeparam name="T">Type of input objects to the pipeline</typeparam>
+        /// <param name="input">An async enumerable with input objects for the pipeline</param>
+        /// <returns>Object for continuation of pipeline configuration</returns>
+        public static IEtlPipelineStep<T, T> StartWith<T>(IAsyncEnumerable<T> input)
+        {
+            var pipeline = new EtlPipeline();
+            var etlPipelineSetupContext = new EtlPipelineContext(pipeline, s => pipeline.AddStep(s));
+            var step = new AsyncStartEtlPipelineStep<T>(etlPipelineSetupContext, input);
+
+            etlPipelineSetupContext.AddStep(step);
+
+            return step;
+        }
+#endif
+
     }
 }

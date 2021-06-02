@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using BulkWriter.Internal;
+using System.Threading;
 
 namespace BulkWriter
 {
@@ -110,15 +111,26 @@ namespace BulkWriter
             }
         }
 
-        public async Task WriteToDatabaseAsync(IEnumerable<TResult> items)
+        public async Task WriteToDatabaseAsync(IEnumerable<TResult> items, CancellationToken cancellationToken = default)
         {
             BulkCopySetup(_sqlBulkCopy);
 
             using (var dataReader = new EnumerableDataReader<TResult>(items, _propertyMappings))
             {
-                await _sqlBulkCopy.WriteToServerAsync(dataReader);
+                await _sqlBulkCopy.WriteToServerAsync(dataReader, cancellationToken);
             }
         }
+
+#if NETSTANDARD2_1
+        public async Task WriteToDatabaseAsync(IAsyncEnumerable<TResult> items, CancellationToken cancellationToken = default)
+        {
+            BulkCopySetup(_sqlBulkCopy);
+
+            await using var dataReader = new AsyncEnumerableDataReader<TResult>(items, _propertyMappings);
+
+            await _sqlBulkCopy.WriteToServerAsync(dataReader, cancellationToken);
+        }
+#endif
 
         public void Dispose() => ((IDisposable)_sqlBulkCopy).Dispose();
     }

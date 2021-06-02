@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if NETCOREAPP3_1
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -9,7 +10,7 @@ using Xunit;
 
 namespace BulkWriter.Tests.Pipeline
 {
-    public class EtlPipelineTests
+    public class AsyncEtlPipelineTests
     {
         private readonly string _connectionString = TestHelpers.ConnectionString;
 
@@ -33,7 +34,11 @@ namespace BulkWriter.Tests.Pipeline
 
             using (var writer = new BulkWriter<PipelineTestsMyTestClass>(_connectionString))
             {
-                var items = Enumerable.Range(1, 1000).Select(i => new PipelineTestsMyTestClass { Id = i, Name = "Bob" });
+                var items = Enumerable
+                    .Range(1, 1000)
+                    .Select(i => new PipelineTestsMyTestClass { Id = i, Name = "Bob" })
+                    .ToAsyncEnumerable();
+
                 var pipeline = EtlPipeline
                     .StartWith(items)
                     .WriteTo(writer);
@@ -53,7 +58,11 @@ namespace BulkWriter.Tests.Pipeline
 
             using (var writer = new BulkWriter<PipelineTestsMyTestClass>(_connectionString))
             {
-                var items = Enumerable.Range(1, 1000).Select(i => new PipelineTestsMyTestClass { Id = i, Name = "Bob" });
+                var items = Enumerable
+                    .Range(1, 1000)
+                    .Select(i => new PipelineTestsMyTestClass { Id = i, Name = "Bob" })
+                    .ToAsyncEnumerable();
+
                 var pipeline = EtlPipeline
                     .StartWith(items)
                     .Project<PipelineTestsMyTestClass>(i => throw new Exception("Projection exception"))
@@ -72,7 +81,11 @@ namespace BulkWriter.Tests.Pipeline
 
             using (var writer = new BulkWriter<PipelineTestsMyTestClass>(_connectionString))
             {
-                var items = Enumerable.Range(1, 1000).Select(i => new PipelineTestsMyTestClass { Id = i, Name = "Bob" });
+                var items = Enumerable
+                    .Range(1, 1000)
+                    .Select(i => new PipelineTestsMyTestClass { Id = i, Name = "Bob" })
+                    .ToAsyncEnumerable();
+
                 var pipeline = EtlPipeline
                     .StartWith(items)
                     .Project(i =>
@@ -109,7 +122,11 @@ namespace BulkWriter.Tests.Pipeline
 
             using (var writer = new BulkWriter<PipelineTestsMyTestClass>(_connectionString))
             {
-                var items = Enumerable.Range(1, 1000).Select(i => new PipelineTestsMyTestClass { Id = i, Name = "Bob" });
+                var items = Enumerable
+                    .Range(1, 1000)
+                    .Select(i => new PipelineTestsMyTestClass { Id = i, Name = "Bob" })
+                    .ToAsyncEnumerable();
+
                 var pipeline = EtlPipeline
                     .StartWith(items)
                     .TransformInPlace(i =>
@@ -133,7 +150,11 @@ namespace BulkWriter.Tests.Pipeline
         {
             using (var writer = new TestBulkWriter<int>())
             {
-                var items = Enumerable.Range(1, 1000).Select(i => new PipelineTestsMyTestClass { Id = i, Name = "Bob" });
+                var items = Enumerable
+                    .Range(1, 1000)
+                    .Select(i => new PipelineTestsMyTestClass { Id = i, Name = "Bob" })
+                    .ToAsyncEnumerable();
+                    
                 var pipeline = EtlPipeline.StartWith(items)
                     .Aggregate(f => f.Sum(c => c.Id))
                     .WriteTo(writer);
@@ -151,7 +172,13 @@ namespace BulkWriter.Tests.Pipeline
             using (var writer = new TestBulkWriter<PipelineTestsMyTestClass>())
             {
                 var idCounter = 0;
-                var items = Enumerable.Range(1, 10).ToList();
+                var list = Enumerable
+                    .Range(1, 10)
+                    .ToList();
+
+                var items = list
+                    .ToAsyncEnumerable();
+
                 var pipeline = EtlPipeline.StartWith(items)
                     .Pivot(i =>
                     {
@@ -167,7 +194,7 @@ namespace BulkWriter.Tests.Pipeline
 
                 await pipeline.ExecuteAsync();
 
-                var expectedSum = items.Sum();
+                var expectedSum = list.Sum();
                 Assert.Equal(expectedSum, writer.ItemsWritten.Count);
                 Assert.Equal(1, writer.ItemsWritten[0].Id);
                 Assert.Equal("Bob 1", writer.ItemsWritten[0].Name);
@@ -181,7 +208,11 @@ namespace BulkWriter.Tests.Pipeline
         {
             using (var writer = new TestBulkWriter<PipelineTestsMyTestClass>())
             {
-                var items = Enumerable.Range(1, 1000).Select(i => new PipelineTestsOtherTestClass { Id = i, FirstName = "Bob", LastName = $"{i}"});
+                var items = Enumerable
+                    .Range(1, 1000)
+                    .Select(i => new PipelineTestsOtherTestClass { Id = i, FirstName = "Bob", LastName = $"{i}"})
+                    .ToAsyncEnumerable();
+                    
                 var pipeline = EtlPipeline
                     .StartWith(items)
                     .Project(i => new PipelineTestsMyTestClass { Id = i.Id, Name = $"{i.FirstName} {i.LastName}"})
@@ -202,7 +233,11 @@ namespace BulkWriter.Tests.Pipeline
         {
             using (var writer = new TestBulkWriter<PipelineTestsMyTestClass>())
             {
-                var items = Enumerable.Range(1, 1000).Select(i => new PipelineTestsMyTestClass { Id = i, Name = "Bob" });
+                var items = Enumerable
+                    .Range(1, 1000)
+                    .Select(i => new PipelineTestsMyTestClass { Id = i, Name = "Bob" })
+                    .ToAsyncEnumerable();
+
                 var pipeline = EtlPipeline
                     .StartWith(items)
                     .TransformInPlace(i => 
@@ -227,7 +262,11 @@ namespace BulkWriter.Tests.Pipeline
         {
             using (var writer = new TestBulkWriter<PipelineTestsOtherTestClass>())
             {
-                var items = Enumerable.Range(1, 1000).Select(i => new PipelineTestsMyTestClass { Id = i, Name = "Bob" });
+                var items = Enumerable
+                    .Range(1, 1000)
+                    .Select(i => new PipelineTestsMyTestClass { Id = i, Name = "Bob" })
+                    .ToAsyncEnumerable();
+                    
                 var pipeline = EtlPipeline
                     .StartWith(items)
                     .Aggregate(f => f.Max(c => c.Id))
@@ -270,7 +309,11 @@ namespace BulkWriter.Tests.Pipeline
         {
             using (var writer = new TestBulkWriter<PipelineTestsMyTestClass>())
             {
-                var items = Enumerable.Range(1, 1000).Select(i => new PipelineTestsMyTestClass { Id = i, Name = "Bob" });
+                var items = Enumerable
+                    .Range(1, 1000)
+                    .Select(i => new PipelineTestsMyTestClass { Id = i, Name = "Bob" })
+                    .ToAsyncEnumerable();
+                    
                 var pipeline = EtlPipeline
                     .StartWith(items)
                     .TransformInPlace(i =>
@@ -292,7 +335,11 @@ namespace BulkWriter.Tests.Pipeline
         {
             using (var writer = new TestBulkWriter<PipelineTestsOtherTestClass>())
             {
-                var items = Enumerable.Range(1, 1000).Select(i => new PipelineTestsMyTestClass { Id = i, Name = "Bob" });
+                var items = Enumerable
+                    .Range(1, 1000)
+                    .Select(i => new PipelineTestsMyTestClass { Id = i, Name = "Bob" })
+                    .ToAsyncEnumerable();
+
                 var loggerFactory = new FakeLoggerFactory();
                 var pipeline = EtlPipeline
                     .StartWith(items)
@@ -345,7 +392,11 @@ namespace BulkWriter.Tests.Pipeline
         {
             using (var writer = new TestBulkWriter<PipelineTestsMyTestClass>())
             {
-                var items = Enumerable.Range(1, 1000).Select(i => new PipelineTestsMyTestClass { Id = i, Name = "Bob" });
+                var items = Enumerable
+                    .Range(1, 1000)
+                    .Select(i => new PipelineTestsMyTestClass { Id = i, Name = "Bob" })
+                    .ToAsyncEnumerable();
+                    
                 var loggerFactory = new FakeLoggerFactory();
                 var pipeline = EtlPipeline
                     .StartWith(items)
@@ -380,15 +431,14 @@ namespace BulkWriter.Tests.Pipeline
             public Task WriteToDatabaseAsync(IEnumerable<T> items, CancellationToken cancellationToken = default)
             {
                 ItemsWritten.AddRange(items);
+
                 return Task.CompletedTask;
             }
 
-#if NETCOREAPP3_1
             public async Task WriteToDatabaseAsync(IAsyncEnumerable<T> items, CancellationToken cancellationToken = default)
             {
                 ItemsWritten.AddRange(await items.ToListAsync(cancellationToken));
             }
-#endif
         }
 
         private class FakeLoggerFactory : ILoggerFactory
@@ -458,3 +508,4 @@ namespace BulkWriter.Tests.Pipeline
         }
     }
 }
+#endif

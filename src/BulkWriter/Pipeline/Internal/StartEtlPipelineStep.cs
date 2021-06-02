@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace BulkWriter.Pipeline.Internal
 {
@@ -12,12 +13,14 @@ namespace BulkWriter.Pipeline.Internal
             _inputEnumerable = inputEnumerable;
         }
 
-        protected override void RunCore(CancellationToken cancellationToken)
+        protected override Task RunCore(CancellationToken cancellationToken)
         {
             foreach (var item in _inputEnumerable)
             {
                 OutputCollection.Add(item, cancellationToken);
             }
+
+            return Task.CompletedTask;
         }
     }
 }

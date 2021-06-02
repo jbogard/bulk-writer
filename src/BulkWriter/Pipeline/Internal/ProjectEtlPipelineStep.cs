@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace BulkWriter.Pipeline.Internal
 {
@@ -12,7 +13,7 @@ namespace BulkWriter.Pipeline.Internal
             _projectionFunc = projectionFunc ?? throw new ArgumentNullException(nameof(projectionFunc));
         }
 
-        protected override void RunCore(CancellationToken cancellationToken)
+        protected override Task RunCore(CancellationToken cancellationToken)
         {
             var enumerable = InputCollection.GetConsumingEnumerable(cancellationToken);
 
@@ -21,6 +22,8 @@ namespace BulkWriter.Pipeline.Internal
                 var result = _projectionFunc(item);
                 OutputCollection.Add(result, cancellationToken);
             }
+
+            return Task.CompletedTask;
         }
     }
 }
