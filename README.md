@@ -4,7 +4,7 @@ Bulk Writer is a small library which facilitates building fast, pull-based ETL p
 
 ## Documentation
 
-Documentation can be found at https://headspringlabs.github.io/bulk-writer/
+Documentation can be found at https://jbogard.github.io/bulk-writer/
 
 ## Installation
 
