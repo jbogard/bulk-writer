@@ -16,7 +16,7 @@
 title: "Bulk Writer"
 description: "Bulk Writer is a small library which facilitates building fast, memory-efficient, pull-based ETL processes in C#."
 baseurl: "/bulk-writer" # the subpath of your site, e.g. /blog
-url: "https://headspringlabs.github.io" # the base hostname & protocol for your site, e.g. http://example.com
+url: "https://jbogard.github.io" # the base hostname & protocol for your site, e.g. http://example.com
 
 # Build settings
 markdown: kramdown
