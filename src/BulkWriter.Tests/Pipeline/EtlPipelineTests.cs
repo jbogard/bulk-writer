@@ -383,12 +383,10 @@ namespace BulkWriter.Tests.Pipeline
                 return Task.CompletedTask;
             }
 
-#if NETCOREAPP3_1
             public async Task WriteToDatabaseAsync(IAsyncEnumerable<T> items, CancellationToken cancellationToken = default)
             {
                 ItemsWritten.AddRange(await items.ToListAsync(cancellationToken));
             }
-#endif
         }
 
         private class FakeLoggerFactory : ILoggerFactory

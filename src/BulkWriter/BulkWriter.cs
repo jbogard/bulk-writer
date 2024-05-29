@@ -121,7 +121,7 @@ namespace BulkWriter
             }
         }
 
-#if NETSTANDARD2_1
+#if NETSTANDARD2_1_OR_GREATER || NET6_0_OR_GREATER
         public async Task WriteToDatabaseAsync(IAsyncEnumerable<TResult> items, CancellationToken cancellationToken = default)
         {
             BulkCopySetup(_sqlBulkCopy);

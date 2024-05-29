@@ -11,13 +11,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BulkWriter.Tests", "src\Bul
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{432DE5FB-310C-432E-8ADE-ED6FCBD45C18}"
 	ProjectSection(SolutionItems) = preProject
-		azure-pipelines.yml = azure-pipelines.yml
-		GitVersion.yml = GitVersion.yml
-		global.json = global.json
-		psake-build-helpers.ps1 = psake-build-helpers.ps1
-		psake.cmd = psake.cmd
-		psakefile.ps1 = psakefile.ps1
 		setup.ps1 = setup.ps1
+		Build.ps1 = Build.ps1
+		Push.ps1 = Push.ps1
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BulkWriter.Benchmark", "src\BulkWriter.Benchmark\BulkWriter.Benchmark.csproj", "{C39F623C-7958-427E-B5E3-2CE704A69B85}"
@@ -26,6 +22,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 		README.md = README.md
+		.github\workflows\ci.yml = .github\workflows\ci.yml
+		.github\workflows\triage-issues.yml = .github\workflows\triage-issues.yml
+		.github\workflows\devskim.yml = .github\workflows\devskim.yml
+		.github\workflows\release.yml = .github\workflows\release.yml
+		.gitignore = .gitignore
 	EndProjectSection
 EndProject
 Global

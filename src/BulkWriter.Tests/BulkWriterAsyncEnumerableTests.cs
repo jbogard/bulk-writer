@@ -1,4 +1,3 @@
-#if NETCOREAPP3_1
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
@@ -47,4 +46,3 @@ namespace BulkWriter.Tests
         }
     }
 }
-#endif

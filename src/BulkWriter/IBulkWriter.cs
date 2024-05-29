@@ -21,7 +21,7 @@ namespace BulkWriter
         /// <returns>Awaitable task for writing to the database</returns>
         Task WriteToDatabaseAsync(IEnumerable<TResult> items, CancellationToken cancellationToken = default);
 
-#if NETSTANDARD2_1
+#if NETSTANDARD2_1_OR_GREATER || NET6_0_OR_GREATER
 
         /// <summary>
         /// Bulk loads an input async enumerable of type <typeparamref name="TResult"/>
