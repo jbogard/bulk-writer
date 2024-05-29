@@ -5,15 +5,24 @@ using Xunit;
 
 namespace BulkWriter.Tests
 {
+    [Collection(nameof(DbContainerFixture))]
     public class BulkWriterInitializationTests
     {
-        private readonly string _connectionString = TestHelpers.ConnectionString;
+        private readonly string _connectionString;
 
         public class BulkWriterInitializationTestsMyTestClass
         {
             public int Id { get; set; }
 
             public string Name { get; set; }
+        }
+        
+        private readonly DbContainerFixture _fixture;
+
+        public BulkWriterInitializationTests(DbContainerFixture fixture)
+        {
+            _fixture = fixture;
+            _connectionString = fixture.TestConnectionString;
         }
 
         [Table("TestClass2")]
@@ -51,7 +60,7 @@ namespace BulkWriter.Tests
 
             writer.WriteToDatabase(items);
 
-            var count = (int)await TestHelpers.ExecuteScalar(_connectionString, $"SELECT COUNT(1) FROM {tableName}");
+            var count = (int)await _fixture.ExecuteScalar(_connectionString, $"SELECT COUNT(1) FROM {tableName}");
 
             Assert.Equal(10, count);
             Assert.True(setupCallbackInvoked);
@@ -83,7 +92,7 @@ namespace BulkWriter.Tests
 
             writer.WriteToDatabase(items);
 
-            var count = (int)await TestHelpers.ExecuteScalar(_connectionString, $"SELECT COUNT(1) FROM {tableName }");
+            var count = (int)await _fixture.ExecuteScalar(_connectionString, $"SELECT COUNT(1) FROM {tableName }");
 
             Assert.Equal(10, count);
             Assert.True(setupCallbackInvoked);
@@ -91,9 +100,9 @@ namespace BulkWriter.Tests
 
         private string DropCreate(string tableName)
         {
-            TestHelpers.ExecuteNonQuery(_connectionString, $"DROP TABLE IF EXISTS [dbo].[{tableName}]");
+            _fixture.ExecuteNonQuery(_connectionString, $"DROP TABLE IF EXISTS [dbo].[{tableName}]");
 
-            TestHelpers.ExecuteNonQuery(_connectionString,
+            _fixture.ExecuteNonQuery(_connectionString,
                 "CREATE TABLE [dbo].[" + tableName + "](" +
                 "[Id] [int] IDENTITY(1,1) NOT NULL," +
                 "[Name] [nvarchar](50) NULL," +

@@ -8,9 +8,10 @@ using Xunit;
 
 namespace BulkWriter.Tests
 {
+    [Collection(nameof(DbContainerFixture))]
     public class EnumerableDataReaderTests : IDisposable
     {
-        private readonly string _connectionString = TestHelpers.ConnectionString;
+        private readonly string _connectionString;
 
         private readonly string _tableName = nameof(MyTestClass);
         private readonly string _customOrderTableName = nameof(MyCustomOrderTestClass);
@@ -21,17 +22,22 @@ namespace BulkWriter.Tests
         private readonly IEnumerable<MyCustomOrderTestClass> _customOrderEnumerable;
         private readonly EnumerableDataReader<MyCustomOrderTestClass> _customOrderDataReader;
         
-        public EnumerableDataReaderTests()
+        private readonly DbContainerFixture _fixture;
+
+        public EnumerableDataReaderTests(DbContainerFixture fixture)
         {
+            _fixture = fixture;
+            _connectionString = fixture.TestConnectionString;
+        
             //
             // Setup for testing default mapping using the source entity's property positions as the ordinals.
             //
 
             _enumerable = new[] { new MyTestClass() };
 
-            TestHelpers.ExecuteNonQuery(_connectionString, $"DROP TABLE IF EXISTS [dbo].[{_tableName}]");
+            _fixture.ExecuteNonQuery(_connectionString, $"DROP TABLE IF EXISTS [dbo].[{_tableName}]");
 
-            TestHelpers.ExecuteNonQuery(_connectionString,
+            _fixture.ExecuteNonQuery(_connectionString,
                 "CREATE TABLE [dbo].[" + _tableName + "](" +
                 "[Id] [int] IDENTITY(1,1) NOT NULL," +
                 "[Name] [nvarchar](50) NULL," +
@@ -54,9 +60,9 @@ namespace BulkWriter.Tests
 
             _customOrderEnumerable = new[] { new MyCustomOrderTestClass() };
 
-            TestHelpers.ExecuteNonQuery(_connectionString, $"DROP TABLE IF EXISTS [dbo].[{_customOrderTableName}]");
+            _fixture.ExecuteNonQuery(_connectionString, $"DROP TABLE IF EXISTS [dbo].[{_customOrderTableName}]");
 
-            TestHelpers.ExecuteNonQuery(_connectionString,
+            _fixture.ExecuteNonQuery(_connectionString,
                 "CREATE TABLE [dbo].[" + _customOrderTableName + "](" +
                 "[Id] [int] IDENTITY(1,1) NOT NULL," +
                 "[FirstName] [nvarchar](50) NULL," +
@@ -73,8 +79,8 @@ namespace BulkWriter.Tests
 
         public void Dispose()
         {
-            TestHelpers.ExecuteNonQuery(_connectionString, "DROP TABLE " + _tableName);
-            TestHelpers.ExecuteNonQuery(_connectionString, "DROP TABLE " + _customOrderTableName);
+            _fixture.ExecuteNonQuery(_connectionString, "DROP TABLE " + _tableName);
+            _fixture.ExecuteNonQuery(_connectionString, "DROP TABLE " + _customOrderTableName);
         }
 
         [Fact]
