@@ -6,20 +6,17 @@
     <Description>LINQ to SQL bulk copy</Description>
     <AssemblyName>BulkWriter</AssemblyName>
     <PackageId>BulkWriter</PackageId>
-    <PackageProjectUrl>https://github.com/HeadspringLabs/bulk-writer</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/jbogard/bulk-writer</PackageProjectUrl>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/HeadspringLabs/bulk-writer</RepositoryUrl>
+    <RepositoryUrl>https://github.com/jbogard/bulk-writer</RepositoryUrl>
     <PackageIcon>logo.png</PackageIcon>
+    <MinVerTagPrefix>v</MinVerTagPrefix>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(TF_BUILD)' == 'true'">
-    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
-    <Deterministic>true</Deterministic>
-    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+    <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">true</ContinuousIntegrationBuild>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
