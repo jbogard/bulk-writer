@@ -24,7 +24,7 @@ jobs:
       with:
         dotnet-version: '8.0.100'
     - name: Setup required dependencies
-      run: ./Setup.ps1
+      run: ./setup.ps1
       shell: pwsh    
     - name: Build and Test
       run: ./Build.ps1
