@@ -4,9 +4,10 @@ using Xunit;
 
 namespace BulkWriter.Tests
 {
+    [Collection(nameof(DbContainerFixture))]
     public class BulkWriterAsyncTests
     {
-        private readonly string _connectionString = TestHelpers.ConnectionString;
+        private readonly string _connectionString;
         private readonly string _tableName = nameof(BulkWriterAsyncTestsMyTestClass);
 
         public class BulkWriterAsyncTestsMyTestClass
@@ -16,11 +17,15 @@ namespace BulkWriter.Tests
             public string Name { get; set; }
         }
 
-        public BulkWriterAsyncTests()
-        {
-            TestHelpers.ExecuteNonQuery(_connectionString, $"DROP TABLE IF EXISTS [dbo].[{_tableName}]");
+        private readonly DbContainerFixture _fixture;
 
-            TestHelpers.ExecuteNonQuery(_connectionString,
+        public BulkWriterAsyncTests(DbContainerFixture fixture)
+        {
+            _fixture = fixture;
+            _connectionString = fixture.TestConnectionString;
+            _fixture.ExecuteNonQuery(_connectionString, $"DROP TABLE IF EXISTS [dbo].[{_tableName}]");
+
+            _fixture.ExecuteNonQuery(_connectionString,
                 "CREATE TABLE [dbo].[" + _tableName + "](" +
                 "[Id] [int] IDENTITY(1,1) NOT NULL," +
                 "[Name] [nvarchar](50) NULL," +
@@ -37,7 +42,7 @@ namespace BulkWriter.Tests
 
             await writer.WriteToDatabaseAsync(items);
 
-            var count = (int) await TestHelpers.ExecuteScalar(_connectionString, $"SELECT COUNT(1) FROM {_tableName}");
+            var count = (int) await _fixture.ExecuteScalar(_connectionString, $"SELECT COUNT(1) FROM {_tableName}");
 
             Assert.Equal(1000, count);
         }

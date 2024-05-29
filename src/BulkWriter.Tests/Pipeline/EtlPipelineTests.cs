@@ -9,10 +9,18 @@ using Xunit;
 
 namespace BulkWriter.Tests.Pipeline
 {
+    [Collection(nameof(DbContainerFixture))]
     public class EtlPipelineTests
     {
-        private readonly string _connectionString = TestHelpers.ConnectionString;
+        private readonly DbContainerFixture _fixture;
+        private readonly string _connectionString;
 
+        public EtlPipelineTests(DbContainerFixture fixture)
+        {
+            _fixture = fixture;
+            _connectionString = fixture.TestConnectionString;
+        }
+        
         public class PipelineTestsMyTestClass
         {
             public int Id { get; set; }
@@ -29,7 +37,7 @@ namespace BulkWriter.Tests.Pipeline
         [Fact]
         public async Task WritesToBulkWriter()
         {
-            var tableName = TestHelpers.DropCreate(nameof(PipelineTestsMyTestClass));
+            var tableName = _fixture.DropCreate(nameof(PipelineTestsMyTestClass));
 
             using (var writer = new BulkWriter<PipelineTestsMyTestClass>(_connectionString))
             {
@@ -40,7 +48,7 @@ namespace BulkWriter.Tests.Pipeline
 
                 await pipeline.ExecuteAsync();
 
-                var count = (int)await TestHelpers.ExecuteScalar(_connectionString, $"SELECT COUNT(1) FROM {tableName}");
+                var count = (int)await _fixture.ExecuteScalar(_connectionString, $"SELECT COUNT(1) FROM {tableName}");
 
                 Assert.Equal(1000, count);
             }
@@ -49,7 +57,7 @@ namespace BulkWriter.Tests.Pipeline
         [Fact]
         public async Task ThrowsWhenAStepThrows()
         {
-            var tableName = TestHelpers.DropCreate(nameof(PipelineTestsMyTestClass));
+            var tableName = _fixture.DropCreate(nameof(PipelineTestsMyTestClass));
 
             using (var writer = new BulkWriter<PipelineTestsMyTestClass>(_connectionString))
             {
@@ -68,7 +76,7 @@ namespace BulkWriter.Tests.Pipeline
         [Fact]
         public async Task RaisesExceptionsForAllStepsThatThrow()
         {
-            var tableName = TestHelpers.DropCreate(nameof(PipelineTestsMyTestClass));
+            var tableName = _fixture.DropCreate(nameof(PipelineTestsMyTestClass));
 
             using (var writer = new BulkWriter<PipelineTestsMyTestClass>(_connectionString))
             {
@@ -105,7 +113,7 @@ namespace BulkWriter.Tests.Pipeline
         [Fact]
         public async Task PartiallyCompletesWhenAStepThrows()
         {
-            var tableName = TestHelpers.DropCreate(nameof(PipelineTestsMyTestClass));
+            var tableName = _fixture.DropCreate(nameof(PipelineTestsMyTestClass));
 
             using (var writer = new BulkWriter<PipelineTestsMyTestClass>(_connectionString))
             {
@@ -123,7 +131,7 @@ namespace BulkWriter.Tests.Pipeline
                 var pipelineTask = pipeline.ExecuteAsync();
                 await Assert.ThrowsAsync<Exception>(() => pipelineTask);
 
-                var count = (int)await TestHelpers.ExecuteScalar(_connectionString, $"SELECT COUNT(1) FROM {tableName}");
+                var count = (int)await _fixture.ExecuteScalar(_connectionString, $"SELECT COUNT(1) FROM {tableName}");
                 Assert.Equal(500, count);
             }
         }
